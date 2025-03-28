@@ -4,7 +4,7 @@
 # General Info
 ## General API Information
 
-* The base endpoint is: **https://www.astherus.finance**
+* The base endpoint is: **https://www.asterdex.com**
 * All endpoints return either a JSON object or array.
 * All time and timestamp related fields are in **milliseconds**.
 
@@ -184,7 +184,7 @@ timestamp | 1499827319559
 > **curl command:**
 ```shell
     (HMAC SHA256)
-    $ curl -H "X-MBX-APIKEY: vmPUZE6mv9SD5VNHk4HlWFsOr6aKE2zvsw0MuIgwCIPy6utIco14y7Ju91duEh8A" -X POST 'https://www.astherus.finance/api/v1/order' -d 'symbol=LTCBTC&side=BUY&type=LIMIT&timeInForce=GTC&quantity=1&price=0.1&recvWindow=5000&timestamp=1499827319559&signature=c8db56825ae71d6d79447849e617115f4a920fa2acdcab2b053c4b2838bd6b71'
+    $ curl -H "X-MBX-APIKEY: vmPUZE6mv9SD5VNHk4HlWFsOr6aKE2zvsw0MuIgwCIPy6utIco14y7Ju91duEh8A" -X POST 'https://www.asterdex.com/api/v1/order' -d 'symbol=LTCBTC&side=BUY&type=LIMIT&timeInForce=GTC&quantity=1&price=0.1&recvWindow=5000&timestamp=1499827319559&signature=c8db56825ae71d6d79447849e617115f4a920fa2acdcab2b053c4b2838bd6b71'
     
 ```
 
@@ -213,7 +213,7 @@ symbol=LTCBTC
 > **curl command:**
 ```shell
     (HMAC SHA256)
-   $ curl -H "X-MBX-APIKEY: vmPUZE6mv9SD5VNHk4HlWFsOr6aKE2zvsw0MuIgwCIPy6utIco14y7Ju91duEh8A" -X POST 'https://www.astherus.finance/api/v1/order?symbol=LTCBTC&side=BUY&type=LIMIT&timeInForce=GTC&quantity=1&price=0.1&recvWindow=5000&timestamp=1499827319559&signature=c8db56825ae71d6d79447849e617115f4a920fa2acdcab2b053c4b2838bd6b71'
+   $ curl -H "X-MBX-APIKEY: vmPUZE6mv9SD5VNHk4HlWFsOr6aKE2zvsw0MuIgwCIPy6utIco14y7Ju91duEh8A" -X POST 'https://www.asterdex.com/api/v1/order?symbol=LTCBTC&side=BUY&type=LIMIT&timeInForce=GTC&quantity=1&price=0.1&recvWindow=5000&timestamp=1499827319559&signature=c8db56825ae71d6d79447849e617115f4a920fa2acdcab2b053c4b2838bd6b71'
     
 ```
 
@@ -242,7 +242,7 @@ symbol=LTCBTC
 > **curl command:**
 ```shell
     (HMAC SHA256)
-    $ curl -H "X-MBX-APIKEY: vmPUZE6mv9SD5VNHk4HlWFsOr6aKE2zvsw0MuIgwCIPy6utIco14y7Ju91duEh8A" -X POST 'https://www.astherus.finance/api/v1/order?symbol=LTCBTC&side=BUY&type=LIMIT&timeInForce=GTC' -d 'quantity=1&price=0.1&recvWindow=5000&timestamp=1499827319559&signature=0fd168b8ddb4876a0358a8d14d0c9f3da0e9b20c5d52b2a00fcf7d1c602f9a77'
+    $ curl -H "X-MBX-APIKEY: vmPUZE6mv9SD5VNHk4HlWFsOr6aKE2zvsw0MuIgwCIPy6utIco14y7Ju91duEh8A" -X POST 'https://www.asterdex.com/api/v1/order?symbol=LTCBTC&side=BUY&type=LIMIT&timeInForce=GTC' -d 'quantity=1&price=0.1&recvWindow=5000&timestamp=1499827319559&signature=0fd168b8ddb4876a0358a8d14d0c9f3da0e9b20c5d52b2a00fcf7d1c602f9a77'
 ```
 
 * **queryString:** 
@@ -1415,13 +1415,13 @@ timestamp | LONG | YES |  
 ---
 # Websocket Market Streams
 
-* The base endpoint is: **wss://stream.astherus.finance**
+* The base endpoint is: **wss://stream.asterdex.com**
 * Streams can be accessed either in a single raw stream or in a combined stream
 * Raw streams are accessed at **/ws/\<streamName\>**
 * Combined streams are accessed at **/stream?streams=\<streamName1\>/\<streamName2\>/\<streamName3\>**
 * Combined stream events are wrapped as follows: **{"stream":"\<streamName\>","data":\<rawPayload\>}**
 * All symbols for streams are **lowercase**
-* A single connection to **stream.astherus.finance** is only valid for 24 hours; expect to be disconnected at the 24 hour mark
+* A single connection to **stream.asterdex.com** is only valid for 24 hours; expect to be disconnected at the 24 hour mark
 * The websocket server will send a `ping frame` every 3 minutes. If the websocket server does not receive a `pong frame` back from the connection within a 10 minute period, the connection will be disconnected. Unsolicited `pong frames` are allowed.
 
 ## Live Subscribing/Unsubscribing to streams
@@ -1900,9 +1900,9 @@ Order book price and quantity depth updates used to locally manage an order book
 
 
 ## How to manage a local order book correctly
-1. Open a stream to **wss://stream.astherus.finance/ws/bnbbtc@depth**.
+1. Open a stream to **wss://stream.asterdex.com/ws/bnbbtc@depth**.
 2. Buffer the events you receive from the stream.
-3. Get a depth snapshot from **https://www.astherus.finance/api/v1/depth?symbol=BNBBTC&limit=1000** .
+3. Get a depth snapshot from **https://www.asterdex.com/api/v1/depth?symbol=BNBBTC&limit=1000** .
 4. Drop any event where `u` is <= `lastUpdateId` in the snapshot.
 5. The first processed event should have `U` <= `lastUpdateId`+1 **AND** `u` >= `lastUpdateId`+1.
 6. While listening to the stream, each new event's `U` should be equal to the previous event's `u`+1.
@@ -1918,14 +1918,14 @@ Order book price and quantity depth updates used to locally manage an order book
 # User Data Streams
 
 
-* The base API endpoint is: **https://www.astherus.finance**
+* The base API endpoint is: **https://www.asterdex.com**
 * A User Data Stream `listenKey` is valid for 60 minutes after creation.
 * Doing a `PUT` on a `listenKey` will extend its validity for 60 minutes.
 * Doing a `DELETE` on a `listenKey` will close the stream and invalidate the `listenKey`.
 * Doing a `POST` on an account with an active `listenKey` will return the currently active `listenKey` and extend its validity for 60 minutes.
-* The base websocket endpoint is: **wss://stream.astherus.finance**
+* The base websocket endpoint is: **wss://stream.asterdex.com**
 * User Data Streams are accessed at **/ws/\<listenKey\>**
-* A single connection to **stream.astherus.finance** is only valid for 24 hours; expect to be disconnected at the 24 hour mark
+* A single connection to **stream.asterdex.com** is only valid for 24 hours; expect to be disconnected at the 24 hour mark
 
 
 ## LISTEN KEY

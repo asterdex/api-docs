@@ -1,6 +1,6 @@
 # 基本信息
 ## API 基本信息
-* 本篇列出接口的baseurl: **https://www.astherus.finance**
+* 本篇列出接口的baseurl: **https://www.asterdex.com**
 * 所有接口的响应都是 JSON 格式。
 * 所有时间、时间戳均为UNIX时间，单位为**毫秒**。
 
@@ -158,7 +158,7 @@ timestamp | 1499827319559
 > **curl command:**
 ```shell
     (HMAC SHA256)
-    $ curl -H "X-MBX-APIKEY: vmPUZE6mv9SD5VNHk4HlWFsOr6aKE2zvsw0MuIgwCIPy6utIco14y7Ju91duEh8A" -X POST 'https://www.astherus.finance/api/v1/order' -d 'symbol=LTCBTC&side=BUY&type=LIMIT&timeInForce=GTC&quantity=1&price=0.1&recvWindow=5000&timestamp=1499827319559&signature=c8db56825ae71d6d79447849e617115f4a920fa2acdcab2b053c4b2838bd6b71'
+    $ curl -H "X-MBX-APIKEY: vmPUZE6mv9SD5VNHk4HlWFsOr6aKE2zvsw0MuIgwCIPy6utIco14y7Ju91duEh8A" -X POST 'https://www.asterdex.com/api/v1/order' -d 'symbol=LTCBTC&side=BUY&type=LIMIT&timeInForce=GTC&quantity=1&price=0.1&recvWindow=5000&timestamp=1499827319559&signature=c8db56825ae71d6d79447849e617115f4a920fa2acdcab2b053c4b2838bd6b71'
     
 ```
 
@@ -186,7 +186,7 @@ symbol=LTCBTC
 > **curl command:**
 ```shell
     (HMAC SHA256)
-   $ curl -H "X-MBX-APIKEY: vmPUZE6mv9SD5VNHk4HlWFsOr6aKE2zvsw0MuIgwCIPy6utIco14y7Ju91duEh8A" -X POST 'https://www.astherus.finance/api/v1/order?symbol=LTCBTC&side=BUY&type=LIMIT&timeInForce=GTC&quantity=1&price=0.1&recvWindow=5000&timestamp=1499827319559&signature=c8db56825ae71d6d79447849e617115f4a920fa2acdcab2b053c4b2838bd6b71'
+   $ curl -H "X-MBX-APIKEY: vmPUZE6mv9SD5VNHk4HlWFsOr6aKE2zvsw0MuIgwCIPy6utIco14y7Ju91duEh8A" -X POST 'https://www.asterdex.com/api/v1/order?symbol=LTCBTC&side=BUY&type=LIMIT&timeInForce=GTC&quantity=1&price=0.1&recvWindow=5000&timestamp=1499827319559&signature=c8db56825ae71d6d79447849e617115f4a920fa2acdcab2b053c4b2838bd6b71'
     
 ```
 * **queryString:**  
@@ -214,7 +214,7 @@ symbol=LTCBTC
 > **curl command:**
 ```shell
     (HMAC SHA256)
-    $ curl -H "X-MBX-APIKEY: vmPUZE6mv9SD5VNHk4HlWFsOr6aKE2zvsw0MuIgwCIPy6utIco14y7Ju91duEh8A" -X POST 'https://www.astherus.finance/api/v1/order?symbol=LTCBTC&side=BUY&type=LIMIT&timeInForce=GTC' -d 'quantity=1&price=0.1&recvWindow=5000&timestamp=1499827319559&signature=0fd168b8ddb4876a0358a8d14d0c9f3da0e9b20c5d52b2a00fcf7d1c602f9a77'
+    $ curl -H "X-MBX-APIKEY: vmPUZE6mv9SD5VNHk4HlWFsOr6aKE2zvsw0MuIgwCIPy6utIco14y7Ju91duEh8A" -X POST 'https://www.asterdex.com/api/v1/order?symbol=LTCBTC&side=BUY&type=LIMIT&timeInForce=GTC' -d 'quantity=1&price=0.1&recvWindow=5000&timestamp=1499827319559&signature=0fd168b8ddb4876a0358a8d14d0c9f3da0e9b20c5d52b2a00fcf7d1c602f9a77'
 ```
 
 * **queryString:** 
@@ -1354,13 +1354,13 @@ timestamp | LONG | YES |
 ---
 # Websocket 行情推送
 
-* 本篇所列出的所有wss接口的baseurl为: **wss://stream.astherus.finance**
+* 本篇所列出的所有wss接口的baseurl为: **wss://stream.asterdex.com**
 * Streams有单一原始 stream 或组合 stream
 * 单一原始 streams 格式为 **/ws/\<streamName\>**
 * 组合streams的URL格式为 **/stream?streams=\<streamName1\>/\<streamName2\>/\<streamName3\>**
 * 订阅组合streams时，事件payload会以这样的格式封装: **{"stream":"\<streamName\>","data":\<rawPayload\>}**
 * stream名称中所有交易对均为 **小写**
-* 每个到 **stream.astherus.finance** 的链接有效期不超过24小时，请妥善处理断线重连。
+* 每个到 **stream.asterdex.com** 的链接有效期不超过24小时，请妥善处理断线重连。
 * 每3分钟，服务端会发送ping帧，客户端应当在10分钟内回复pong帧，否则服务端会主动断开链接。允许客户端发送不成对的pong帧(即客户端可以以高于10分钟每次的频率发送pong帧保持链接)。
 
 ## 实时订阅/取消数据流
@@ -1792,9 +1792,9 @@ m -> 分钟; h -> 小时; d -> 天; w -> 周; M -> 月
 **Update Speed:** 1000ms 或 100ms
 
 ## 如何正确在本地维护一个orderbook副本
-1. 订阅 **wss://stream.astherus.finance/ws/bnbbtc@depth**
+1. 订阅 **wss://stream.asterdex.com/ws/bnbbtc@depth**
 2. 开始缓存收到的更新。同一个价位，后收到的更新覆盖前面的。
-3. 访问Rest接口 **https://www.astherus.finance/api/v1/depth?symbol=BNBBTC&limit=1000** 获得一个1000档的深度快照
+3. 访问Rest接口 **https://www.asterdex.com/api/v1/depth?symbol=BNBBTC&limit=1000** 获得一个1000档的深度快照
 4. 将目前缓存到的信息中`u` <= 步骤3中获取到的快照中的`lastUpdateId`的部分丢弃(丢弃更早的信息，已经过期)。
 5. 将深度快照中的内容更新到本地orderbook副本中，并从websocket接收到的第一个`U` <= `lastUpdateId`+1 **且** `u` >= `lastUpdateId`+1 的event开始继续更新本地副本。
 6. 每一个新event的`U`应该恰好等于上一个event的`u`+1，否则可能出现了丢包，请从step3重新进行初始化。
@@ -1808,12 +1808,12 @@ m -> 分钟; h -> 小时; d -> 天; w -> 周; M -> 月
 
 # Websocket账户信息推送
 
-* 本篇所列出API接口的base url : **https://www.astherus.finance**
+* 本篇所列出API接口的base url : **https://www.asterdex.com**
 * 用于订阅账户数据的 `listenKey` 从创建时刻起有效期为60分钟
 * 可以通过 `PUT` 一个 `listenKey` 延长60分钟有效期
 * 可以通过`DELETE`一个 `listenKey` 立即关闭当前数据流，并使该`listenKey` 无效
 * 在具有有效`listenKey`的帐户上执行`POST`将返回当前有效的`listenKey`并将其有效期延长60分钟
-* websocket接口的baseurl: **wss://stream.astherus.finance**
+* websocket接口的baseurl: **wss://stream.asterdex.com**
 * U订阅账户数据流的stream名称为 **/ws/\<listenKey\>**
 * 每个链接有效期不超过24小时，请妥善处理断线重连。
 

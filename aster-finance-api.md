@@ -111,8 +111,8 @@
 
 ## General API Information
 
-* Some endpoints will require an API Key. Please refer to [this page](https://www.astherus.finance/)
-* The base endpoint is: **https://fapi.astherus.finance**
+* Some endpoints will require an API Key. Please refer to [this page](https://www.asterdex.com/)
+* The base endpoint is: **https://fapi.asterdex.com**
 * All endpoints return either a JSON object or array.
 * Data is returned in **ascending** order. Oldest first, newest last.
 * All time and timestamp related fields are in milliseconds.
@@ -278,7 +278,7 @@ timestamp | 1591702613943
 
 ```shell
     (HMAC SHA256)
-    $ curl -H "X-MBX-APIKEY: dbefbc809e3e83c283a984c3a1459732ea7db1360ca80c5c2c8867408d28cc83" -X POST 'https://fapi/astherus.finance/fapi/v1/order?symbol=BTCUSDT&side=BUY&type=LIMIT&quantity=1&price=9000&timeInForce=GTC&recvWindow=5000&timestamp=1591702613943&signature= 3c661234138461fcc7a7d8746c6558c9842d4e10870d2ecbedf7777cad694af9'
+    $ curl -H "X-MBX-APIKEY: dbefbc809e3e83c283a984c3a1459732ea7db1360ca80c5c2c8867408d28cc83" -X POST 'https://fapi/asterdex.com/fapi/v1/order?symbol=BTCUSDT&side=BUY&type=LIMIT&quantity=1&price=9000&timeInForce=GTC&recvWindow=5000&timestamp=1591702613943&signature= 3c661234138461fcc7a7d8746c6558c9842d4e10870d2ecbedf7777cad694af9'
 ```
 * **queryString:** 
 
@@ -310,7 +310,7 @@ timestamp | 1591702613943
 
 ```shell
     (HMAC SHA256)
-    $ curl -H "X-MBX-APIKEY: dbefbc809e3e83c283a984c3a1459732ea7db1360ca80c5c2c8867408d28cc83" -X POST 'https://fapi/astherus.finance/fapi/v1/order' -d 'symbol=BTCUSDT&side=BUY&type=LIMIT&quantity=1&price=9000&timeInForce=GTC&recvWindow=5000&timestamp=1591702613943&signature= 3c661234138461fcc7a7d8746c6558c9842d4e10870d2ecbedf7777cad694af9'
+    $ curl -H "X-MBX-APIKEY: dbefbc809e3e83c283a984c3a1459732ea7db1360ca80c5c2c8867408d28cc83" -X POST 'https://fapi/asterdex.com/fapi/v1/order' -d 'symbol=BTCUSDT&side=BUY&type=LIMIT&quantity=1&price=9000&timeInForce=GTC&recvWindow=5000&timestamp=1591702613943&signature= 3c661234138461fcc7a7d8746c6558c9842d4e10870d2ecbedf7777cad694af9'
 ```
 
 * **requestBody:**
@@ -341,7 +341,7 @@ timestamp | 1591702613943
 
 ```shell
     (HMAC SHA256)
-    $ curl -H "X-MBX-APIKEY: dbefbc809e3e83c283a984c3a1459732ea7db1360ca80c5c2c8867408d28cc83" -X POST 'https://fapi/astherus.finance/fapi/v1/order?symbol=BTCUSDT&side=BUY&type=LIMIT&timeInForce=GTC' -d 'quantity=1&price=9000&recvWindow=5000&timestamp=1591702613943&signature=3c661234138461fcc7a7d8746c6558c9842d4e10870d2ecbedf7777cad694af9'
+    $ curl -H "X-MBX-APIKEY: dbefbc809e3e83c283a984c3a1459732ea7db1360ca80c5c2c8867408d28cc83" -X POST 'https://fapi/asterdex.com/fapi/v1/order?symbol=BTCUSDT&side=BUY&type=LIMIT&timeInForce=GTC' -d 'quantity=1&price=9000&recvWindow=5000&timestamp=1591702613943&signature=3c661234138461fcc7a7d8746c6558c9842d4e10870d2ecbedf7777cad694af9'
 ```
 
 * **queryString:** symbol=BTCUSDT&side=BUY&type=LIMIT&timeInForce=GTC
@@ -1421,7 +1421,7 @@ symbol | STRING | NO |
 
 # Websocket Market Streams
 
-* The baseurl for websocket is **wss://fstream.astherus.finance**
+* The baseurl for websocket is **wss://fstream.asterdex.com**
 * Streams can be access either in a single raw stream or a combined stream
 * Raw streams are accessed at **/ws/\<streamName\>**
 * Combined streams are accessed at **/stream?streams=\<streamName1\>/\<streamName2\>/\<streamName3\>**
@@ -2101,9 +2101,9 @@ Bids and asks, pushed every 250 milliseconds, 500 milliseconds, 100 milliseconds
 
 
 ## How to manage a local order book correctly
-1. Open a stream to **wss://fstream.astherus.finance/stream?streams=btcusdt@depth**.
+1. Open a stream to **wss://fstream.asterdex.com/stream?streams=btcusdt@depth**.
 2. Buffer the events you receive from the stream. For same price, latest received update covers the previous one. 
-3. Get a depth snapshot from **https://fapi.astherus.finance/fapi/v1/depth?symbol=BTCUSDT&limit=1000** .
+3. Get a depth snapshot from **https://fapi.asterdex.com/fapi/v1/depth?symbol=BTCUSDT&limit=1000** .
 4. Drop any event where `u` is < `lastUpdateId` in the snapshot.
 5. The first processed event should have `U` <= `lastUpdateId` **AND** `u` >= `lastUpdateId`
 6. While listening to the stream, each new event's `pu` should be equal to the previous event's `u`, otherwise initialize the process from step 3.
@@ -3557,15 +3557,15 @@ timestamp | LONG | YES
 
 # User Data Streams
 
-* The base API endpoint is: **https://fapi.astherus.finance**
+* The base API endpoint is: **https://fapi.asterdex.com**
 * A User Data Stream `listenKey` is valid for 60 minutes after creation.
 * Doing a `PUT` on a `listenKey` will extend its validity for 60 minutes.
 * Doing a `DELETE` on a `listenKey` will close the stream and invalidate the `listenKey`.
 * Doing a `POST` on an account with an active `listenKey` will return the currently active `listenKey` and extend its validity for 60 minutes.
-* The baseurl for websocket is **wss://fstream.astherus.finance**
+* The baseurl for websocket is **wss://fstream.asterdex.com**
 * User Data Streams are accessed at **/ws/\<listenKey\>**
 * User data stream payloads are **not guaranteed** to be in order during heavy periods; **make sure to order your updates using E**
-* A single connection to **fstream.astherus.finance** is only valid for 24 hours; expect to be disconnected at the 24 hour mark
+* A single connection to **fstream.asterdex.com** is only valid for 24 hours; expect to be disconnected at the 24 hour mark
 
 
 ## Start User Data Stream (USER_STREAM)
