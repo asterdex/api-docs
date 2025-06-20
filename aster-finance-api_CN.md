@@ -392,6 +392,7 @@ timestamp | 1591702613943
 * IOC - Immediate or Cancel 无法立即成交(吃单)的部分就撤销
 * FOK - Fill or Kill 无法全部立即成交就撤销
 * GTX - Good Till Crossing 无法成为挂单方就撤销
+* HIDDEN - HIDDEN 该类型订单在订单薄里不可见
 
 **条件价格触发类型 (workingType)**
 
@@ -754,6 +755,7 @@ NONE
    				"IOC", // 无法立即成交(吃单)的部分就撤销
    				"FOK", // 无法全部立即成交就撤销
    				"GTX" // 无法成为挂单方就撤销
+				"HIDDEN" //  该类型订单在订单薄里不可见
  			],
  			"liquidationFee": "0.010000",	// 强平费率
    			"marketTakeBound": "0.30",	// 市价吃单(相对于标记价格)允许可造成的最大价格偏离比例
@@ -3767,6 +3769,7 @@ None
 * IOC
 * FOK
 * GTX
+* HIDDEN
 
 
 ## 杠杆倍数等账户配置 更新推送
