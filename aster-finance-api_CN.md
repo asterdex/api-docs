@@ -2786,7 +2786,7 @@ timestamp | LONG | YES
 
 
 
-## 账户信息V2 (USER_DATA)
+## 账户信息V4 (USER_DATA)
 
 > **响应:**
 
@@ -2800,15 +2800,15 @@ timestamp | LONG | YES
  	"updateTime": 0,
  	"totalInitialMargin": "0.00000000",  // 但前所需起始保证金总额(存在逐仓请忽略), 仅计算usdt资产
  	"totalMaintMargin": "0.00000000",  // 维持保证金总额, 仅计算usdt资产
- 	"totalWalletBalance": "23.72469206",   // 账户总余额, 仅计算usdt资产
+ 	"totalWalletBalance": "23.72469206",   // 账户总余额, 联保模式下采用BidRate/AskRate来计算余额
  	"totalUnrealizedProfit": "0.00000000",  // 持仓未实现盈亏总额, 仅计算usdt资产
- 	"totalMarginBalance": "23.72469206",  // 保证金总余额, 仅计算usdt资产
+ 	"totalMarginBalance": "23.72469206",  // 保证金总余额, 联保模式下采用BidRate/AskRate来计算余额
  	"totalPositionInitialMargin": "0.00000000",  // 持仓所需起始保证金(基于最新标记价格), 仅计算usdt资产
  	"totalOpenOrderInitialMargin": "0.00000000",  // 当前挂单所需起始保证金(基于最新标记价格), 仅计算usdt资产
- 	"totalCrossWalletBalance": "23.72469206",  // 全仓账户余额, 仅计算usdt资产
+ 	"totalCrossWalletBalance": "23.72469206",  // 全仓账户余额, 联保模式下采用BidRate/AskRate来计算余额
  	"totalCrossUnPnl": "0.00000000",	// 全仓持仓未实现盈亏总额, 仅计算usdt资产
  	"availableBalance": "23.72469206",       // 可用余额, 仅计算usdt资产
- 	"maxWithdrawAmount": "23.72469206"     // 最大可转出余额, 仅计算usdt资产
+ 	"maxWithdrawAmount": "23.72469206"     // 最大可转出余额, 联保模式下采用BidRate来计算余额
  	"assets": [
  		{
  			"asset": "USDT",	 	//资产
@@ -2866,7 +2866,7 @@ timestamp | LONG | YES
 
 
 ``
-GET /fapi/v2/account (HMAC SHA256)
+GET /fapi/v4/account (HMAC SHA256)
 ``
 
 **权重:**
