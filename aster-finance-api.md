@@ -243,7 +243,7 @@ It is recommended to use a small recvWindow of 5000 or less!
 </aside>
 
 ### SIGNED Endpoint Examples for POST /fapi/v1/order
-Here is a step-by-step example of how to send a vaild signed payload from the
+Here is a step-by-step example of how to send a valid signed payload from the
 Linux command line using `echo`, `openssl`, and `curl`.
 
 Key | Value
@@ -1817,7 +1817,7 @@ m -> minutes; h -> hours; d -> days; w -> weeks; M -> months
 }
 ```
 
-24hr rollwing window ticker statistics for a single symbol. These are NOT the statistics of the UTC day, but a 24hr rolling window from requestTime to 24hrs before.
+24hr rolling window ticker statistics for a single symbol. These are NOT the statistics of the UTC day, but a 24hr rolling window from requestTime to 24hrs before.
 
 **Stream Name:**     
 ``<symbol>@ticker``
@@ -1856,7 +1856,7 @@ m -> minutes; h -> hours; d -> days; w -> weeks; M -> months
 ]
 ```
 
-24hr rollwing window ticker statistics for all symbols. These are NOT the statistics of the UTC day, but a 24hr rolling window from requestTime to 24hrs before. Note that only tickers that have changed will be present in the array.
+24hr rolling window ticker statistics for all symbols. These are NOT the statistics of the UTC day, but a 24hr rolling window from requestTime to 24hrs before. Note that only tickers that have changed will be present in the array.
 
 **Stream Name:**     
 ``!ticker@arr``
@@ -3325,7 +3325,7 @@ timestamp|LONG|YES|
 
 * If neither `startTime` nor `endTime` is sent, the recent 7-day data will be returned.
 * If `incomeType ` is not sent, all kinds of flow will be returned
-* "trandId" is unique in the same incomeType for a user
+* "tranId" is unique in the same incomeType for a user
 
 
 ## Notional and Leverage Brackets (USER_DATA)
@@ -3412,8 +3412,8 @@ timestamp|LONG|YES|
  			{
  				// for positions of the symbol are in One-way Mode or isolated margined in Hedge Mode
  				"LONG": 1, 	// adl quantile for "LONG" position in hedge mode
- 				"SHORT": 2, 	// adl qauntile for "SHORT" position in hedge mode
- 				"BOTH": 0		// adl qunatile for position in one-way mode
+ 				"SHORT": 2, 	// adl quantile for "SHORT" position in hedge mode
+ 				"BOTH": 0		// adl quantile for position in one-way mode
  			}
  	}
  ]
@@ -3442,7 +3442,7 @@ timestamp|LONG|YES|
 
 * If the positions of the symbol are crossed margined in Hedge Mode:
 	* "HEDGE" as a sign will be returned instead of "BOTH"; 
-	* A same value caculated on unrealized pnls on long and short sides' positions will be shown for "LONG" and "SHORT" when there are positions in both of long and short sides.
+	* A same value calculated on unrealized pnls on long and short sides' positions will be shown for "LONG" and "SHORT" when there are positions in both of long and short sides.
 
 
 
@@ -3767,7 +3767,7 @@ Event type is `ACCOUNT_UPDATE`.
 * When balance or position get updated, this event will be pushed.
 	* `ACCOUNT_UPDATE` will be pushed only when update happens on user's account, including changes on balances, positions, or margin type.
 	* Unfilled orders or cancelled orders will not make the event `ACCOUNT_UPDATE` pushed, since there's no change on positions.
-	* Only positions of symbols with non-zero isolatd wallet or non-zero position amount will be pushed in the "position" part of the event `ACCOUNT_UPDATE` when any position changes.
+	* Only positions of symbols with non-zero isolated wallet or non-zero position amount will be pushed in the "position" part of the event `ACCOUNT_UPDATE` when any position changes.
 
 * When "FUNDING FEE" changes to the user's balance, the event will be pushed with the brief message:
 	* When "FUNDING FEE" occurs in a **crossed position**, `ACCOUNT_UPDATE` will be pushed with only the balance `B`(including the "FUNDING FEE" asset only), without any position `P` message. 
@@ -3834,8 +3834,8 @@ Event type is `ACCOUNT_UPDATE`.
     "ot":"TRAILING_STOP_MARKET",	// Original Order Type
     "ps":"LONG",						// Position Side
     "cp":false,						// If Close-All, pushed with conditional order
-    "AP":"7476.89",				// Activation Price, only puhed with TRAILING_STOP_MARKET order
-    "cr":"5.0",					// Callback Rate, only puhed with TRAILING_STOP_MARKET order
+    "AP":"7476.89",				// Activation Price, only pushed with TRAILING_STOP_MARKET order
+    "cr":"5.0",					// Callback Rate, only pushed with TRAILING_STOP_MARKET order
     "rp":"0"							// Realized Profit of the trade
   }
   
