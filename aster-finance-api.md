@@ -38,6 +38,7 @@
 	- [Mark Price Kline/Candlestick Data](#mark-price-klinecandlestick-data)
 	- [Mark Price](#mark-price)
 	- [Get Funding Rate History](#get-funding-rate-history)
+    - [Get Funding Rate Config](#get-funding-rate-config)
 	- [24hr Ticker Price Change Statistics](#24hr-ticker-price-change-statistics)
 	- [Symbol Price Ticker](#symbol-price-ticker)
 	- [Symbol Order Book Ticker](#symbol-order-book-ticker)
@@ -1247,7 +1248,44 @@ limit | INT | NO | Default 100; max 1000
 * If the number of data between `startTime` and `endTime` is larger than `limit`, return as `startTime` + `limit`.
 * In ascending order.
 
+## Get Funding Rate Config
 
+> **Response:**
+
+```javascript
+[
+	{
+		"symbol": "INJUSDT",
+		"interestRate": "0.00010000",
+		"time": 1756197479000,
+		"fundingIntervalHours": 8,
+		"fundingFeeCap": 0.03,
+		"fundingFeeFloor": -0.03
+	},
+	{
+		"symbol": "ZORAUSDT",
+		"interestRate": "0.00005000",
+		"time": 1756197479000,
+		"fundingIntervalHours": 4,
+		"fundingFeeCap": 0.02,
+		"fundingFeeFloor": -0.02
+	}
+]
+```
+
+``
+GET /fapi/v1/fundingInfo
+``
+
+
+**Weight:**
+1
+
+**Parameters:**
+
+Name | Type | Mandatory | Description
+------------ | ------------ | ------------ | ------------
+symbol | STRING | NO |
 
 
 
