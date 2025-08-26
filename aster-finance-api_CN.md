@@ -38,6 +38,7 @@
 	- [标记价格K线数据](#标记价格k线数据)
 	- [最新标记价格和资金费率](#最新标记价格和资金费率)
 	- [查询资金费率历史](#查询资金费率历史)
+    - [查询资金费率配置](#查询资金费率配置)
 	- [24hr价格变动情况](#24hr价格变动情况)
 	- [最新价格](#最新价格)
 	- [当前最优挂单](#当前最优挂单)
@@ -1180,6 +1181,44 @@ limit     | INT    | NO       | 默认值:100 最大值:1000
 
 * 如果 `startTime` 和 `endTime` 都未发送, 返回最近 `limit` 条数据.
 * 如果 `startTime` 和 `endTime` 之间的数据量大于 `limit`, 返回 `startTime` + `limit`情况下的数据。
+
+## 查询资金费率配置
+
+> **响应:**
+
+```javascript
+[
+	{
+		"symbol": "INJUSDT",            // 交易对
+		"interestRate": "0.00010000",   // 利率
+		"time": 1756197479000,          // 更新时间
+		"fundingIntervalHours": 8,      // 资金费间隔小时数
+		"fundingFeeCap": 0.03,          // 资金费上限
+		"fundingFeeFloor": -0.03        // 资金费下限
+	},
+	{
+		"symbol": "ZORAUSDT",
+		"interestRate": "0.00005000",
+		"time": 1756197479000,
+		"fundingIntervalHours": 4,
+		"fundingFeeCap": 0.02,
+		"fundingFeeFloor": -0.02
+	}
+]
+```
+
+``
+GET /fapi/v1/fundingInfo
+``
+
+**权重:**
+1
+
+**参数:**
+
+  名称    |  类型  | 是否必需 |                         描述
+--------- | ------ | -------- | -----------------------------------------------------
+symbol    | STRING | NO      | 交易对
 
 
 ## 24hr价格变动情况
