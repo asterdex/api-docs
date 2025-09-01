@@ -72,6 +72,7 @@
 	- [Get Current Multi-Assets Mode (USER_DATA)](#get-current-multi-assets-mode-user_data)
 	- [New Order  (TRADE)](#new-order--trade)
 	- [Place Multiple Orders  (TRADE)](#place-multiple-orders--trade)
+	- [Transfer Between Futures And Spot  (TRADE)](#transfer-between-futures-and-spot--trade)
 	- [Query Order (USER_DATA)](#query-order-user_data)
 	- [Cancel Order (TRADE)](#cancel-order-trade)
 	- [Cancel All Open Orders (TRADE)](#cancel-all-open-orders-trade)
@@ -2462,8 +2463,39 @@ newOrderRespType | ENUM    | NO       | "ACK", "RESULT", default "ACK"
 * Batch orders are processed concurrently, and the order of matching is not guaranteed.
 * The order of returned contents for batch orders is the same as the order of the order list.
 
+## Transfer Between Futures And Spot  (TRADE)
 
+> **Response:**
 
+```javascript
+{
+    "tranId": 21841, //transaction id
+    "status": "SUCCESS" //status
+}
+```
+
+``
+POST /fapi/v1/asset/transfer  (HMAC SHA256)
+``
+
+**Weight:**
+5
+
+**Parameters:**
+
+Name | Type | Mandatory | Description
+---------------- | ------- | -------- | ----
+amount |	DECIMAL | 	YES |	amount
+asset |	STRING | 	YES |	asset
+clientTranId |	STRING | 	YES |	transaction id 
+kindType |	STRING | 	YES |	kindType
+timestamp	| LONG | YES	|	timestamp
+
+Notes:
+
+* kindType can take the following values:
+     FUTURE_SPOT  (futures converted to spot)
+	 SPOT_FUTURE  (spot converted to futures)
 
 
 ## Query Order (USER_DATA)
