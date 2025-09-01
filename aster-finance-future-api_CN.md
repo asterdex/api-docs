@@ -72,6 +72,7 @@
 	- [下单 (TRADE)](#下单-trade)
 	- [测试下单接口 (TRADE)](#测试下单接口-trade)
 	- [批量下单 (TRADE)](#批量下单-trade)
+	- [期货现货互转 (TRADE)](#期货现货互转-trade)
 	- [查询订单 (USER_DATA)](#查询订单-user_data)
 	- [撤销订单 (TRADE)](#撤销订单-trade)
 	- [撤销全部订单 (TRADE)](#撤销全部订单-trade)
@@ -2370,7 +2371,36 @@ newOrderRespType | ENUM    | NO       | "ACK", "RESULT", 默认 "ACK"
 * 批量下单采取并发处理，不保证订单撮合顺序
 * 批量下单的返回内容顺序，与订单列表顺序一致
 
+## 期货现货互转 (TRADE)
 
+> **响应:**
+
+```javascript
+{
+    "tranId": 21841, //交易id
+    "status": "SUCCESS" //状态
+}
+```
+
+``
+POST /fapi/v1/asset/transfer  (HMAC SHA256)
+``
+
+**权重:**
+5
+
+**参数:**
+
+
+名称              |  类型   | 是否必需   | 描述
+---------------- | ------- | -------- | ----
+amount |	DECIMAL | 	YES |	数量
+asset |	STRING | 	YES |	资产
+clientTranId |	STRING | 	YES |	交易id 
+kindType |	STRING | 	YES |	交易类型
+timestamp	| LONG | YES	|	时间戳
+
+* kindType 取值为FUTURE_SPOT(期货转现货),SPOT_FUTURE(现货转期货)
 
 
 ## 查询订单 (USER_DATA)
