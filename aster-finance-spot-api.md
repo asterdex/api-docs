@@ -1,41 +1,34 @@
-# General Info
-## General API Information
+# Spot API Overview
 
-* The base endpoint is: **https://sapi.asterdex.com**
-* All endpoints return either a JSON object or array.
-* All time and timestamp related fields are in **milliseconds**.
+* This document lists the base URL for the API endpoints: [**https://sapi.asterdex.com**](https://sapi.asterdex.com)  
+* All API responses are in JSON format.  
+* All times and timestamps are in UNIX time, in **milliseconds**.
 
-## API Key Setup
+## API Key settings
 
-* Some endpoints will require an API Key. 
-* Once API key is created, it is recommended to set IP restrictions on the key for security reasons.
-* **Never share your API key/secret key to ANYONE.**
+* Many endpoints require an API Key to access.  
+* When setting the API Key, for security reasons it is recommended to set an IP access whitelist.  
+* **Never reveal your API key/secret to anyone.**
 
-<aside class="warning">
-If the API keys were accidentally shared, please delete them immediately and create a new key.
-</aside>
+If an API Key is accidentally exposed, immediately delete that Key and generate a new one.
 
 ### Attention
 * TESTUSDT or any other symbols starting with TEST are symbols used for Aster’s INTERNAL TESTING ONLY. Please DO NOT trade on these symbols starting with TEST. Aster does not hold any accountability for loss of funds due to trading on these symbols. However, if you run into issues, you may contact support about this any time, we will try to help you recover your funds.
 
+### HTTP return codes
 
+* HTTP `4XX` status codes are used to indicate errors in the request content, behavior, or format. The problem lies with the requester.  
+* HTTP `403` status code indicates a violation of WAF restrictions (Web Application Firewall).  
+* HTTP `429` error code indicates a warning that the access frequency limit has been exceeded and the IP is about to be blocked.  
+* HTTP `418` indicates that after receiving a 429 you continued to access, so the IP has been blocked.  
+* HTTP `5XX` error codes are used to indicate issues on the Aster service side.
 
-### HTTP Return Codes
-* HTTP `4XX` return codes are used for malformed requests;
-  the issue is on the sender's side.
-* HTTP `403` return code is used when the WAF Limit (Web Application Firewall) has been violated.
-* HTTP `429` return code is used when breaking a request rate limit.
-* HTTP `418` return code is used when an IP has been auto-banned for continuing to send requests after receiving `429` codes.
-* HTTP `5XX` return codes are used for internal errors; the issue is on Aster's side.
-  It is important to **NOT** treat this as a failure operation; the execution status is
-  **UNKNOWN** and could have been a success.
+### API error codes
 
-### Error Codes and Messages
+* When using the endpoint `/api/v1`, any endpoint may throw exceptions;
 
-* If there is an error, the API will return an error with a message of the reason.
+The API error codes are returned in the following format:
 
-> The error payload on API is as follows:
- 
 ```javascript
 {
   "code": -1121,
@@ -43,86 +36,85 @@ If the API keys were accidentally shared, please delete them immediately and cre
 }
 ```
 
-### General Information on Endpoints
+### Basic information about the endpoint
 
-* For `GET` endpoints, parameters must be sent as a `query string`.
-* For `POST`, `PUT`, and `DELETE` endpoints, the parameters may be sent as a
-  `query string` or in the `request body` with content type
-  `application/x-www-form-urlencoded`.
-* Parameters may be sent in any order.
-
----
-## LIMITS
-
-### General Info on Limits
-* The `/api/v1/exchangeInfo` `rateLimits` array contains objects related to the exchange's `REQUEST_WEIGHT`, and `ORDERS` rate limits. These are further defined in the `ENUM definitions` section under `Rate limiters (rateLimitType)`.
-* A 429 will be returned when either rate limit is violated.
-
-### IP Limits
-* Every request will contain `X-MBX-USED-WEIGHT-(intervalNum)(intervalLetter)` in the response headers which has the current used weight for the IP for all request rate limiters defined.
-* Each route has a `weight` which determines for the number of requests each endpoint counts for. Heavier endpoints and endpoints that do operations on multiple symbols will have a heavier `weight`.
-* When a 429 is received, it's your obligation as an API to back off and not spam the API.
-* **Repeatedly violating rate limits and/or failing to back off after receiving 429s will result in an automated IP ban (HTTP status 418).**
-* IP bans are tracked and **scale in duration** for repeat offenders, **from 2 minutes to 3 days**.
-* A `Retry-After` header is sent with a 418 or 429 responses and will give the **number of seconds** required to wait, in the case of a 429, to prevent a ban, or, in the case of a 418, until the ban is over.
-* **The limits on the API are based on the IPs, not the API keys.**
-
-<aside class="notice">
-We recommend using the websocket for getting data as much as possible, as this will not count to the request rate limit.
-</aside>
-
-### Order Rate Limits
-* Every successful order response will contain a `X-MBX-ORDER-COUNT-(intervalNum)(intervalLetter)` header which has the current order count for the account for all order rate limiters defined.
-* Rejected/unsuccessful orders are not guaranteed to have `X-MBX-ORDER-COUNT-**` headers in the response.
-* **The order rate limit is counted against each account**.
-
-### Websocket Limits
-* WebSocket connections have a limit of 5 incoming messages per second. A message is considered:
-    * A PING frame
-    * A PONG frame
-    * A JSON controlled message (e.g. subscribe, unsubscribe)
-* A connection that goes beyond the limit will be disconnected; IPs that are repeatedly disconnected may be banned.
-* A single connection can listen to a maximum of 1024 streams.
+* Endpoints with the `GET` method must send parameters in the `query string`.  
+* For `POST`, `PUT`, and `DELETE` endpoints, parameters can be sent in the `query string` with content type `application/x-www-form-urlencoded` , or in the `request body`.  
+* The order of parameters is not required.
 
 ---
 
-## Endpoint security type
-* Each endpoint has a security type that determines how you will
-  interact with it. This is stated next to the NAME of the endpoint.
-    * If no security type is stated, assume the security type is NONE.
-* API-keys are passed into the Rest API via the `X-MBX-APIKEY`
-  header.
-* API-keys and secret-keys **are case sensitive**.
-* API-keys can be configured to only access certain types of secure endpoints.
-* By default, API-keys can access all secure routes.
+## Access restrictions
 
-Security Type | Description
------------- | ------------
-NONE | Endpoint can be accessed freely.
-TRADE | Endpoint requires sending a valid API-Key and signature.
-USER_DATA | Endpoint requires sending a valid API-Key and signature.
-USER_STREAM | Endpoint requires sending a valid API-Key.
-MARKET_DATA | Endpoint requires sending a valid API-Key.
+### Basic information on access restrictions
 
-* `TRADE` and `USER_DATA` endpoints are `SIGNED` endpoints.
+* The `rateLimits` array in `/api/v1/exchangeInfo` contains objects related to REQUEST\_WEIGHT and ORDERS rate limits for trading. These are further defined in the `enum definitions` section under `rateLimitType`.  
+* A 429 will be returned when any of the rate limits are violated.
 
-## SIGNED (TRADE AND USER_DATA) Endpoint security
-* `SIGNED` endpoints require an additional parameter, `signature`, to be
-  sent in the  `query string` or `request body`.
-* Endpoints use `HMAC SHA256` signatures. The `HMAC SHA256 signature` is a keyed `HMAC SHA256` operation.
-  Use your `secretKey` as the key and `totalParams` as the value for the HMAC operation.
-* The `signature` is **not case sensitive**.
-* `totalParams` is defined as the `query string` concatenated with the
-  `request body`.
+### IP access limits
 
-### Timing security
-* A `SIGNED` endpoint also requires a parameter, `timestamp`, to be sent which
-  should be the millisecond timestamp of when the request was created and sent.
-* An additional parameter, `recvWindow`, may be sent to specify the number of
-  milliseconds after `timestamp` the request is valid for. If `recvWindow`
-  is not sent, **it defaults to 5000**.
+* Each request will include a header named `X-MBX-USED-WEIGHT-(intervalNum)(intervalLetter)` that contains the used weight of all requests from the current IP.  
+* Each endpoint has a corresponding weight, and some endpoints may have different weights depending on their parameters. The more resources an endpoint consumes, the higher its weight will be.  
+* Upon receiving a 429, you are responsible for stopping requests and must not abuse the API.  
+* **If you continue to violate access limits after receiving a 429, your IP will be banned and you will receive a 418 error code.**  
+* Repeated violations of the limits will result in progressively longer bans, **from a minimum of 2 minutes up to a maximum of 3 days**.  
+* The `Retry-After` header will be sent with responses bearing 418 or 429, and will give the wait time **in seconds** (if 429\) to avoid the ban, or, if 418, until the ban ends.  
+* **Access restrictions are based on IP, not API Key**
 
-> The logic is as follows:
+You are advised to use WebSocket messages to obtain the corresponding data as much as possible to reduce the load and rate-limit pressure from requests.
+
+### Order rate limits
+
+* Each successful order response will include a `X-MBX-ORDER-COUNT-(intervalNum)(intervalLetter)` header containing the number of order limit units currently used by the account.  
+* When the number of orders exceeds the limit, you will receive a response with status 429 but without the `Retry-After` header. Please check the order rate limits in `GET api/v1/exchangeInfo` (rateLimitType \= ORDERS) and wait until the ban period ends.  
+* Rejected or unsuccessful orders are not guaranteed to include the above header in the response.  
+* **Order placement rate limits are counted per account.**
+
+### WebSocket connection limits
+
+* The WebSocket server accepts a maximum of 5 messages per second. Messages include:  
+  * PING frame  
+  * PONG frame  
+  * Messages in JSON format, such as subscribe and unsubscribe.  
+* If a user sends messages that exceed the limit, the connection will be terminated. IPs that are repeatedly disconnected may be blocked by the server.  
+* A single connection can subscribe to up to **1024** Streams.
+
+---
+
+## API authentication types
+
+* Each API has its own authentication type, which determines what kind of authentication should be performed when accessing it.  
+* The authentication type will be indicated next to each endpoint name in this document; if not specifically stated, it defaults to `NONE`.  
+* If API keys are required, they should be passed in the HTTP header using the `X-MBX-APIKEY` field.  
+* API keys and secret keys are **case-sensitive**.   
+* By default, API keys have access to all authenticated routes.
+
+| Authentication type | Description |
+| :---- | :---- |
+| NONE | APIs that do not require authentication |
+| TRADE | A valid API-Key and signature are required |
+| USER\_DATA | A valid API-Key and signature are required |
+| USER\_STREAM | A valid API-Key is required |
+| MARKET\_DATA | A valid API-Key is required |
+
+* The `TRADE` and `USER_DATA` endpoints are signed (SIGNED) endpoints.
+
+---
+
+## SIGNED (TRADE AND USER\_DATA) Endpoint security
+
+* When calling a `SIGNED` endpoint, in addition to the parameters required by the endpoint itself, you must also pass a `signature` parameter in the `query string` or `request body`.  
+* The signature uses the `HMAC SHA256` algorithm. The API-Secret corresponding to the API-KEY is used as the key for `HMAC SHA256`, and all other parameters are used as the data for the `HMAC SHA256` operation; the output is the signature.  
+* The `signature` is **case-insensitive**.  
+* "totalParams" is defined as the "query string" concatenated with the "request body".
+
+### Time synchronization safety
+
+* Signed endpoints must include the `timestamp` parameter, whose value should be the unix timestamp (milliseconds) at the moment the request is sent.  
+* When the server receives a request it will check the timestamp; if it was sent more than 5,000 milliseconds earlier, the request will be considered invalid. This time window value can be defined by sending the optional `recvWindow` parameter.
+
+The logical pseudocode is as follows:
+
 ```javascript
   if (timestamp < (serverTime + 1000) && (serverTime - timestamp) <= recvWindow)
   {
@@ -134,174 +126,157 @@ MARKET_DATA | Endpoint requires sending a valid API-Key.
   }
 ```
 
-**Serious trading is about timing.** Networks can be unstable and unreliable,
-which can lead to requests taking varying amounts of time to reach the
-servers. With `recvWindow`, you can specify that the request must be
-processed within a certain number of milliseconds or be rejected by the
-server.
+**About trade timeliness** Internet conditions are not completely stable or reliable, so the latency from your client to Aster's servers will experience jitter. This is why we provide `recvWindow`; if you engage in high-frequency trading and have strict requirements for timeliness, you can adjust `recvWindow` flexibly to meet your needs.
 
-<aside class="notice">
-It is recommended to use a small recvWindow of 5000 or less! The max cannot go beyond 60,000!
-</aside>
+It is recommended to use a recvWindow of under 5 seconds. It must not exceed 60 seconds.
 
-### SIGNED Endpoint Examples for POST /api/v1/order
-Here is a step-by-step example of how to send a vaild signed payload from the
-Linux command line using `echo`, `openssl`, and `curl`.
+### Example of POST /api/v1/order
 
-Key | Value
------------- | ------------
-apiKey | 4452d7e2ed4da80b74105e02d06328c71a34488c9fdd60a5a0900d42d584b795
-secretKey | fdde510a2b71fa43a43bff3e3cf7819c8c66df34633d338050f4f59664b3b313
+Below is an example of placing an order by calling the API using echo, openssl, and curl tools in a Linux bash environment. The apiKey and secretKey are for demonstration only.
 
-Parameter | Value
------------- | ------------
-symbol | BNBUSDT
-side | BUY
-type | LIMIT
-timeInForce | GTC
-quantity | 5
-price | 1.1
-recvWindow | 5000
-timestamp | 1756187806000
+| Key | Value |
+| :---- | :---- |
+| apiKey | 4452d7e2ed4da80b74105e02d06328c71a34488c9fdd60a5a0900d42d584b795 |
+| secretKey | fdde510a2b71fa43a43bff3e3cf7819c8c66df34633d338050f4f59664b3b313 |
 
+| Parameters | Values |
+| :---- | :---- |
+| symbol | BNBUSDT |
+| side | BUY |
+| type | LIMIT |
+| timeInForce | GTC |
+| quantity | 5 |
+| price | 1.1 |
+| recvWindow | 5000 |
+| timestamp | 1756187806000 |
 
-#### Example 1: As a request body
+#### Example 1: All parameters are sent through the request body
 
+**Example 1** **HMAC SHA256 signature:**
 
-> **Example 1**
-> **HMAC SHA256 signature:**
 ```shell
     $ echo -n "symbol=BNBUSDT&side=BUY&type=LIMIT&timeInForce=GTC&quantity=5&price=1.1&recvWindow=5000&timestamp=1756187806000" | openssl dgst -sha256 -hmac "fdde510a2b71fa43a43bff3e3cf7819c8c66df34633d338050f4f59664b3b313"
     (stdin)= e09169bf6c02ec4b29fa1bdc3a967f92c8c6cfcde0551ba1d477b2d3cf4c51b0
 ```
 
+**curl command:**
 
-> **curl command:**
 ```shell
     (HMAC SHA256)
     $ curl -H "X-MBX-APIKEY: 4452d7e2ed4da80b74105e02d06328c71a34488c9fdd60a5a0900d42d584b795" -X POST 'https://sapi.asterdex.com/api/v1/order' -d 'symbol=BNBUSDT&side=BUY&type=LIMIT&timeInForce=GTC&quantity=5&price=1.1&recvWindow=5000&timestamp=1756187806000&signature=e09169bf6c02ec4b29fa1bdc3a967f92c8c6cfcde0551ba1d477b2d3cf4c51b0'
 ```
 
-* **requestBody:** 
+* **requestBody:**
 
-symbol=BNBUSDT   
-&side=BUY   
-&type=LIMIT   
-&timeInForce=GTC   
-&quantity=5   
-&price=1.1   
-&recvWindow=5000   
-&timestamp=1756187806000
+symbol=BNBUSDT \&side=BUY \&type=LIMIT \&timeInForce=GTC \&quantity=5 \&price=1.1 \&recvWindow=5000 \&timestamp=1756187806000
 
+#### Example 2: All parameters sent through the query string
 
-#### Example 2: As a query string
+**Example 2** **HMAC SHA256 signature:**
 
-> **Example 2**
-> **HMAC SHA256 signature:**
 ```shell
-     $ echo -n "symbol=BNBUSDT&side=BUY&type=LIMIT&timeInForce=GTC&quantity=5&price=1.1&recvWindow=5000&timestamp=1756187806000" | openssl dgst -sha256 -hmac "fdde510a2b71fa43a43bff3e3cf7819c8c66df34633d338050f4f59664b3b313"
-    (stdin)= e09169bf6c02ec4b29fa1bdc3a967f92c8c6cfcde0551ba1d477b2d3cf4c51b0
+    $ echo -n "symbol=BNBUSDT&side=BUY&type=LIMIT&timeInForce=GTC&quantity=5&price=1.1&recvWindow=5000&timestamp=1756187806000" | openssl dgst -sha256 -hmac "fdde510a2b71fa43a43bff3e3cf7819c8c66df34633d338050f4f59664b3b313"
+    (stdin)= e09169bf6c02ec4b29fa1bdc3a967f92c8c6cfcde0551ba1d477b2d3cf4c51b0 
 ```
 
-> **curl command:**
+**curl command:**
+
 ```shell
     (HMAC SHA256)
    $ curl -H "X-MBX-APIKEY: 4452d7e2ed4da80b74105e02d06328c71a34488c9fdd60a5a0900d42d584b795" -X POST 'https://sapi.asterdex.com/api/v1/order?symbol=BNBUSDT&side=BUY&type=LIMIT&timeInForce=GTC&quantity=5&price=1.1&recvWindow=5000&timestamp=1756187806000&signature=e09169bf6c02ec4b29fa1bdc3a967f92c8c6cfcde0551ba1d477b2d3cf4c51b0'
 ```
 
-*  **queryString:** 
+* **queryString:**
 
-symbol=BNBUSDT   
-&side=BUY   
-&type=LIMIT   
-&timeInForce=GTC   
-&quantity=5   
-&price=1.1   
-&recvWindow=5000   
-&timestamp=1756187806000
+symbol=BNBUSDT \&side=BUY \&type=LIMIT \&timeInForce=GTC \&quantity=5 \&price=1.1 \&recvWindow=5000 \&timestamp=1756187806000
 
 ---
 
-## Public API Definitions
+## Public API parameters
+
 ### Terminology
 
-These terms will be used throughout the documentation, so it is recommended especially for new users to read to help their understanding of the API.
+The terminology in this section applies throughout the document. New users are encouraged to read it carefully for better understanding.
 
-* `base asset` refers to the asset that is the `quantity` of a symbol. For the symbol BTCUSDT, BTC would be the `base asset.`
-* `quote asset` refers to the asset that is the `price` of a symbol. For the symbol BTCUSDT, USDT would be the `quote asset`.
+* `base asset` refers to the asset being traded in a trading pair, i.e., the asset name written first; for example, in `BTCUSDT`, `BTC` is the `base asset`.  
+* `quote asset` refers to the pricing asset of a trading pair, i.e., the asset name written at the latter part; for example, in `BTCUSDT`, `USDT` is the `quote asset`.
 
-### ENUM definitions
-**Symbol status (status):**
+### Enumeration definition
 
-* TRADING
+**Trading pair status (status):**
 
+* TRADING \- after trade
+
+**Trading pair type:**
+
+* SPOT \- spot
 
 **Order status (status):**
 
-Status | Description
------------| --------------
-`NEW` | The order has been accepted by the engine.
-`PARTIALLY_FILLED`| A part of the order has been filled.
-`FILLED` | The order has been completed.
-`CANCELED` | The order has been canceled by the user.
-`REJECTED`       | The order was not accepted by the engine and not processed.
-`EXPIRED` | The order was canceled according to the order type's rules (e.g. LIMIT FOK orders with no fill, LIMIT IOC or MARKET orders that partially fill) or by the exchange, (e.g. orders canceled during maintenance)
-
+| Status | Description |
+| :---- | :---- |
+| NEW | Order accepted by the matching engine |
+| PARTIALLY\_FILLED | Part of the order was filled |
+| FILLED | The order was fully filled |
+| CANCELED | The user canceled the order |
+| REJECTED | The order was not accepted by the matching engine and was not processed |
+| EXPIRED | Order canceled by the trading engine, for example: Limit FOK order not filled, Market order not fully filled, orders canceled during exchange maintenance |
 
 **Order types (orderTypes, type):**
 
-* LIMIT
-* MARKET
-* STOP
-* TAKE_PROFIT
-* STOP_MARKET 
-* TAKE_PROFIT_MARKET
+* LIMIT \- Limit Order  
+* MARKET \- Market Order  
+* STOP \- Limit Stop Order  
+* TAKE\_PROFIT \- Limit Take-Profit Order  
+* STOP\_MARKET \- Market Stop Order  
+* TAKE\_PROFIT\_MARKET \- Market Take-Profit Order
 
-**Order Response Type (newOrderRespType):**
+**Order response type (newOrderRespType):**
 
-* ACK
-* RESULT
+* ACK  
+* RESULT  
 * FULL
 
-**Order side (side):**
+**Order direction (direction side):**
 
-* BUY
-* SELL
+* BUY \- Buy  
+* SELL \- Sell
 
-**Time in force (timeInForce):**
+**Valid types (timeInForce):**
 
-This sets how long an order will be active before expiration.
+This defines how long an order can remain valid before expiring.
 
-Status | Description
------------| --------------
-`GTC` | Good Till Canceled <br> An order will be on the book unless the order is canceled. 
-`IOC` | Immediate Or Cancel <br> An order will try to fill the order as much as it can before the order expires.
-`FOK`| Fill or Kill <br> An order will expire if the full order cannot be filled upon execution.
-`GTX`| Good Till Crossing <br>  Post only order
+| Status | Description |
+| :---- | :---- |
+| GTC (Good ‘Til Canceled) | The order remains active until it is fully executed or manually canceled. |
+| IOC (Immediate or Cancel) | The order will execute immediately for any amount available. Any unfilled portion is automatically canceled. |
+| FOK (Fill or Kill) | The order must be fully executed immediately. If it cannot be filled in full, it is canceled right away. |
+| GTX (Good ‘Til Executed) | The order remains active until it is fully executed. Only limit orders are supported. |
 
-**Kline/Candlestick chart intervals:**
+**K-line interval:**
 
-m -> minutes; h -> hours; d -> days; w -> weeks; M -> months
+m (minutes), h (hours), d (days), w (weeks), M (months)
 
-* 1m
-* 3m
-* 5m
-* 15m
-* 30m
-* 1h
-* 2h
-* 4h
-* 6h
-* 8h
-* 12h
-* 1d
-* 3d
-* 1w
+* 1m  
+* 3m  
+* 5m  
+* 15m  
+* 30m  
+* 1h  
+* 2h  
+* 4h  
+* 6h  
+* 8h  
+* 12h  
+* 1d  
+* 3d  
+* 1w  
 * 1M
 
-**Rate limiters (rateLimitType)**
+**Rate limit type (rateLimitType)**
 
-> REQUEST_WEIGHT
+REQUEST\_WEIGHT
+
 ```json
     {
       "rateLimitType": "REQUEST_WEIGHT",
@@ -311,7 +286,8 @@ m -> minutes; h -> hours; d -> days; w -> weeks; M -> months
     }
 ```
 
-> ORDERS
+ORDERS
+
 ```json
     {
       "rateLimitType": "ORDERS",
@@ -321,182 +297,160 @@ m -> minutes; h -> hours; d -> days; w -> weeks; M -> months
     }
 ```
 
-* REQUEST_WEIGHT
+* REQUEST\_WEIGHT \- The maximum sum of request weights allowed within a unit time  
+    
+* ORDERS \- Order placement frequency limit per time unit
 
-* ORDERS
+**Interval restriction (interval)**
 
-**Rate limit intervals (interval)**
-
-* MINUTE
+* MINUTE \- Minute
 
 ---
+
 ## Filters
-Filters define trading rules on a symbol or an exchange.
-Filters come in two forms: `symbol filters` and `exchange filters`. Currently only `symbol filters` is used.
 
-### Symbol Filters
+Filters, i.e. Filter, define a set of trading rules. There are two types: filters for trading pairs `symbol filters`, and filters for the entire exchange `exchange filters` (not supported yet)
 
-#### PRICE_FILTER
+### Trading pair filters
 
-> **ExchangeInfo format:**
-```javascript    
+#### PRICE\_FILTER Price filter
+
+**Format in the /exchangeInfo response:**
+
+```javascript
   {                     
-	"minPrice": "556.72",
+    "minPrice": "556.72",
     "maxPrice": "4529764",
     "filterType": "PRICE_FILTER",
     "tickSize": "0.01"   
-  }  
+  }
 ```
 
-The `PRICE_FILTER` defines the `price` rules for a symbol. There are 3 parts:
+The `Price Filter` checks the validity of the `price` parameter in an order. It consists of the following three parts:
 
-* `minPrice` defines the minimum `price`/`stopPrice` allowed; disabled on `minPrice` == 0.
-* `maxPrice` defines the maximum `price`/`stopPrice` allowed; disabled on `maxPrice` == 0.
-* `tickSize` defines the intervals that a `price`/`stopPrice` can be increased/decreased by; disabled on `tickSize` == 0.
+* `minPrice` defines the minimum allowed value for `price`/`stopPrice`.  
+* `maxPrice` defines the maximum allowed value for `price`/`stopPrice`.  
+* `tickSize` defines the step interval for `price`/`stopPrice`, meaning the price must equal minPrice plus an integer multiple of tickSize.
 
-Any of the above variables can be set to 0, which disables that rule in the `price filter`. In order to pass the `price filter`, the following must be true for `price`/`stopPrice` of the enabled rules:
+Each of the above items can be 0; when 0 it means that item is not constrained.
 
-* `price` >= `minPrice` 
-* `price` <= `maxPrice`
-* (`price`-`minPrice`) % `tickSize` == 0
+The logical pseudocode is as follows:
 
+* `price` \>= `minPrice`  
+* `price` \<= `maxPrice`  
+* (`price`\-`minPrice`) % `tickSize` \== 0
 
-#### PERCENT_PRICE
+#### PERCENT\_PRICE price amplitude filter
 
-> **ExchangeInfo format:**
-```javascript    
+**Format in the /exchangeInfo response:**
+
+```javascript
   {                    
 	"multiplierDown": "0.9500",
 	"multiplierUp": "1.0500",
 	"multiplierDecimal": "4",
 	"filterType": "PERCENT_PRICE"
-  }  
+  }
 ```
 
-The `PERCENT_PRICE` filter defines valid range for a price based on the index price.
+The `PERCENT_PRICE` filter defines the valid range of prices based on the index price.
 
-In order to pass the `percent price`, the following must be true for `price`:  
+For the "price percentage" to apply, the "price" must meet the following conditions:
 
-* `price` <=`indexPrice` *`multiplierUp`
-* `price`> =`indexPrice` *`multiplierDown`    
+* `price` \<=`indexPrice` \*`multiplierUp`  
+* `price`\> \=`indexPrice` \*`multiplierDown`
 
+#### LOT\_SIZE order size
 
-#### LOT_SIZE
+**Format in the /exchangeInfo response:**
 
-> **ExchangeInfo format:**
-```javascript    
+```javascript
   {
     "stepSize": "0.00100000",
     "filterType": "LOT_SIZE",
     "maxQty": "100000.00000000",
     "minQty": "0.00100000"
-  }  
-```
-
-The `LOT_SIZE` filter defines the `quantity` (aka "lots" in auction terms) rules for a symbol. There are 3 parts:
-
-* `minQty` defines the minimum `quantity` allowed.
-* `maxQty` defines the maximum `quantity` allowed.
-* `stepSize` defines the intervals that a `quantity` can be increased/decreased by.
-
-In order to pass the `lot size`, the following must be true for `quantity`:
-
-* `quantity` >= `minQty`
-* `quantity` <= `maxQty`
-* (`quantity`-`minQty`) % `stepSize` == 0
-
-
-
-
-#### MARKET_LOT_SIZE
-
-> **ExchangeInfo format:**
-```javascript
-  {      
-	"stepSize": "0.00100000",
-  "filterType": "MARKET_LOT_SIZE"
-	"maxQty": "100000.00000000",
-	"minQty": "0.00100000"    
   }
 ```
 
+Lots is an auction term. The `LOT_SIZE` filter validates the `quantity` (i.e., the amount) parameter in orders. It consists of three parts:
 
-The `MARKET_LOT_SIZE` filter defines the `quantity` (aka "lots" in auction terms) rules for `MARKET` orders on a symbol. There are 3 parts:
+* `minQty` indicates the minimum allowed value for `quantity`.  
+* `maxQty` denotes the maximum allowed value for `quantity`.  
+* `stepSize` denotes the allowed step increment for `quantity`.
 
-* `minQty` defines the minimum `quantity` allowed.
-* `maxQty` defines the maximum `quantity` allowed.
-* `stepSize` defines the intervals that a `quantity` can be increased/decreased by.
+The logical pseudocode is as follows:
 
-In order to pass the `market lot size`, the following must be true for `quantity`:
+* `quantity` \>= `minQty`  
+* `quantity` \<= `maxQty`  
+* (`quantity`\-`minQty`) % `stepSize` \== 0
 
-* `quantity` >= `minQty`
-* `quantity` <= `maxQty`
-* (`quantity`-`minQty`) % `stepSize` == 0
+#### MARKET\_LOT\_SIZE \- Market order size
 
+\***/exchangeInfo response format:**
 
+```javascript
+  {
+    "stepSize": "0.00100000",
+    "filterType": "MARKET_LOT_SIZE"
+	"maxQty": "100000.00000000",
+	"minQty": "0.00100000"
+  }
+```
 
+The `MARKET_LOT_SIZE` filter defines the `quantity` (i.e., the "lots" in an auction) rules for `MARKET` orders on a trading pair. There are three parts:
 
+* `minQty` defines the minimum allowed `quantity`.  
+* `maxQty` defines the maximum allowed quantity.  
+* `stepSize` defines the increments by which the quantity can be increased or decreased.
 
+In order to comply with the `market lot size`, the `quantity` must satisfy the following conditions:
 
+* `quantity` \>= `minQty`  
+* `quantity` \<= `maxQty`  
+* (`quantity`\-`minQty`) % `stepSize` \== 0
 
+# Market data API
 
+## Test server connectivity
 
+**Response**
 
-
-
-# Market Data Endpoints
-
-## Test Connectivity
-
-
-
-> **Response:**
 ```javascript
 {}
 ```
 
-``
-GET /api/v1/ping
-``
+`GET /api/v1/ping`
 
-Test connectivity to the Rest API.
+Test whether the REST API can be reached.
 
-**Weight:**
-1
+**Weight:** 1
 
-**Parameters:**
+**Parameters:** NONE
 
-NONE
+## Get server time
 
-## Check Server Time
+**Response**
 
-
-> **Response:**
 ```javascript
 {
   "serverTime": 1499827319559
 }
 ```
 
-``
-GET /api/v1/time
-``
+`GET /api/v1/time`
 
-Test connectivity to the Rest API and get the current server time.
+Test if the REST API can be reached and retrieve the server time.
 
-**Weight:**
-1
+**Weight:** 1
 
-**Parameters:**
+**Parameters:** NONE
 
-NONE
+## Trading specification information
 
+**Response**
 
-## Exchange Information
-
-> **Response:** 
-
-```javascript  
+```javascript
 {
 	"timezone": "UTC",
 	"serverTime": 1756197279679,
@@ -611,32 +565,27 @@ NONE
 }
 ```
 
-``
-GET /api/v1/exchangeInfo
-``
+`GET /api/v1/exchangeInfo`
 
-Current exchange trading rules and symbol information
+Retrieve trading rules and trading pair information.
 
-**Weight:**
-1
+**Weight:** 1
 
-**Parameters:**
-NONE
+**Parameters:** None
 
+## Depth information
 
-## Order Book
+**Response**
 
-
-> **Response:**
 ```javascript
 {
   "lastUpdateId": 1027024,
-  "E": 1589436922972,   // Message output time
-  "T": 1589436922959,   // Transaction time
-  "bids": [
+  "E":1589436922972, //  Message output time
+  "T":1589436922959, //  Transaction time
+  "bids": [
     [
-      "4.00000000",     // PRICE
-      "431.00000000"    // QTY
+      "4.00000000", // PRICE
+      "431.00000000" // QTY
     ]
   ],
   "asks": [
@@ -648,34 +597,30 @@ NONE
 }
 ```
 
-``
-GET /api/v1/depth
-``
+`GET /api/v1/depth`
 
-**Weight(IP):**
+**Weight:**
 
-Adjusted based on the limit:
+Based on limit adjustments:
 
+| Limitations | Weight |
+| :---- | :---- |
+| 5, 10, 20, 50 | 2 |
+| 100 | 5 |
+| 500 | 10 |
+| 1000 | 20 |
 
-Limit | Weight
------------- | ------------ 
-5, 10, 20, 50 | 2
-100 | 5
-500 | 10
-1000 | 20
-   
 **Parameters:**
 
-Name | Type | Mandatory | Description
------------- | ------------ | ------------ | ------------
-symbol | STRING | YES |
-limit | INT | NO | Default 100. Valid limits:[5, 10, 20, 50, 100, 500, 1000]
+| Name | Type | Is it required? | Description |
+| :---- | :---- | :---- | :---- |
+| symbol | STRING | YES |  |
+| limit | INT | NO | Default 100\. Optional values: \[5, 10, 20, 50, 100, 500, 1000\] |
 
+## Recent trades list
 
-## Recent Trades List
+**Response**
 
-
-> **Response:**
 ```javascript
 [
  {
@@ -689,26 +634,22 @@ limit | INT | NO | Default 100. Valid limits:[5, 10, 20, 50, 100, 500, 1000]
 ]
 ```
 
-``
-GET /api/v1/trades
-``
+`GET /api/v1/trades`
 
-Get recent trades.
+Get recent trades
 
-**Weight:**
-1
+**Weight:** 1
 
 **Parameters:**
 
-Name | Type | Mandatory | Description
------------- | ------------ | ------------ | ------------
-symbol | STRING | YES |
-limit | INT | NO | Default 500；max 1000
+| Name | Type | Is it required? | Description |
+| :---- | :---- | :---- | :---- |
+| symbol | STRING | YES |  |
+| limit | INT | NO | Default 500; maximum 1000 |
 
+## Query historical trades (MARKET\_DATA)
 
-## Old Trade Lookup (MARKET_DATA)
-
-> **Response:**
+**Response**
 
 ```javascript
 [
@@ -723,117 +664,102 @@ limit | INT | NO | Default 500；max 1000
 ]
 ```
 
-``
-GET /api/v1/historicalTrades
-``
+`GET /api/v1/historicalTrades`
 
-Get older market trades.
+Retrieve historical trades
 
-**Weight:**
-20
+**Weight:** 20
 
 **Parameters:**
 
-Name | Type | Mandatory | Description
------------- | ------------ | ------------ | ------------
-symbol | STRING | YES |
-limit | INT | NO | Default 500; max 1000.
-fromId | LONG | NO | Trade id to fetch from. Default gets most recent trades.
+| Name | Type | Is it required? | Description |
+| :---- | :---- | :---- | :---- |
+| symbol | STRING | YES |  |
+| limit | INT | NO | Default 500; maximum 1000\. |
+| fromId | LONG | NO | Return starting from which trade id. Defaults to returning the most recent trade records. |
 
+## Recent trades (aggregated)
 
-## Compressed/Aggregate Trades List
+**Response**
 
-
-> **Response:**
 ```javascript
 [
   {
-    "a": 26129,         // Aggregate tradeId
-    "p": "0.01633102",  // Price
-    "q": "4.70443515",  // Quantity
-    "f": 27781,         // First tradeId
-    "l": 27781,         // Last tradeId
+    "a": 26129, // Aggregate tradeId
+    "p": "0.01633102", // Price
+    "q": "4.70443515", // Quantity
+    "f": 27781, // First tradeId
+    "l": 27781, // Last tradeId
     "T": 1498793709153, // Timestamp
-    "m": true,          // Was the buyer the maker?
+    "m": true, // Was the buyer the maker?
   }
 ]
 ```
 
-``
-GET /api/v1/aggTrades
-``
+`GET /api/v1/aggTrades`
 
-Get compressed, aggregate trades. Trades that fill at the time, from the same
-order, with the same price will have the quantity aggregated.
+The difference between aggregated trades and individual trades is that trades with the same price, same side, and same time are combined into a single entry.
 
-**Weight:**
-20
+**Weight:** 20
 
 **Parameters:**
 
-Name | Type | Mandatory | Description
------------- | ------------ | ------------ | ------------
-symbol | STRING | YES |
-fromId | LONG | NO | id to get aggregate trades from INCLUSIVE.
-startTime | LONG | NO | Timestamp in ms to get aggregate trades from INCLUSIVE.
-endTime | LONG | NO | Timestamp in ms to get aggregate trades until INCLUSIVE.
-limit | INT | NO | Default 500; max 1000.
+| Name | Type | Is it required? | Description |
+| :---- | :---- | :---- | :---- |
+| symbol | STRING | YES |  |
+| fromId | LONG | NO | Return results starting from the trade ID that includes fromId |
+| startTime | LONG | NO | Return results starting from trades after that time |
+| endTime | LONG | NO | Return the trade records up to that moment |
+| limit | INT | NO | Default 500; maximum 1000\. |
 
-* If startTime and endTime are sent, time between startTime and endTime must be less than 1 hour.
-* If fromId, startTime, and endTime are not sent, the most recent aggregate trades will be returned.
+* If you send startTime and endTime, the interval must be less than one hour.  
+* If no filter parameters (fromId, startTime, endTime) are sent, the most recent trade records are returned by default
 
+## K-line data
 
-## Kline/Candlestick Data
+**Response**
 
-
-> **Response:**
 ```javascript
 [
   [
-    1499040000000,      // Open time
-    "0.01634790",       // Open
-    "0.80000000",       // High
-    "0.01575800",       // Low
-    "0.01577100",       // Close
-    "148976.11427815",  // Volume
-    1499644799999,      // Close time
-    "2434.19055334",    // Quote asset volume
-    308,                // Number of trades
-    "1756.87402397",    // Taker buy base asset volume
-    "28.46694368",      // Taker buy quote asset volume
-    "17928899.62484339" // Ignore.
+    1499040000000, // Open time
+    "0.01634790", // Open
+    "0.80000000", // High
+    "0.01575800", // Low
+    "0.01577100", // Close
+    "148976.11427815", // Volume
+    1499644799999, // Close time
+    "2434.19055334", // Quote asset volume
+    308, // Number of trades
+    "1756.87402397", // Taker buy base asset volume
+    "28.46694368", // Taker buy quote asset volume
   ]
 ]
 ```
 
-``
-GET /api/v1/klines
-``
+`GET /api/v1/klines`
 
-Kline/candlestick bars for a symbol.   
-Klines are uniquely identified by their open time.
-
+Each K-line represents a trading pair. The open time of each K-line can be regarded as a unique ID.
 
 **Parameters:**
 
-Name | Type | Mandatory | Description
------------- | ------------ | ------------ | ------------
-symbol | STRING | YES |
-interval | ENUM | YES |
-startTime | LONG | NO |
-endTime | LONG | NO |
-limit | INT | NO | Default 500; max 1500.
+| Name | Type | Is it required? | Description |
+| :---- | :---- | :---- | :---- |
+| symbol | STRING | YES |  |
+| interval | ENUM | YES | See the enumeration definition: K-line interval |
+| startTime | LONG | NO |  |
+| endTime | LONG | NO |  |
+| limit | INT | NO | Default 500; maximum 1500\. |
 
-* If startTime and endTime are not sent, the most recent klines are returned.
+* If startTime and endTime are not sent, the most recent trades are returned by default
 
+## 24h price change
 
-## 24hr Ticker Price Change Statistics
+**Response**
 
-> **Response:**
-
-```javascript 
+```javascript
 {
-  "symbol": "BTCUSDT",
+  "symbol": "BTCUSDT",              //symbol
   "priceChange": "-94.99999800",    //price change
   "priceChangePercent": "-95.960",  //price change percent
   "weightedAvgPrice": "0.29628482", //weighted avgPrice
@@ -857,32 +783,25 @@ limit | INT | NO | Default 500; max 1500.
 }
 ```
 
-``
-GET /api/v1/ticker/24hr
-``
+`GET /api/v1/ticker/24hr`
 
-24 hour rolling window price change statistics. 
-**Careful** when accessing this with no symbol.
+24-hour rolling window price change data. Please note that omitting the symbol parameter will return data for all trading pairs; in that case the returned data is an example array for the respective pairs, which is not only large in volume but also has a very high weight.
 
-**Weight:**
-
-1 for a single symbol;    
-**40** when the symbol parameter is omitted;
+**Weight:** 1 \= single trading pair; **40** \= When the trading pair parameter is missing (returns all trading pairs)
 
 **Parameters:**
 
-Name | Type | Mandatory | Description
------------- | ------------ | ------------ | ------------
-symbol | STRING | NO |
+| Name | Type | Is it required? | Description |
+| :---- | :---- | :---- | :---- |
+| symbol | STRING | NO |  |
 
-* If the symbol is not sent, tickers for all symbols will be returned in an array.   
+* Please note that omitting the symbol parameter will return data for all trading pairs
 
+## Latest price
 
-## 最新价格
+**Response**
 
-> **Response**
-
-```javascript    
+```javascript
 {
    "symbol": "ADAUSDT",
    "price": "1.30000000",
@@ -890,7 +809,7 @@ symbol | STRING | NO |
 }  
 ```
 
-> OR
+OR
 
 ```javascript
 [     
@@ -902,28 +821,24 @@ symbol | STRING | NO |
 ]
 ```
 
-``
-GET /api/v1/ticker/price
-``  
+`GET /api/v1/ticker/price`
 
-Latest price for a symbol or symbols.
+Get the latest price for a trading pair
 
-**Weight:**
-1 for a single symbol;
-2 when the symbol parameter is omitted
+**Weight:** 1 \= Single trading pair; **2** \= No symbol parameter (returns all pairs)
 
 **Parameters:**
 
-Name | Type | Mandatory | Description
------------- | ------------ | ------------ | ------------
-symbol | STRING | NO |
+| Name | Type | Is it required? | Description |
+| :---- | :---- | :---- | :---- |
+| symbol | STRING | NO |  |
 
-* If the symbol is not sent, prices for all symbols will be returned in an array.
+* If no trading pair parameter is sent, information for all trading pairs will be returned
 
+## Current best order
 
-## Symbol Order Book Ticker     
+**Response**
 
-> **Response** 
 ```javascript
 {
   "symbol": "LTCBTC",
@@ -931,11 +846,11 @@ symbol | STRING | NO |
   "bidQty": "431.00000000",
   "askPrice": "4.00000200",
   "askQty": "9.00000000"
-  "time": 1589437530011   
+  "time": 1589437530011   // Timestamp
 }
 ```
 
-> OR
+OR
 
 ```javascript
 [
@@ -945,33 +860,28 @@ symbol | STRING | NO |
     "bidQty": "431.00000000",
     "askPrice": "4.00000200",
     "askQty": "9.00000000",
-    "time": 1589437530011  
+    "time": 1589437530011   // Timestamp
   }
 ]
 ```
 
-``
-GET /api/v1/ticker/bookTicker
-``  
+`GET /api/v1/ticker/bookTicker`
 
-Best price/qty on the order book for a symbol or symbols.
+Return the current best orders (highest bid, lowest ask)
 
-**Weight:**
-1 for a single symbol;
-2 when the symbol parameter is omitted
+**Weight:** 1 \= Single trading pair; **2** \= No symbol parameter (returns all pairs)
 
 **Parameters:**
 
-Name | Type | Mandatory | Description
------------- | ------------ | ------------ | ------------
-symbol | STRING | NO |
+| Name | Type | Is it required? | Description |
+| :---- | :---- | :---- | :---- |
+| symbol | STRING | NO |  |
 
-* If the symbol is not sent, prices for all symbols will be returned in an array.
+* If no trading pair parameter is sent, information for all trading pairs will be returned
 
+## Get symbol fees
 
-## Symbol Commmission Fee
-
-> **Response:**
+**Response**
 
 ```javascript
 {
@@ -981,32 +891,27 @@ symbol | STRING | NO |
 }
 ```
 
-``
-GET /api/v1/commissionRate
-``
+`GET /api/v1/commissionRate`
 
-Get symbol commission fee.
+Get symbol fees
 
-**Weight:**
-20
+**Weight:** 20
 
 **Parameters:**
 
-Name | Type | Mandatory | Description
------------- | ------------ | ------------ | ------------
-symbol | STRING | YES | 
-recvWindow | LONG | NO |
-timestamp | LONG | YES |
+| Name | Type | Is it required? | Description |
+| :---- | :---- | :---- | :---- |
+| symbol | STRING | YES |  |
+| recvWindow | LONG | NO | The assigned value cannot be greater than 60000 |
+| timestamp | LONG | YES |  |
 
+# Spot account and trading API
 
+## Place order (TRADE)
 
+**Response ACK:**
 
-# Spot Account/Trade
-
-## New Order (TRADE)
-
-> **Response:**
-```javascript 
+```javascript
 {
   "symbol": "BTCUSDT", 
   "orderId": 28, 
@@ -1027,55 +932,50 @@ timestamp | LONG | YES |
 }
 ```
 
-``
-POST /api/v1/order (HMAC SHA256)
-``
+`POST /api/v1/order (HMAC SHA256)`
 
-Send in a new order.
+Send order
 
-**Weight:**
-1
+**Weight:** 1
 
 **Parameters:**
 
-Name | Type | Mandatory | Description
------------- | ------------ | ------------ | ------------
-symbol | STRING | YES |
-side | ENUM | YES |
-type | ENUM | YES |
-timeInForce | ENUM | NO |
-quantity | DECIMAL | NO |
-quoteOrderQty|DECIMAL|NO|
-price | DECIMAL | NO |
-newClientOrderId | STRING | NO | A unique id among open orders. Automatically generated if not sent.
-stopPrice | DECIMAL | NO | Used with `STOP`, `STOP_MARKET`,`TAKE_PROFIT`, `TAKE_PROFIT_MARKET` orders.
-recvWindow | LONG | NO |The value cannot be greater than ```60000```
-timestamp | LONG | YES |
+| Name | Type | Is it required? | Description |
+| :---- | :---- | :---- | :---- |
+| symbol | STRING | YES |  |
+| side | ENUM | YES | See enum definition: Order direction |
+| type | ENUM | YES | See enumeration definition: Order type |
+| timeInForce | ENUM | NO | See enum definition: Time in force |
+| quantity | DECIMAL | NO |  |
+| quoteOrderQty | DECIMAL | NO |  |
+| price | DECIMAL | NO |  |
+| newClientOrderId | STRING | NO | Client-customized unique order ID. If not provided, one will be generated automatically. |
+| stopPrice | DECIMAL | NO | Only STOP, STOP\_MARKET, TAKE\_PROFIT, TAKE\_PROFIT\_MARKET require this parameter |
+| recvWindow | LONG | NO | The value cannot be greater than 60000 |
+| timestamp | LONG | YES |  |
 
-Additional mandatory parameters based on `type`:
+Depending on the order `type`, certain parameters are mandatory:
 
-Type | Additional mandatory parameters
------------- | ------------ 
-`LIMIT` | `timeInForce`, `quantity`, `price`
-`MARKET` | `quantity` or `quoteOrderQty`
-`STOP`和`TAKE_PROFIT` | `quantity`,  `price`, `stopPrice`  
-`STOP_MARKET`和`TAKE_PROFIT_MARKET` | `quantity`, `stopPrice`
+| Type | Mandatory parameters |
+| :---- | :---- |
+| LIMIT | timeInForce, quantity, price |
+| MARKET | quantity or quoteOrderQty |
+| STOP and TAKE\_PROFIT | quantity, price, stopPrice |
+| STOP\_MARKET and TAKE\_PROFIT\_MARKET | quantity, stopPrice |
 
+Other information:
 
-Other info:
+* Place a `MARKET` `SELL` market order; the user controls the amount of base assets to sell with the market order via `QUANTITY`.  
+  * For example, when placing a `MARKET` `SELL` market order on the `BTCUSDT` pair, use `QUANTITY` to let the user specify how much BTC they want to sell.  
+* For a `MARKET` `BUY` market order, the user controls how much of the quote asset they want to spend with `quoteOrderQty`; `QUANTITY` will be calculated by the system based on market liquidity. For example, when placing a `MARKET` `BUY` market order on the `BTCUSDT` pair, use `quoteOrderQty` to let the user choose how much USDT to use to buy BTC.  
+* A `MARKET` order using `quoteOrderQty` will not violate the `LOT_SIZE` limit rules; the order will be executed as closely as possible to the given `quoteOrderQty`.  
+* Unless a previous order has already been filled, orders set with the same `newClientOrderId` will be rejected.
 
-* `MARKET` `SELL` orders using the `quantity` field specifies the amount of the `base asset` the user wants to sell at the market price.
- * For example, sending a `MARKET` `SELL` order on BTCUSDT will specify how much BTC the user is selling.
-* `MARKET` `BUY` orders using `quoteOrderQty` specifies the amount the user wants to spend the `quote` asset; the correct `quantity` will be determined based on the market liquidity and `quoteOrderQty`.
- * For example, sending a `MARKET` `BUY` order on BTCUSDT specify how much USDT the user is using to buy. The order will buy as many BTC as `quoteOrderQty` USDT can.
-* `MARKET` orders using `quoteOrderQty` will not break `LOT_SIZE` filter rules; the order will execute a `quantity` that will have the notional value as close as possible to `quoteOrderQty`.
-* same `newClientOrderId` can be accepted only when the previous one is filled, otherwise the order will be rejected.
-   
+## Cancel order (TRADE)
 
-## Cancel Order (TRADE)
+**Response**
 
-> **Response:**
-```javascript 
+```javascript
 {
   "symbol": "BTCUSDT", 
   "orderId": 28, 
@@ -1096,33 +996,29 @@ Other info:
 }
 ```
 
-``
-DELETE /api/v1/order (HMAC SHA256)
-``
+`DELETE /api/v1/order (HMAC SHA256)`
 
-Cancel an active order.
+Cancel active orders
 
-**Weight:**
-1
+**Weight:** 1
 
 **Parameters:**
 
-Name | Type | Mandatory | Description
------------- | ------------ | ------------ | ------------
-symbol | STRING | YES |
-orderId | LONG | NO |
-origClientOrderId | STRING | NO |
-recvWindow | LONG | NO |
-timestamp | LONG | YES |
+| Name | Type | Is it required? | Description |
+| :---- | :---- | :---- | :---- |
+| symbol | STRING | YES |  |
+| orderId | LONG | NO |  |
+| origClientOrderId | STRING | NO |  |
+| recvWindow | LONG | NO |  |
+| timestamp | LONG | YES |  |
 
-Either `orderId` or `origClientOrderId` must be sent.  
+At least one of `orderId` or `origClientOrderId` must be sent.
 
+## Query order (USER\_DATA)
 
-## Query Order (USER_DATA)
+**Response**
 
-> **Response:**
-
-```javascript 
+```javascript
 {
     "orderId": 38,
     "symbol": "ADA25SLP25",
@@ -1143,88 +1039,37 @@ Either `orderId` or `origClientOrderId` must be sent.  
 } 
 ```
 
-``
-GET /api/v1/order (HMAC SHA256)
-``
+`GET /api/v1/order (HMAC SHA256)`
 
-Check an order's status.  
+Query order status
 
-**Weight:**
-1
+* Please note that orders meeting the following conditions will not be returned:  
+  * The final status of the order is `CANCELED` or `EXPIRED`, **and**  
+  * The order has no trade records, **and**  
+  * Order creation time \+ 7 days \< current time
 
-* These orders will not be found:
-	* order status is `CANCELED` or `EXPIRED`, **AND** 
-	* order has NO filled trade, **AND**
-	* created time + 7 days < current time  
+**Weight:** 1
 
 **Parameters:**
 
-Name | Type | Mandatory | Description
------------- | ------------ | ------------ | ------------
-symbol | STRING | YES |
-orderId | LONG | NO |
-origClientOrderId | STRING | NO |
-recvWindow | LONG | NO | 
-timestamp | LONG | YES |
+| Name | Type | Is it required? | Description |
+| :---- | :---- | :---- | :---- |
+| symbol | STRING | YES |  |
+| orderId | LONG | NO |  |
+| origClientOrderId | STRING | NO |  |
+| recvWindow | LONG | NO |  |
+| timestamp | LONG | YES |  |
 
-Notes:
+Note:
 
-* Either `orderId` or `origClientOrderId` must be sent.
+* You must send at least one of `orderId` or `origClientOrderId`.
 
+## Current open orders (USER\_DATA)
 
-## current one opne order (USER_DATA)
+**Response**
 
-> **Response:**
 ```javascript
-{
-    "orderId": 38, 
-    "symbol": "ADA25SLP25", 
-    "status": "NEW", 
-    "clientOrderId": "afMd4GBQyHkHpGWdiy34Li", 
-    "price": "20", 
-    "avgPrice": "12.0000000000000000", 
-    "origQty": "10", 
-    "executedQty": "10", 
-    "cumQuote": "120",
-    "timeInForce": "GTC",
-    "type": "LIMIT",
-    "side": "BUY", 
-    "stopPrice": "0",
-    "origType": "LIMIT", 
-    "time": 1649913186270, 
-    "updateTime": 1649913186297 
-}
-```
-
-``
-GET /api/v1/openOrder (HMAC SHA256)
-``
-
-get one current  opne order
-
-**Weight:** 
-1
-
-**Parameters:**
-
-Name | Type | Mandatory | Description
------------- | ------------ | ------------ | ------------
-symbol | STRING | YES |
-orderId | LONG | NO |
-origClientOrderId | STRING | NO |
-recvWindow | LONG | NO |  
-timestamp | LONG | YES |
-
-**Notes:**
-
-Either `orderId` or `origClientOrderId` must be sent. 
-
-
-## Current Open Orders (USER_DATA)
-
-> **Response:**
-```javascript 
-[     
+[
     {
         "orderId": 349661, 
         "symbol": "BNBUSDT", 
@@ -1243,63 +1088,31 @@ Either `orderId` or `origClientOrderId` must be sent.
         "time": 1756252940207, 
         "updateTime": 1756252940207, 
     }
-] 
+]
 ```
 
-``
-GET /api/v1/openOrders (HMAC SHA256)
-``
+`GET /api/v1/openOrders (HMAC SHA256)`
 
-Get all open orders on a symbol. **Careful** when accessing this with no symbol.
-
-**Weight:** 
-1 for a single symbol; **40** when the symbol parameter is omitted
- 
-**Parameters:**
-
-Name | Type | Mandatory | Description
------------- | ------------ | ------------ | ------------
-symbol | STRING | NO |
-recvWindow | LONG | NO | 
-timestamp | LONG | YES |
-
-* If the symbol is not sent, orders for all symbols will be returned in an array.
-
-
-
-## Cancel All Open Order (USER_DATA)
-
-> **Response:**
-
-```javascript
-{
-    "code": 200,
-    "msg": "The operation of cancel all open order is done."
-}
-```
-
-``
-DEL /api/v1/allOpenOrders  (HMAC SHA256)
-``
+Retrieve all current open orders for trading pairs. Use calls without a trading pair parameter with caution.
 
 **Weight:**
-- ***1***
+
+* With symbol ***1***  
+* Without ***40***  
 
 **Parameters:**
 
-Name | Type | Mandatory | Description
------------- | ------------ | ------------ | ------------
-symbol | STRING | YES |
-orderIdList | STRING | NO | id array
-origClientOrderIdList | STRING | NO | clientOrderId array
-recvWindow | LONG | NO |
-timestamp | LONG | YES |
+| Name | Type | Is it required? | Description |
+| :---- | :---- | :---- | :---- |
+| symbol | STRING | NO |  |
+| recvWindow | LONG | NO |  |
+| timestamp | LONG | YES |  |
 
+* If the symbol parameter is not provided, it will return the order books for all trading pairs.
 
+## Query all orders (USER\_DATA)
 
-## All Orders (USER_DATA)
-
-> **Response:**
+**Response**
 
 ```javascript
 [
@@ -1324,70 +1137,61 @@ timestamp | LONG | YES |
 ]
 ```
 
-``
-GET /api/v1/allOrders (HMAC SHA256)
-``
+`GET /api/v1/allOrders (HMAC SHA256)`
 
-Get all account orders; active, canceled, or filled.
+Retrieve all account orders; active, canceled, or completed.
 
-* These orders will not be found:
-	* created time + 7 days < current time
+* Please note that orders meeting the following conditions will not be returned:  
+  * Order creation time \+ 7 days \< current time
 
-**Weight:**
-5
+**Weight:** 5
 
 **Parameters:**
 
-Name | Type | Mandatory | Description
------------- | ------------ | ------------ | ------------
-symbol | STRING | YES |
-orderId | LONG | NO |
-startTime | LONG | NO |
-endTime | LONG | NO |
-limit | INT | NO | Default 500; max 1000.
-recvWindow | LONG | NO | 
-timestamp | LONG | YES |  
+| Name | Type | Is it required? | Description |
+| :---- | :---- | :---- | :---- |
+| symbol | STRING | YES |  |
+| orderId | LONG | NO |  |
+| startTime | LONG | NO |  |
+| endTime | LONG | NO |  |
+| limit | INT | NO | Default 500; maximum 1000 |
+| recvWindow | LONG | NO |  |
+| timestamp | LONG | YES |  |
 
-**Notes:**
-
-* If `orderId` is set, it will get orders >= that `orderId`. Otherwise most recent orders are returned.
-* The query time period must be less then 7 days( default as the recent 7 days).  ## Account Information (USER_DATA)
+* The maximum query time range must not exceed 7 days.  
+* By default, query data is from the last 7 days.
 
 
-## Swap Between Futures and Spot (TRADE)
 
-> **Response:**
+## Perp-spot transfer (TRADE)
+
+**Response:**
 
 ```javascript
 {
-    "tranId": 21841, 
-    "status": "SUCCESS" 
+    "tranId": 21841, //Tran Id
+    "status": "SUCCESS" //Status
 }
 ```
 
-``
-POST /api/v1/asset/wallet/transfer  (HMAC SHA256)
-``
+`POST /api/v1/asset/wallet/transfer  (HMAC SHA256)`
 
-**Weight:**
-5
+**Weight:** 5
 
 **Parameters:**
 
+| Name | Type | Is it required? | Description |
+| :---- | :---- | :---- | :---- |
+| amount | DECIMAL | YES | Quantity |
+| asset | STRING | YES | Asset |
+| clientTranId | STRING | YES | Transaction ID |
+| kindType | STRING | YES | Transaction type |
+| timestamp | LONG | YES | Timestamp |
 
-Name | Type | Mandatory | Description
----------------- | ------- | -------- | ----
-amount |	DECIMAL | 	YES |	
-asset |	STRING | 	YES |	
-clientTranId |	STRING | 	YES |
-kindType |	STRING | 	YES |	
-recvWindow | LONG | NO | 
-timestamp	| LONG | YES	|
+* kindType values are FUTURE\_MAIN (perp to spot) and MAIN\_FUTURE (spot to perp)
 
-**Notes:**
-* kindType FUTURE_SPOT(future to spot)/SPOT_FUTURE(spot to future)
 
-## Transfer Asset To Other Address (TRADE)
+## Transfer asset to other address (TRADE)
 
 > **Response:**
 
@@ -1423,7 +1227,7 @@ timestamp	| LONG | YES	|
 * If clientTranId is provided, its length must be at least 20 characters.
 
 
-## Get Withdraw Fee (NONE)
+## Get withdraw fee (NONE)
 > **Response:**
 ```javascript
 {
@@ -1525,7 +1329,7 @@ const types = {
 const signature = await signer.signTypedData(domain, types, value)
 ```
 
-## Get User Create Apikey Nonce (NONE)
+## Get user create apikey nonce (NONE)
 
 > **Response:**
 ```javascript
@@ -1552,8 +1356,9 @@ network | STRING | NO |
 **Notes:**
 * userOperationType : CREATE_API_KEY
 * network : For the Solana network, SOL must be provided; otherwise, this field is ignored.
+* Rate limit: 60 requests per minute per IP
 
-## Create Apikey (NONE)
+## Create apikey (NONE)
 
 > **Response:**
 ```javascript
@@ -1598,18 +1403,19 @@ const signature = await signer.signMessage(message);
 ```
 
 
-## Account Information (USER_DATA)
+## Account information (USER\_DATA)
 
-> **Response:**
+**Response**
+
 ```javascript
-{   
+{     
    "feeTier": 0,
    "canTrade": true,
    "canDeposit": true,
    "canWithdraw": true,
    "canBurnAsset": true,
-   "updateTime": 0,   
-   "balances": [
+   "updateTime": 0,
+   "balances": [
     {
       "asset": "BTC",
       "free": "4723846.89208129",
@@ -1624,27 +1430,24 @@ const signature = await signer.signMessage(message);
 }
 ```
 
-``
-GET /api/v1/account (HMAC SHA256)
-``
+`GET /api/v1/account (HMAC SHA256)`
 
-Get current account information.
+Retrieve current account information
 
-**Weight:**
-5
+**Weight:** 5
 
 **Parameters:**
 
-Name | Type | Mandatory | Description
------------- | ------------ | ------------ | ------------
-recvWindow | LONG | NO | 
-timestamp | LONG | YES |
+| Name | Type | Is it required? | Description |
+| :---- | :---- | :---- | :---- |
+| recvWindow | LONG | NO |  |
+| timestamp | LONG | YES |  |
 
+## Account trade history (USER\_DATA)
 
-## Account Trade List (USER_DATA)
+**Response**
 
-> **Response:**
-```javascript  
+```javascript
 [ 
   {
     "symbol": "BNBUSDT",
@@ -1665,200 +1468,139 @@ timestamp | LONG | YES |
 ] 
 ```
 
-``
-GET /api/v1/userTrades (HMAC SHA256)
-``
+`GET /api/v1/userTrades (HMAC SHA256)`
 
-Get trades for a specific account and symbol.
+Retrieve the trade history for a specified trading pair of an account
 
-**Weight:**
-5
+**Weight:** 5
 
 **Parameters:**
 
-Name | Type | Mandatory | Description
------------- | ------------ | ------------ | ------------
-symbol | STRING | NO |
-orderId|LONG|NO| This can only be used in combination with `symbol`.
-startTime | LONG | NO |
-endTime | LONG | NO |
-fromId | LONG | NO | TradeId to fetch from. Default gets most recent trades.
-limit | INT | NO | Default 500; max 1000.
-recvWindow | LONG | NO |
-timestamp | LONG | YES |   
+| Name | Type | Is it required? | Description |
+| :---- | :---- | :---- | :---- |
+| symbol | STRING | NO |  |
+| orderId | LONG | NO | Must be used together with the parameter symbol |
+| startTime | LONG | NO |  |
+| endTime | LONG | NO |  |
+| fromId | LONG | NO | Starting trade ID. Defaults to fetching the most recent trade. |
+| limit | INT | NO | Default 500; maximum 1000 |
+| recvWindow | LONG | NO |  |
+| timestamp | LONG | YES |  |
 
-* If `startTime` and `endTime` are both not sent, then the last 7 days' data will be returned.
-* The time between `startTime` and `endTime` cannot be longer than 7 days.
-* The parameter `fromId` cannot be sent with `startTime` or `endTime`.     
-
-
-
-
-
-
-
+* If both `startTime` and `endTime` are not sent, only data from the last 7 days will be returned.  
+* The maximum interval between startTime and endTime is 7 days.  
+* `fromId` cannot be sent together with `startTime` or `endTime`.      
 
 ---
-# Websocket Market Streams
 
-* The base endpoint is: **wss://sstream.asterdex.com**
-* Streams can be accessed either in a single raw stream or in a combined stream
-* Raw streams are accessed at **/ws/\<streamName\>**
-* Combined streams are accessed at **/stream?streams=\<streamName1\>/\<streamName2\>/\<streamName3\>**
-* Combined stream events are wrapped as follows: **{"stream":"\<streamName\>","data":\<rawPayload\>}**
-* All symbols for streams are **lowercase**
-* A single connection to **sstream.asterdex.com** is only valid for 24 hours; expect to be disconnected at the 24 hour mark
-* The websocket server will send a `ping frame` every 3 minutes. If the websocket server does not receive a `pong frame` back from the connection within a 10 minute period, the connection will be disconnected. Unsolicited `pong frames` are allowed.
+# WebSocket market data feed
 
-## Live Subscribing/Unsubscribing to streams
+* The base URL for all wss endpoints listed in this document is: **wss://sstream.asterdex.com**  
+* Streams have either a single raw stream or a combined stream  
+* Single raw streams format is \*\*/ws/\*\*  
+* The URL format for combined streams is \*\*/stream?streams=//\*\*  
+* When subscribing to combined streams, the event payload is wrapped in this format: \*\*{"stream":"","data":}\*\*  
+* All trading pairs in stream names are **lowercase**  
+* Each link to **sstream.asterdex.com** is valid for no more than 24 hours; please handle reconnections appropriately  
+* Every 3 minutes the server sends a ping frame; the client must reply with a pong frame within 10 minutes, otherwise the server will close the connection. The client is allowed to send unpaired pong frames (i.e., the client may send pong frames at a frequency higher than once every 10 minutes to keep the connection alive).
 
-* The following data can be sent through the websocket instance in order to subscribe/unsubscribe from streams. Examples can be seen below.
-* The `id` used in the JSON payloads is an unsigned INT used as an identifier to uniquely identify the messages going back and forth.
-* In the response, if the `result` received is `null` this means the request sent was a success.
+## Real-time subscribe/unsubscribe data streams
+
+* The following messages can be sent via WebSocket to subscribe or unsubscribe to data streams. Examples are shown below.  
+* The `id` in the response content is an unsigned integer that serves as the unique identifier for exchanges of information.  
+* If the `result` in the response content is `null`, it indicates the request was sent successfully.
 
 ### Subscribe to a stream
 
-> **Response**
-  ```javascript
-  {
-    "result": null,  
-    "id": 1
-  }
-  ```
+**Response**
 
-* **Request**
-
-  	{    
-    	"method": "SUBSCRIBE",    
-    	"params":     
-    	[   
-      	"btcusdt@aggTrade",    
-      	"btcusdt@depth"     
-    	],    
-    	"id": 1   
-  	}
-
-
-
-### Unsubscribe to a stream
-
-> **Response**
-  
-  ```javascript
-  {
-    "result": null,
-    "id": 312
-  }
-  ```
-
-
-* **Request**
-
-  {   
-    "method": "UNSUBSCRIBE",    
-    "params":     
-    [    
-      "btcusdt@depth"   
-    ],    
-    "id": 312   
-  }
-
-
-
-### Listing Subscriptions
-
-> **Response**
-  
-  ```javascript
-  {
-    "result": [
-      "btcusdt@aggTrade"
-    ],
-    "id": 3
-  }
-  ```
-
-
-* **Request**
-
-  {   
-    "method": "LIST_SUBSCRIPTIONS",    
-    "id": 3   
-  }     
- 
-
-
-### Setting Properties
-Currently, the only property can be set is to set whether `combined` stream payloads are enabled or not.
-The combined property is set to `false` when connecting using `/ws/` ("raw streams") and `true` when connecting using `/stream/`.
-
-> **Response**
-  
-  ```javascript
+```javascript
 {
   "result": null,
-  "id": 5
+  "id": 1
 }
-  ```
+```
 
-* **Request**
+* **Request** { "method": "SUBSCRIBE", "params": \[ "btcusdt@aggTrade", "btcusdt@depth" \], "id": 1 }
 
-  {    
-    "method": "SET_PROPERTY",    
-    "params":     
-    [   
-      "combined",    
-      true   
-    ],    
-    "id": 5   
-  }
+### Unsubscribe from a stream
 
+**Response**
 
+```javascript
+{
+  "result": null,
+  "id": 312
+}
+```
 
+* **Request** { "method": "UNSUBSCRIBE", "params": \[ "btcusdt@depth" \], "id": 312 }
 
-### Retrieving Properties
+### Subscribed to the feed
 
-> **Response**
-  ```javascript
-  {
-    "result": true, // Indicates that combined is set to true.
-    "id": 2
-  }
-  ```
-  
-* **Request**
-  
-  {   
-    "method": "GET_PROPERTY",    
-    "params":     
-    [   
-      "combined"   
-    ],    
-    "id": 2   
-  }   
- 
+**Response**
 
+```javascript
+{
+  "result": [
+    "btcusdt@aggTrade"
+  ],
+  "id": 3
+}
+```
 
+* **Request**  
+    
+  { "method": "LIST\_SUBSCRIPTIONS", "id": 3 }
 
-### Error Messages
+### Set properties
 
-Error Message | Description
----|---
-{"code": 0, "msg": "Unknown property", "id": '%s'} | Parameter used in the `SET_PROPERTY` or `GET_PROPERTY` was invalid
-{"code": 1, "msg": "Invalid value type: expected Boolean", "id": '%s'} | Value should only be `true` or `false`
-{"code": 2, "msg": "Invalid request: property name must be a string"}| Property name provided was invalid
-{"code": 2, "msg": "Invalid request: request ID must be an unsigned integer"}| Parameter `id` had to be provided or the value provided in the `id` parameter is an unsupported type
-{"code": 2, "msg": "Invalid request: unknown variant %s, expected one of `SUBSCRIBE`, `UNSUBSCRIBE`, `LIST_SUBSCRIPTIONS`, `SET_PROPERTY`, `GET_PROPERTY` at line 1 column 28"} | Possible typo in the provided method or provided method was neither of the expected values
-{"code": 2, "msg": "Invalid request: too many parameters"}| Unnecessary parameters provided in the data
-{"code": 2, "msg": "Invalid request: property name must be a string"} | Property name was not provided
-{"code": 2, "msg": "Invalid request: missing field `method` at line 1 column 73"} | `method` was not provided in the data
-{"code":3,"msg":"Invalid JSON: expected value at line %s column %s"} | JSON data sent has incorrect syntax.
+Currently, the only configurable property is whether to enable the `combined` ("combined") stream. When connecting using `/ws/` ("raw stream"), the combined property is set to `false`, while connecting using `/stream/` sets the property to `true`.
 
+**Response**
 
-## Aggregate Trade Streams
+```javascript
+{
+"result": null,
+"id": 5
+}
+```
 
+* **Request** { "method": "SET\_PROPERTY" "params": \[ "combined", true \], "id": 5 }
 
-> **Payload:**
+### Retrieve properties
+
+**Response**
+
+```javascript
+{
+  "result": true, // Indicates that combined is set to true.
+  "id": 2
+}
+```
+
+* **Request**  
+    
+  { "method": "GET\_PROPERTY", "params": \[ "combined" \], "id": 2 }
+
+\#\#\# Error message
+
+| Error message | Description |
+| :---- | :---- |
+| {"code": 0, "msg": "Unknown property"} | Parameters applied in SET\_PROPERTY or GET\_PROPERTY are invalid |
+| {"code": 1, "msg": "Invalid value type: expected Boolean", "id": '%s'} | Only true or false are accepted |
+| {"code": 2, "msg": "Invalid request: property name must be a string"} | The provided attribute name is invalid |
+| {"code": 2, "msg": "Invalid request: request ID must be an unsigned integer"} | Parameter ID not provided or ID has an invalid type |
+| {"code": 2, "msg": "Invalid request: unknown variant %s, expected one of SUBSCRIBE, UNSUBSCRIBE, LIST\_SUBSCRIPTIONS, SET\_PROPERTY, GET\_PROPERTY at line 1 column 28"} | Typo warning, or the provided value is not of the expected type |
+| {"code": 2, "msg": "Invalid request: too many parameters"} | Unnecessary parameters were provided in the data |
+| {"code": 2, "msg": "Invalid request: property name must be a string"} | Property name not provided |
+| {"code": 2, "msg": "Invalid request: missing field method at line 1 column 73"} | Data did not provide method |
+| {"code":3,"msg":"Invalid JSON: expected value at line %s column %s"} | JSON syntax error |
+
+## Collection transaction flow
+
+**Payload:**
+
 ```javascript
 {
   "e": "aggTrade",  // Event type
@@ -1875,17 +1617,16 @@ Error Message | Description
 }
 ```
 
-The Aggregate Trade Streams push trade information that is aggregated for a single taker order.
+The collection transaction stream pushes transaction information and is an aggregation of a single order.
 
-**Stream Name:** `<symbol>@aggTrade`
+**Stream name:** `<symbol>@aggTrade`
 
-**Update Speed:** Real-time
+**Update speed:** real-time
 
+## Tick-by-tick trades
 
-## Trade Streams
+**Payload:**
 
-
-> **Payload:**
 ```javascript
 {
   "e": "trade",     // Event type
@@ -1899,21 +1640,14 @@ The Aggregate Trade Streams push trade information that is aggregated for a sing
 }
 ```
 
-The Trade Streams push raw trade information; each trade has a unique buyer and seller.
+**Stream name:** `<symbol>@trade`
 
-**Stream Name:** `<symbol>@trade`
+Each trade stream pushes the details of every individual trade. A **trade**, also called a transaction, is defined as a match between exactly one taker and one maker.
 
-**Update Speed:** Real-time
+## K-line streams
 
+**Payload:**
 
-
-
-
-
-## Kline/Candlestick Streams
-
-
-> **Payload:**
 ```javascript
 {
   "e": "kline",     // Event type
@@ -1941,38 +1675,36 @@ The Trade Streams push raw trade information; each trade has a unique buyer and 
 }
 ```
 
-The Kline/Candlestick Stream push updates to the current klines/candlestick every second.
+The K-line stream pushes per-second updates for the requested type of K-line (the latest candle).
 
-**Stream Name:** `<symbol>@kline_<interval>`
+**Stream name:** `<symbol>@kline_<interval>`
 
-**Update Speed:** 2000ms
+**Update speed:** 2000ms
 
-**Kline/Candlestick chart intervals:**
+**K-line interval parameter:**
 
-m -> minutes; h -> hours; d -> days; w -> weeks; M -> months
+m (minutes), h (hours), d (days), w (weeks), M (months)
 
-* 1m
-* 3m
-* 5m
-* 15m
-* 30m
-* 1h
-* 2h
-* 4h
-* 6h
-* 8h
-* 12h
-* 1d
-* 3d
-* 1w
+* 1m  
+* 3m  
+* 5m  
+* 15m  
+* 30m  
+* 1h  
+* 2h  
+* 4h  
+* 6h  
+* 8h  
+* 12h  
+* 1d  
+* 3d  
+* 1w  
 * 1M
 
+## Simplified ticker by symbol
 
+**Payload:**
 
-
-## Individual Symbol Mini Ticker Stream
-
-> **Payload:**
 ```javascript
   {
     "e": "24hrMiniTicker",  // Event type
@@ -1987,18 +1719,16 @@ m -> minutes; h -> hours; d -> days; w -> weeks; M -> months
   }
 ```
 
-24hr rolling window mini-ticker statistics. These are NOT the statistics of the UTC day, but a 24hr rolling window for the previous 24hrs.
+Refreshed simplified 24-hour ticker information by symbol
 
-**Stream Name:** `<symbol>@miniTicker`
+**Stream name:** `<symbol>@miniTicker`
 
-**Update Speed:** 1000ms
+**Update speed:** 1000ms
 
+## Compact tickers for all symbols in the entire market
 
+**Payload:**
 
-
-## All Market Mini Tickers Stream
-
-> **Payload:**
 ```javascript
 [
   {
@@ -2007,18 +1737,16 @@ m -> minutes; h -> hours; d -> days; w -> weeks; M -> months
 ]
 ```
 
-24hr rolling window mini-ticker statistics for all symbols that changed in an array. These are NOT the statistics of the UTC day, but a 24hr rolling window for the previous 24hrs. Note that only tickers that have changed will be present in the array.
+Same as above, but pushes all trading pairs. Note that only updated tickers will be pushed.
 
-**Stream Name:** `!miniTicker@arr`
+**Stream name:** \!miniTicker@arr
 
-**Update Speed:** 1000ms
+**Update speed:** 1000ms
 
+## Full ticker per symbol
 
+**Payload:**
 
-## Individual Symbol Ticker Streams
-
-
-> **Payload:**
 ```javascript
 {
   "e": "24hrTicker",  // Event type
@@ -2042,17 +1770,16 @@ m -> minutes; h -> hours; d -> days; w -> weeks; M -> months
 }
 ```
 
+Pushes per-second tag statistics for a single trading pair over a rolling 24-hour window.
 
-24hr rolling window ticker statistics for a single symbol. These are NOT the statistics of the UTC day, but a 24hr rolling window for the previous 24hrs.
+**Stream name:** `<symbol>@ticker`
 
-**Stream Name:** `<symbol>@ticker`
+**Update speed:** 1000ms
 
-**Update Speed:** 1000ms
+## Complete ticker for all trading pairs on the entire market
 
+**Payload:**
 
-## All Market Tickers Stream
-
-> **Payload:**
 ```javascript
 [
   {
@@ -2061,19 +1788,16 @@ m -> minutes; h -> hours; d -> days; w -> weeks; M -> months
 ]
 ```
 
-24hr rolling window ticker statistics for all symbols that changed in an array. These are NOT the statistics of the UTC day, but a 24hr rolling window for the previous 24hrs. Note that only tickers that have changed will be present in the array.
+Pushes the full 24-hour refreshed ticker information for all trading pairs across the entire market. Note that tickers without updates will not be pushed.
 
-**Stream Name:** `!ticker@arr`
+**Stream name:** `!ticker@arr`
 
-**Update Speed:** 1000ms
+**Update speed:** 1000ms
 
+## Best order book information by symbol
 
+**Payload:**
 
-
-
-## Individual Symbol Book Ticker Streams
-
-> **Payload:**
 ```javascript
 {
   "u":400900217,     // order book updateId
@@ -2085,37 +1809,32 @@ m -> minutes; h -> hours; d -> days; w -> weeks; M -> months
 }
 ```
 
+Real-time push of best order book information for the specified trading pair
 
-Pushes any update to the best bid or ask's price or quantity in real-time for a specified symbol.
+**Stream name:** `<symbol>@bookTicker`
 
-**Stream Name:** `<symbol>@bookTicker`
+**Update speed:** Real-time
 
-**Update Speed:** Real-time
+## Best order book information across the entire market
 
+**Payload:**
 
-
-
-
-## All Book Tickers Stream
-
-> **Payload:**
 ```javascript
 {
-  // Same as <symbol>@bookTicker payload
+  // 同 <symbol>@bookTicker payload
 }
 ```
 
-Pushes any update to the best bid or ask's price or quantity in real-time for all symbols.
+Real-time push of the best order information for all trading pairs
 
-**Stream Name:** `!bookTicker`
+**Stream name:** `!bookTicker`
 
-**Update Speed:** Real-time
+**Update speed:** Real-time
 
+## Limited depth information
 
+**Payload:**
 
-## Partial Book Depth Streams
-
-> **Payload:**
 ```javascript
 { 
   "e": "depthUpdate", // Event type
@@ -2137,23 +1856,20 @@ Pushes any update to the best bid or ask's price or quantity in real-time for al
       "100"             // Quantity
     ]
   ]
-}
+} 
 ```
 
-Top **<levels\>** bids and asks, Valid **<levels\>** are 5, 10, or 20.
+Limited depth information pushed every second or every 100 milliseconds. Levels indicate how many levels of bid/ask information, optional 5/10/20 levels.
 
-**Stream Names:** `<symbol>@depth<levels>` OR `<symbol>@depth<levels>@100ms`.  
+**Stream names:** `<symbol>@depth<levels>` or `<symbol>@depth<levels>@100ms`.
 
-**Update Speed:** 1000ms or 100ms
+**Update speed:** 1000ms or 100ms
 
+## Incremental depth information
 
+**Payload:**
 
-
-## Diff. Depth Stream
-
-
-> **Payload:**
-```javascript 
+```javascript
 {
   "e": "depthUpdate", // Event type
   "E": 123456789,     // Event time
@@ -2174,122 +1890,103 @@ Top **<levels\>** bids and asks, Valid **<levels\>** are 5, 10, or 20.
       "100"          // Quantity
     ]
   ]
-} 
+}   
 ```
 
-Order book price and quantity depth updates used to locally manage an order book.
- 
-**Stream Name:** `<symbol>@depth` OR `<symbol>@depth@100ms`
+Pushes the changed parts of the orderbook (if any) every second or every 100 milliseconds
 
-**Update Speed:** 1000ms or 100ms
+**Stream name:** `<symbol>@depth` or `<symbol>@depth@100ms`
 
+**Update speed:** 1000ms or 100ms
 
+## How to correctly maintain a local copy of an order book
 
-## How to manage a local order book correctly
-1. Open a stream to **wss://sstream.asterdex.com/ws/bnbbtc@depth**.
-2. Buffer the events you receive from the stream.
-3. Get a depth snapshot from **https://sapi.asterdex.com/v1/depth?symbol=BNBBTC&limit=1000** .
-4. Drop any event where `u` is <= `lastUpdateId` in the snapshot.
-5. The first processed event should have `U` <= `lastUpdateId`+1 **AND** `u` >= `lastUpdateId`+1.
-6. While listening to the stream, each new event's `U` should be equal to the previous event's `u`+1.
-7. The data in each event is the **absolute** quantity for a price level.
-8. If the quantity is 0, **remove** the price level.
-9. Receiving an event that removes a price level that is not in your local order book can happen and is normal.
+1. Subscribe to **wss://sstream.asterdex.com/ws/bnbbtc@depth**  
+2. Start caching the received updates. For the same price level, later updates overwrite earlier ones.  
+3. Fetch the REST endpoint [**https://sapi.asterdex.com/api/v1/depth?symbol=BNBBTC\&limit=1000**](https://sapi.asterdex.com/api/v1/depth?symbol=BNBBTC&limit=1000) to obtain a 1000-level depth snapshot  
+4. Discard from the currently cached messages those with `u` \<= the `lastUpdateId` obtained in step 3 (drop older, expired information)  
+5. Apply the depth snapshot to your local order book copy, and resume updating the local copy from the first WebSocket event whose `U` \<= `lastUpdateId`\+1 **and** `u` \>= `lastUpdateId`\+1  
+6. Each new event’s `U` should equal exactly the previous event’s `u`\+1; otherwise packets may have been lost \- restart initialization from step 3  
+7. The order quantity in each event represents the current order quantity at that price as an **absolute value**, not a relative change  
+8. If the order quantity at a given price is 0, it means the orders at that price have been canceled or filled, and that price level should be removed
 
+# WebSocket account information push
 
+* The base URL for the API endpoints listed in this document is: [**https://sapi.asterdex.com**](https://sapi.asterdex.com)  
+* The `listenKey` used to subscribe to account data is valid for 60 minutes from the time of creation  
+* You can extend the 60-minute validity of a `listenKey` by sending a `PUT` request  
+* You can immediately close the current data stream and invalidate the `listenKey` by sending a `DELETE` for a `listenKey`  
+* Sending a `POST` on an account with a valid `listenKey` will return the currently valid `listenKey` and extend its validity by 60 minutes  
+* The WebSocket interface baseurl: **wss://sstream.asterdex.com**  
+* The stream name for subscribing to the user account data stream is \*\*/ws/\*\*  
+* Each connection is valid for no more than 24 hours; please handle disconnections and reconnections appropriately
 
+## Listen Key (spot account)
 
+### Generate Listen Key (USER\_STREAM)
 
+**Response**
 
-# User Data Streams
-
-
-* The base API endpoint is: **https://sapi.asterdex.com**
-* A User Data Stream `listenKey` is valid for 60 minutes after creation.
-* Doing a `PUT` on a `listenKey` will extend its validity for 60 minutes.
-* Doing a `DELETE` on a `listenKey` will close the stream and invalidate the `listenKey`.
-* Doing a `POST` on an account with an active `listenKey` will return the currently active `listenKey` and extend its validity for 60 minutes.
-* The base websocket endpoint is: **wss://sstream.asterdex.com**
-* User Data Streams are accessed at **/ws/\<listenKey\>**
-* A single connection to **sstream.asterdex.com** is only valid for 24 hours; expect to be disconnected at the 24 hour mark
-
-
-## LISTEN KEY
-
-### Create a ListenKey (USER_STREAM)
-
-> **Response:**
 ```javascript
 {
   "listenKey": "pqia91ma19a5s61cv6a81va65sdf19v8a65a1a5s61cv6a81va65sdf19v8a65a1"
 }
 ```
 
+`POST /api/v1/listenKey`
 
-``
-POST /api/v1/listenKey
-``
+Start a new data stream. The data stream will be closed after 60 minutes unless a keepalive is sent. If the account already has a valid `listenKey`, that `listenKey` will be returned and its validity extended by 60 minutes.
 
-Start a new user data stream. The stream will close after 60 minutes unless a keepalive is sent. If the account has an active `listenKey`, that `listenKey` will be returned and its validity will be extended for 60 minutes.
+**Weight:** 1
 
-**Weight:**
-1
+**Parameters:** NONE
 
-**Parameters:**
-NONE
+### Extend Listen Key validity period (USER\_STREAM)
 
-### Ping/Keep-alive a ListenKey (USER_STREAM)
+**Response**
 
-> **Response:**
 ```javascript
 {}
 ```
 
-``
-PUT /api/v1/listenKey 
-``
+`PUT /api/v1/listenKey`
 
-Keepalive a user data stream to prevent a time out. User data streams will close after 60 minutes. It's recommended to send a ping about every 30 minutes.
+Validity extended to 60 minutes after this call. It is recommended to send a ping every 30 minutes.
 
-**Weight:**
-1
+**Weight:** 1
 
 **Parameters:**
 
-Name | Type | Mandatory | Description
------------- | ------------ | ------------ | ------------
-listenKey | STRING | YES
+| Name | Type | Is it required? | Description |
+| :---- | :---- | :---- | :---- |
+| listenKey | STRING | YES |  |
 
+### Close Listen Key (USER\_STREAM)
 
-### Close a ListenKey (USER_STREAM)
+**Response**
 
-> **Response:**
 ```javascript
 {}
 ```
 
-``
-DELETE /api/v1/listenKey
-``
+`DELETE /api/v1/listenKey`
 
-Close out a user data stream.
+Close user data stream
 
-**Weight:**
-1
+**Weight:** 1
 
 **Parameters:**
 
-Name | Type | Mandatory | Description
------------- | ------------ | ------------ | ------------
-listenKey | STRING | YES
+| Name | Type | Is it required? | Description |
+| :---- | :---- | :---- | :---- |
+| listenKey | STRING | YES |  |
 
+## Payload: ACCOUNT\_UPDATE
 
+An `outboundAccountPosition` event is sent whenever an account balance changes; it contains the assets that may have changed due to the event that generated the balance update.
 
-## Payload: Balance Update
+**Payload**
 
-`outboundAccountPosition` is sent any time an account balance has changed and contains the assets that were possibly changed by the event that generated the balance change.
-
-> **Payload:**
 ```javascript
 {
   "B":[  //Balance
@@ -2311,16 +2008,15 @@ listenKey | STRING | YES
 }
 ```
 
-
 ## Payload: Order Update
 
-Orders are updated with the `executionReport` event.
+Orders are updated via the `executionReport` event
 
-> **Payload:**   
+**Payload**
 
 ```javascript
 {
-  "s":"ADA25SLP25",   // symbol
+ "s":"ADA25SLP25",   // symbol
   "c":"Xzh0gnxT41PStbwqOtXnjD",  // client order id
   "S":"SELL",   // order direction
   "o":"LIMIT",   // order type
@@ -2347,422 +2043,503 @@ Orders are updated with the `executionReport` event.
   "Q":"0",   // Quote Order Qty
   "e":"executionReport",   // event
   "E":1649926447209  // event time
-} 
+}  
 ```
 
-**Execution types:**
+**Execution type:**
 
-* NEW - The order has been accepted into the engine.
-* CANCELED - The order has been canceled by the user. 
-* REPLACED (currently unused)
-* TRADE - Part of the order or all of the order's quantity has filled.
-* EXPIRED - The order was canceled according to the order type's rules (e.g. LIMIT FOK orders with no fill, LIMIT IOC or MARKET orders that partially fill) or by the exchange, (e.g. orders canceled during maintenance)
+* NEW \- New Order  
+* CANCELED \- Order canceled  
+* REJECTED \- New order was rejected  
+* TRADE \- Order had a new fill  
+* EXPIRED \- Order expired (based on the order's Time In Force parameter)
 
+\#错误代码
 
-
-# Error Codes
-
-> Here is the error JSON payload:
+error JSON payload:
 
 ```javascript
 {
-"code":-1121,
-"msg":"Invalid symbol."
+  "code":-1121,
+  "msg":"Invalid symbol."
 }
 ```
 
-Errors consist of two parts: an error code and a message. 
-Codes are universal,but messages can vary. 
+Errors consist of two parts: an error code and a message. The code is standardized, but the message may vary.
 
+## 10xx \- General server or network issues
 
+### \-1000 UNKNOWN
 
+* An unknown error occurred while processing the request.
 
-## 10xx - General Server or Network issues
-### -1000 UNKNOWN
-* An unknown error occured while processing the request.
+### \-1001 DISCONNECTED
 
-### -1001 DISCONNECTED
 * Internal error; unable to process your request. Please try again.
 
-### -1002 UNAUTHORIZED
+### \-1002 UNAUTHORIZED
+
 * You are not authorized to execute this request.
 
-### -1003 TOO_MANY_REQUESTS
-* Too many requests queued.
-* Too many requests; please use the websocket for live updates.
-* Too many requests; current limit is %s requests per minute. Please use the websocket for live updates to avoid polling the API.
-* Way too many requests; IP banned until %s. Please use the websocket for live updates to avoid bans.
+### \-1003 TOO\_MANY\_REQUESTS
 
-### -1004 DUPLICATE_IP
-* This IP is already on the white list
+* Too many requests queued.  
+* Too many requests; please use the WebSocket for live updates.  
+* Too many requests; current limit is %s requests per minute. Please use the WebSocket for live updates to avoid polling the API.  
+* Too many request weights; IP banned until %s. Please use the WebSocket for live updates to avoid bans.
 
-### -1005 NO_SUCH_IP
-* No such IP has been white listed
+### \-1004 DUPLICATE\_IP
 
-### -1006 UNEXPECTED_RESP
+* This IP is already on the white list.
+
+### \-1005 NO\_SUCH\_IP
+
+* No such IP has been whitelisted.
+
+### \-1006 UNEXPECTED\_RESP
+
 * An unexpected response was received from the message bus. Execution status unknown.
 
-### -1007 TIMEOUT
+### \-1007 TIMEOUT
+
 * Timeout waiting for response from backend server. Send status unknown; execution status unknown.
 
-### -1010 ERROR_MSG_RECEIVED
-* ERROR_MSG_RECEIVED. 
+### \-1014 UNKNOWN\_ORDER\_COMPOSITION
 
-### -1011 NON_WHITE_LIST
-* This IP cannot access this route. 
+* The current order parameter combination is not supported.
 
-### -1013 INVALID_MESSAGE
-* INVALID_MESSAGE.
+### \-1015 TOO\_MANY\_ORDERS
 
-### -1014 UNKNOWN_ORDER_COMPOSITION
-* Unsupported order combination.
+* Too many new orders.  
+* Too many new orders; the current limit is %s orders per %s.
 
-### -1015 TOO_MANY_ORDERS
-* Too many new orders.
-* Too many new orders; current limit is %s orders per %s.
+### \-1016 SERVICE\_SHUTTING\_DOWN
 
-### -1016 SERVICE_SHUTTING_DOWN
 * This service is no longer available.
 
-### -1020 UNSUPPORTED_OPERATION
+### \-1020 UNSUPPORTED\_OPERATION
+
 * This operation is not supported.
 
-### -1021 INVALID_TIMESTAMP
-* Timestamp for this request is outside of the recvWindow.
-* Timestamp for this request was 1000ms ahead of the server's time.
+### \-1021 INVALID\_TIMESTAMP
 
-### -1022 INVALID_SIGNATURE
-* Signature for this request is not valid.
+* Timestamp for this request is outside of the recvWindow.  
+* The timestamp for this request was 1000ms ahead of the server's time.
 
-### -1023 START_TIME_GREATER_THAN_END_TIME
-* Start time is greater than end time.
+### \-1022 INVALID\_SIGNATURE
 
+* The signature for this request is invalid.
 
-## 11xx - Request issues
-### -1100 ILLEGAL_CHARS
-* Illegal characters found in a parameter.
-* Illegal characters found in parameter '%s'; legal range is '%s'.
+### \-1023 START\_TIME\_GREATER\_THAN\_END\_TIME
 
-### -1101 TOO_MANY_PARAMETERS
-* Too many parameters sent for this endpoint.
-* Too many parameters; expected '%s' and received '%s'.
+* The start time in the parameters is after the end time.
+
+## 11xx \- Request issues
+
+### \-1100 ILLEGAL\_CHARS
+
+* Illegal characters found in a parameter.  
+* Illegal characters found in parameter %s; legal range is %s.
+
+### \-1101 TOO\_MANY\_PARAMETERS
+
+* Too many parameters sent for this endpoint.  
+* Too many parameters; expected %s and received %s.  
 * Duplicate values for a parameter detected.
 
-### -1102 MANDATORY_PARAM_EMPTY_OR_MALFORMED
-* A mandatory parameter was not sent, was empty/null, or malformed.
-* Mandatory parameter '%s' was not sent, was empty/null, or malformed.
-* Param '%s' or '%s' must be sent, but both were empty/null!
+### \-1102 MANDATORY\_PARAM\_EMPTY\_OR\_MALFORMED
 
-### -1103 UNKNOWN_PARAM
+* A mandatory parameter was not sent, was empty/null, or malformed.  
+* Mandatory parameter %s was not sent, was empty/null, or malformed.  
+* Param %s or %s must be sent, but both were empty/null.
+
+### \-1103 UNKNOWN\_PARAM
+
 * An unknown parameter was sent.
 
-### -1104 UNREAD_PARAMETERS
-* Not all sent parameters were read.
-* Not all sent parameters were read; read '%s' parameter(s) but was sent '%s'.
+### \-1104 UNREAD\_PARAMETERS
 
-### -1105 PARAM_EMPTY
-* A parameter was empty.
-* Parameter '%s' was empty.
+* Not all sent parameters were read.  
+* Not all sent parameters were read; read %s parameter(s) but %s parameter(s) were sent.
 
-### -1106 PARAM_NOT_REQUIRED
-* A parameter was sent when not required.
-* Parameter '%s' sent when not required.
+### \-1105 PARAM\_EMPTY
 
-### -1108 BAD_ASSET
-* Invalid asset.
+* A parameter was empty.  
+* Parameter %s was empty.
 
-### -1109 BAD_ACCOUNT
-* Invalid account.
+### \-1106 PARAM\_NOT\_REQUIRED
 
-### -1110 BAD_INSTRUMENT_TYPE
-* Invalid symbolType.
+* A parameter was sent when not required. 
 
-### -1111 BAD_PRECISION
-* Precision is over the maximum defined for this asset.
+### \-1111 BAD\_PRECISION 
 
-### -1112 NO_DEPTH
-* No orders on book for symbol.
+* The precision exceeds the maximum defined for this asset.
 
-### -1113 WITHDRAW_NOT_NEGATIVE
-* Withdrawal amount must be negative.
+### \-1112 NO\_DEPTH
 
-### -1114 TIF_NOT_REQUIRED
+* No open orders for the trading pair.
+
+### \-1114 TIF\_NOT\_REQUIRED
+
 * TimeInForce parameter sent when not required.
 
-### -1115 INVALID_TIF
+### \-1115 INVALID\_TIF
+
 * Invalid timeInForce.
 
-### -1116 INVALID_ORDER_TYPE
+### \-1116 INVALID\_ORDER\_TYPE
+
 * Invalid orderType.
 
-### -1117 INVALID_SIDE
-* Invalid side.
+### \-1117 INVALID\_SIDE
 
-### -1118 EMPTY_NEW_CL_ORD_ID
+* Invalid order side.
+
+### \-1118 EMPTY\_NEW\_CL\_ORD\_ID
+
 * New client order ID was empty.
 
-### -1119 EMPTY_ORG_CL_ORD_ID
-* Original client order ID was empty.
+### \-1119 EMPTY\_ORG\_CL\_ORD\_ID
 
-### -1120 BAD_INTERVAL
-* Invalid interval.
+* The client’s custom order ID is empty.
 
-### -1121 BAD_SYMBOL
-* Invalid symbol.
+### \-1120 BAD\_INTERVAL
 
-### -1125 INVALID_LISTEN_KEY
+* Invalid time interval.
+
+### \-1121 BAD\_SYMBOL
+
+* Invalid trading pair.
+
+### \-1125 INVALID\_LISTEN\_KEY
+
 * This listenKey does not exist.
 
-### -1127 MORE_THAN_XX_HOURS
-* Lookup interval is too big.
+### \-1127 MORE\_THAN\_XX\_HOURS
+
+* The query interval is too large.  
 * More than %s hours between startTime and endTime.
 
-### -1128 OPTIONAL_PARAMS_BAD_COMBO
-* Combination of optional parameters invalid.
+### \-1128 OPTIONAL\_PARAMS\_BAD\_COMBO 
 
-### -1130 INVALID_PARAMETER
-* Invalid data sent for a parameter.
-* Data sent for parameter '%s' is not valid.
+* Combination of optional parameters invalid. 
 
-### -1136 INVALID_NEW_ORDER_RESP_TYPE
-* Invalid newOrderRespType.
+### \-1130 INVALID\_PARAMETER 
 
+* The parameter sent contains invalid data.  
+* Data sent for parameter %s is not valid. 
 
-## 20xx - Processing Issues
+### \-1136 INVALID\_NEW\_ORDER\_RESP\_TYPE 
 
-### -2010 NEW_ORDER_REJECTED
-* NEW_ORDER_REJECTED
+* Invalid newOrderRespType. 
 
-### -2011 CANCEL_REJECTED
-* CANCEL_REJECTED
+## 20xx \- Processing Issues 
 
-### -2013 NO_SUCH_ORDER
+### \-2010 NEW\_ORDER\_REJECTED 
+
+* New order rejected.
+
+### \-2011 CANCEL\_REJECTED
+
+* Order cancellation rejected.
+
+### \-2013 NO\_SUCH\_ORDER
+
 * Order does not exist.
 
-### -2014 BAD_API_KEY_FMT
+### \-2014 BAD\_API\_KEY\_FMT
+
 * API-key format invalid.
 
-### -2015 REJECTED_MBX_KEY
-* Invalid API-key, IP, or permissions for action.
+### \-2015 REJECTED\_MBX\_KEY
 
-### -2016 NO_TRADING_WINDOW
+* Invalid API key, IP, or permissions for action.
+
+### \-2016 NO\_TRADING\_WINDOW
+
 * No trading window could be found for the symbol. Try ticker/24hrs instead.
 
-### -2018 BALANCE_NOT_SUFFICIENT
+### \-2018 BALANCE\_NOT\_SUFFICIENT
+
 * Balance is insufficient.
 
-### -2020 UNABLE_TO_FILL
+### \-2020 UNABLE\_TO\_FILL
+
 * Unable to fill.
 
-### -2021 ORDER_WOULD_IMMEDIATELY_TRIGGER
+### \-2021 ORDER\_WOULD\_IMMEDIATELY\_TRIGGER
+
 * Order would immediately trigger.
 
-### -2022 REDUCE_ONLY_REJECT
+### \-2022 REDUCE\_ONLY\_REJECT
+
 * ReduceOnly Order is rejected.
 
-### -2024 POSITION_NOT_SUFFICIENT
+### \-2024 POSITION\_NOT\_SUFFICIENT
+
 * Position is not sufficient.
 
-### -2025 MAX_OPEN_ORDER_EXCEEDED
-* Reach max open order limit.
+### \-2025 MAX\_OPEN\_ORDER\_EXCEEDED
 
-### -2026 REDUCE_ONLY_ORDER_TYPE_NOT_SUPPORTED
+* Reached max open order limit.
+
+### \-2026 REDUCE\_ONLY\_ORDER\_TYPE\_NOT\_SUPPORTED
+
 * This OrderType is not supported when reduceOnly.
 
+## 40xx \- Filters and other Issues
 
-## 40xx - Filters and other Issues
-### -4000 INVALID_ORDER_STATUS
+### \-4000 INVALID\_ORDER\_STATUS
+
 * Invalid order status.
 
-### -4001 PRICE_LESS_THAN_ZERO
-* Price less than 0.
+### \-4001 PRICE\_LESS\_THAN\_ZERO
 
-### -4002 PRICE_GREATER_THAN_MAX_PRICE
+* Price less than 0\.
+
+### \-4002 PRICE\_GREATER\_THAN\_MAX\_PRICE
+
 * Price greater than max price.
 
-### -4003 QTY_LESS_THAN_ZERO
+### \-4003 QTY\_LESS\_THAN\_ZERO
+
 * Quantity less than zero.
 
-### -4004 QTY_LESS_THAN_MIN_QTY
-* Quantity less than min quantity.
+### \-4004 QTY\_LESS\_THAN\_MIN\_QTY
 
-### -4005 QTY_GREATER_THAN_MAX_QTY
-* Quantity greater than max quantity. 
+* Quantity less than minimum quantity.
 
-### -4006 STOP_PRICE_LESS_THAN_ZERO
-* Stop price less than zero. 
+### \-4005 QTY\_GREATER\_THAN\_MAX\_QTY
 
-### -4007 STOP_PRICE_GREATER_THAN_MAX_PRICE
-* Stop price greater than max price. 
+* Quantity greater than maximum quantity.
 
-### -4008 TICK_SIZE_LESS_THAN_ZERO
+### \-4006 STOP\_PRICE\_LESS\_THAN\_ZERO
+
+* Stop price less than zero.
+
+### \-4007 STOP\_PRICE\_GREATER\_THAN\_MAX\_PRICE
+
+* Stop price greater than max price.
+
+### \-4008 TICK\_SIZE\_LESS\_THAN\_ZERO
+
 * Tick size less than zero.
 
-### -4009 MAX_PRICE_LESS_THAN_MIN_PRICE
+### \-4009 MAX\_PRICE\_LESS\_THAN\_MIN\_PRICE
+
 * Max price less than min price.
 
-### -4010 MAX_QTY_LESS_THAN_MIN_QTY
-* Max qty less than min qty.
+### \-4010 MAX\_QTY\_LESS\_THAN\_MIN\_QTY
 
-### -4011 STEP_SIZE_LESS_THAN_ZERO
+* Maximum quantity less than minimum quantity.
+
+### \-4011 STEP\_SIZE\_LESS\_THAN\_ZERO
+
 * Step size less than zero.
 
-### -4012 MAX_NUM_ORDERS_LESS_THAN_ZERO
-* Max mum orders less than zero.
+### \-4012 MAX\_NUM\_ORDERS\_LESS\_THAN\_ZERO
 
-### -4013 PRICE_LESS_THAN_MIN_PRICE
-* Price less than min price.
+* Maximum order quantity less than 0\.
 
-### -4014 PRICE_NOT_INCREASED_BY_TICK_SIZE
+### \-4013 PRICE\_LESS\_THAN\_MIN\_PRICE
+
+* Price less than minimum price.
+
+### \-4014 PRICE\_NOT\_INCREASED\_BY\_TICK\_SIZE
+
 * Price not increased by tick size.
 
-### -4015 INVALID_CL_ORD_ID_LEN
-* Client order id is not valid.
-* Client order id length should not be more than 36 chars
+### \-4015 INVALID\_CL\_ORD\_ID\_LEN
 
-### -4016 PRICE_HIGHTER_THAN_MULTIPLIER_UP
+* Client order ID is not valid.  
+* Client order ID length should not be more than 36 characters.
+
+### \-4016 PRICE\_HIGHTER\_THAN\_MULTIPLIER\_UP
+
 * Price is higher than mark price multiplier cap.
 
-### -4017 MULTIPLIER_UP_LESS_THAN_ZERO
+### \-4017 MULTIPLIER\_UP\_LESS\_THAN\_ZERO
+
 * Multiplier up less than zero.
 
-### -4018 MULTIPLIER_DOWN_LESS_THAN_ZERO
+### \-4018 MULTIPLIER\_DOWN\_LESS\_THAN\_ZERO
+
 * Multiplier down less than zero.
 
-### -4019 COMPOSITE_SCALE_OVERFLOW
+### \-4019 COMPOSITE\_SCALE\_OVERFLOW
+
 * Composite scale too large.
 
-### -4020 TARGET_STRATEGY_INVALID
-* Target strategy invalid for orderType '%s',reduceOnly '%b'.
+### \-4020 TARGET\_STRATEGY\_INVALID
 
-### -4021 INVALID_DEPTH_LIMIT
-* Invalid depth limit.
-* '%s' is not valid depth limit.
+* Target strategy invalid for orderType %s, reduceOnly %b'
 
-### -4022 WRONG_MARKET_STATUS
-* market status sent is not valid.
+### \-4021 INVALID\_DEPTH\_LIMIT
 
-### -4023 QTY_NOT_INCREASED_BY_STEP_SIZE
-* Qty not increased by step size.
+* Invalid depth limit.  
+* %s is not a valid depth limit.
 
-### -4024 PRICE_LOWER_THAN_MULTIPLIER_DOWN
+### \-4022 WRONG\_MARKET\_STATUS
+
+* Market status sent is not valid.
+
+### \-4023 QTY\_NOT\_INCREASED\_BY\_STEP\_SIZE
+
+* The increment of the quantity is not a multiple of the step size.
+
+### \-4024 PRICE\_LOWER\_THAN\_MULTIPLIER\_DOWN
+
 * Price is lower than mark price multiplier floor.
 
-### -4025 MULTIPLIER_DECIMAL_LESS_THAN_ZERO
+### \-4025 MULTIPLIER\_DECIMAL\_LESS\_THAN\_ZERO
+
 * Multiplier decimal less than zero.
 
-### -4026 COMMISSION_INVALID
-* Commission invalid.
-* `%s` less than zero.
-* `%s` absolute value greater than `%s`
+### \-4026 COMMISSION\_INVALID
 
-### -4027 INVALID_ACCOUNT_TYPE
+* Commission invalid.  
+* Incorrect profit value.  
+* `%s` less than zero.  
+* `%s` absolute value greater than `%s`.
+
+### \-4027 INVALID\_ACCOUNT\_TYPE
+
 * Invalid account type.
 
-### -4029 INVALID_TICK_SIZE_PRECISION
-* Tick size precision is invalid.
+### \-4029 INVALID\_TICK\_SIZE\_PRECISION
 
-### -4030 INVALID_STEP_SIZE_PRECISION
-* Step size precision is invalid.
+* Tick size precision is invalid.  
+* Price decimal precision is incorrect.
 
-### -4031 INVALID_WORKING_TYPE
-* Invalid parameter working type
+### \-4030 INVALID\_STEP\_SIZE\_PRECISION
+
+* The number of decimal places for the step size is incorrect.
+
+### \-4031 INVALID\_WORKING\_TYPE
+
 * Invalid parameter working type: `%s`
 
-### -4032 EXCEED_MAX_CANCEL_ORDER_SIZE
-* Exceed maximum cancel order size.
+### \-4032 EXCEED\_MAX\_CANCEL\_ORDER\_SIZE
+
+* Exceeds the maximum order quantity that can be canceled.  
 * Invalid parameter working type: `%s`
 
-### -4044 INVALID_BALANCE_TYPE
-* Balance Type is invalid.
+### \-4044 INVALID\_BALANCE\_TYPE
 
-### -4045 MAX_STOP_ORDER_EXCEEDED
-* Reach max stop order limit.
+* The balance type is incorrect.
 
-### -4055 AMOUNT_MUST_BE_POSITIVE
-* Amount must be positive.
+### \-4045 MAX\_STOP\_ORDER\_EXCEEDED
 
-### -4056 INVALID_API_KEY_TYPE
-* Invalid api key type.
+* Reached the stop-loss order limit.
 
-### -4057 INVALID_RSA_PUBLIC_KEY
-* Invalid api public key
+### \-4055 AMOUNT\_MUST\_BE\_POSITIVE
 
-### -4058 MAX_PRICE_TOO_LARGE
-* maxPrice and priceDecimal too large,please check.
+* The quantity must be a positive integer.
 
+### \-4056 INVALID\_API\_KEY\_TYPE
 
-### -4060 INVALID_POSITION_SIDE
+* The API key type is invalid.
+
+### \-4057 INVALID\_RSA\_PUBLIC\_KEY
+
+* The API key is invalid.
+
+### \-4058 MAX\_PRICE\_TOO\_LARGE
+
+* maxPrice and priceDecimal too large, please check.
+
+### \-4060 INVALID\_POSITION\_SIDE
+
 * Invalid position side.
 
-### -4061 POSITION_SIDE_NOT_MATCH
-* Order's position side does not match user's setting.
+### \-4061 POSITION\_SIDE\_NOT\_MATCH
 
-### -4062 REDUCE_ONLY_CONFLICT
+* The order's position direction does not match the user’s settings.
+
+### \-4062 REDUCE\_ONLY\_CONFLICT
+
 * Invalid or improper reduceOnly value.
 
-### -4083 PLACE_BATCH_ORDERS_FAIL
-* Fail to place batch orders.
+### \-4084 UPCOMING\_METHOD
 
-### -4084 UPCOMING_METHOD
-* Method is not allowed currently. Upcoming soon.
+* Method is not allowed currently. Coming soon.
 
-### -4086 INVALID_PRICE_SPREAD_THRESHOLD
-* Invalid price spread threshold
+### \-4086 INVALID\_PRICE\_SPREAD\_THRESHOLD
 
-### -4087 REDUCE_ONLY_ORDER_PERMISSION
-* User can only place reduce only order
+* Invalid price spread threshold.
 
-### -4088 NO_PLACE_ORDER_PERMISSION
-* User can not place order currently
+### \-4087 REDUCE\_ONLY\_ORDER\_PERMISSION
 
-### -4114 INVALID_CLIENT_TRAN_ID_LEN
-* clientTranId is not valid
-* Client tran id length should be less than 64 chars
+* Users can only place reduce-only orders.
 
-### -4115 DUPLICATED_CLIENT_TRAN_ID
-* clientTranId is duplicated
-* Client tran id should be unique within 7 days
+### \-4088 NO\_PLACE\_ORDER\_PERMISSION
 
-### -4118 REDUCE_ONLY_MARGIN_CHECK_FAILED
-* ReduceOnly Order Failed. Please check your existing position and open orders
+* User cannot place orders currently.
 
-### -4131 MARKET_ORDER_REJECT
-* The counterparty's best price does not meet the PERCENT_PRICE filter limit
+### \-4114 INVALID\_CLIENT\_TRAN\_ID\_LEN
 
-### -4135 INVALID_ACTIVATION_PRICE
-* Invalid activation price
+* clientTranId is not valid.  
+* The customer's tranId length should be less than 64 characters.
 
-### -4137 QUANTITY_EXISTS_WITH_CLOSE_POSITION
-* Quantity must be zero with closePosition equals true
+### \-4115 DUPLICATED\_CLIENT\_TRAN\_ID
 
-### -4138 REDUCE_ONLY_MUST_BE_TRUE
-* Reduce only must be true with closePosition equals true
+* clientTranId is duplicated.  
+* The client's tranId should be unique within 7 days.
 
-### -4139 ORDER_TYPE_CANNOT_BE_MKT
-* Order type can not be market if it's unable to cancel
+### \-4118 REDUCE\_ONLY\_MARGIN\_CHECK\_FAILED
 
-### -4140 INVALID_OPENING_POSITION_STATUS
-* Invalid symbol status for opening position
+* ReduceOnly Order failed. Please check your existing position and open orders
 
-### -4141 SYMBOL_ALREADY_CLOSED
-* Symbol is closed
+### \-4131 MARKET\_ORDER\_REJECT
 
-### -4142 STRATEGY_INVALID_TRIGGER_PRICE
-* REJECT: take profit or stop order will be triggered immediately
+* The counterparty's best price does not meet the PERCENT\_PRICE filter limit.
 
-### -4164 MIN_NOTIONAL
-* Order's notional must be no smaller than 5.0 (unless you choose reduce only)
-* Order's notional must be no smaller than %s (unless you choose reduce only)
+### \-4135 INVALID\_ACTIVATION\_PRICE
 
-### -4165 INVALID_TIME_INTERVAL
-* Invalid time interval
+* Invalid activation price.
+
+### \-4137 QUANTITY\_EXISTS\_WITH\_CLOSE\_POSITION
+
+* Quantity must be zero when closePosition is true.
+
+### \-4138 REDUCE\_ONLY\_MUST\_BE\_TRUE
+
+* Reduce only must be true when closePosition is true.
+
+### \-4139 ORDER\_TYPE\_CANNOT\_BE\_MKT
+
+* Order type cannot be a market order if it cannot be canceled.
+
+### \-4140 INVALID\_OPENING\_POSITION\_STATUS
+
+* Invalid symbol status for opening position.
+
+### \-4141 SYMBOL\_ALREADY\_CLOSED
+
+* Trading pair has been delisted.
+
+### \-4142 STRATEGY\_INVALID\_TRIGGER\_PRICE
+
+* Rejected: Take Profit or Stop order would be triggered immediately.
+
+### \-4164 MIN\_NOTIONAL
+
+* Order notional must be at least 5.0 (unless you select Reduce Only)  
+* Order notional must be no smaller than %s (unless you choose Reduce Only)
+
+### \-4165 INVALID\_TIME\_INTERVAL
+
+* Invalid time interval  
 * Maximum time interval is %s days
 
-### -4183 PRICE_HIGHTER_THAN_STOP_MULTIPLIER_UP
-* Price is higher than stop price multiplier cap.
-* Limit price can't be higher than %s.
+### \-4183 PRICE\_HIGHTER\_THAN\_STOP\_MULTIPLIER\_UP
 
-### -4184 PRICE_LOWER_THAN_STOP_MULTIPLIER_DOWN
-* Price is lower than stop price multiplier floor.
-* Limit price can't be lower than %s.
+* Limit price cannot be higher than the cap of %s.  
+* Take-Profit/Stop-Loss price cannot be higher than the cap of %s.
+
+### \-4184 PRICE\_LOWER\_THAN\_STOP\_MULTIPLIER\_DOWN
+
+* Price is below the stop price limit.  
+* Take-Profit/Stop-Loss price must be above the trigger price × multiplier floor.  
+* Order price (limit or TP/SL) can’t be below %s.
+
