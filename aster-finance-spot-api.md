@@ -976,8 +976,8 @@ symbol | STRING | NO |
 ```javascript
 {
    "symbol": "APXUSDT",
-   "makerCommission": "0.000200",    
-   "takerCommission": "0.000700"
+   "makerCommissionRate": "0.000200",    
+   "takerCommissionRate": "0.000700"
 }
 ```
 
@@ -1267,7 +1267,7 @@ timestamp | LONG | YES |
 
 
 
-## cancel all open order (USER_DATA)
+## Cancel All Open Order (USER_DATA)
 
 > **Response:**
 
@@ -1366,7 +1366,7 @@ timestamp | LONG | YES |
 ```
 
 ``
-POST /api/v1/asset/transfer  (HMAC SHA256)
+POST /api/v1/asset/wallet/transfer  (HMAC SHA256)
 ``
 
 **Weight:**
@@ -1387,7 +1387,7 @@ timestamp	| LONG | YES	|
 **Notes:**
 * kindType FUTURE_SPOT(future to spot)/SPOT_FUTURE(spot to future)
 
-## transfer asset to other address (TRADE)
+## Transfer Asset To Other Address (TRADE)
 
 > **Response:**
 
@@ -1423,7 +1423,7 @@ timestamp	| LONG | YES	|
 * If clientTranId is provided, its length must be at least 20 characters.
 
 
-## get withdraw fee (USER_DATA)
+## Get Withdraw Fee (NONE)
 > **Response:**
 ```javascript
 {
@@ -1434,7 +1434,7 @@ timestamp	| LONG | YES	|
 ```
 
 ``
-GET /api/v1/aster/withdraw/estimateFee (HMAC SHA256)
+GET /api/v1/aster/withdraw/estimateFee 
 ``
 
 **Weight:**
@@ -1451,7 +1451,7 @@ asset | STRING | YES |
 * chainId: 1(ETH),56(BSC),42161(Arbi)
 * gasCost: The minimum fee required for a withdrawal
 
-## withdraw (USER_DATA)
+## Withdraw (USER_DATA)
 > **Response:**
 ```javascript
 {
@@ -1525,7 +1525,7 @@ const types = {
 const signature = await signer.signTypedData(domain, types, value)
 ```
 
-## get user create apikey nonce (NONE)
+## Get User Create Apikey Nonce (NONE)
 
 > **Response:**
 ```javascript
@@ -1553,7 +1553,7 @@ network | STRING | NO |
 * userOperationType : CREATE_API_KEY
 * network : For the Solana network, SOL must be provided; otherwise, this field is ignored.
 
-## create apikey (NONE)
+## Create Apikey (NONE)
 
 > **Response:**
 ```javascript
