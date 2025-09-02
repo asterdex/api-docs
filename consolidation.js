@@ -21,8 +21,6 @@ const new_address_config = [
     }
 ]
 
-// const host = 'http://127.0.0.1:9081'
-// const host = 'https://www.astherusqa.finance'
 const host = 'https://sapi.asterdex.com'
 
 //主账户私钥
@@ -34,7 +32,6 @@ const main_address = '*'
 const api_key = '*'
 const api_secret = '*'
 
-const desc = 'newApikey899221' //创建apikey时的描述信息 注意同一账户的desc不能重复
 
 //归集和提现的手续费 代币 数量配置
 const fee = '0.6'
@@ -115,7 +112,6 @@ async function sendRequest(url, method) {
     if (use_new_apikey == true) {
         key = new_address_apikey
     }
-    // console.log('url:', url)
     if (method == 'POST') {
         headers = {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -125,7 +121,7 @@ async function sendRequest(url, method) {
     }
     try {
         const response = await axios({
-            method: method, // 支持 get, post, put, delete, etc.
+            method: method, 
             url: url,
             headers: headers
 
@@ -186,7 +182,8 @@ async function main() {
         message = 'You are signing into Astherus ${nonce}'.replace('${nonce}', nonce)
         userSignature = await sign(config.private_key,message)
         
-        var key_desc = desc + '_' + i
+        //创建apikey时的描述信息 注意同一账户的desc不能重复
+        var key_desc = Date.now() +'_' + i
         i = i + 1
         let new_api = await send(spot_create_apikey, { 'userSignature': userSignature,'address': config.address,'desc': key_desc })
         new_address_apikey = new_api['apiKey']

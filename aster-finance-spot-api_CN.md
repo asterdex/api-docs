@@ -1504,6 +1504,7 @@ network | STRING | NO |
 注意:
 * userOperationType 仅可取值: CREATE_API_KEY
 * network: sol网络必须传入SOL,其他忽略
+* 限流单IP一分钟60次
 
 
 ## 创建apikey (NONE)
