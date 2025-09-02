@@ -33,8 +33,6 @@ const api_key = '*'
 const api_secret = '*'
 
 
-//归集和提现的手续费 代币 数量配置
-const fee = '0.6'
 const withdraw_nonce = Date.now() + '000'
 const withdraw_asset = 'CDL'
 const withdraw_amount = '1'
@@ -77,13 +75,13 @@ const types = {
 }
 
 
-const value = {
+var value = {
     'type': 'Withdraw',
     'destination': main_address,
     'destination Chain': newrok,
     'token': withdraw_asset,
     'amount': withdraw_amount,
-    'fee': fee,
+    'fee': '',
     'nonce': withdraw_nonce,
     'aster chain': 'Mainnet',
 }
@@ -208,11 +206,18 @@ async function main() {
     estimateFee = await send(spot_withdraw_estimateFee, {})
     console.log('estimateFee:', estimateFee)
 
+
+    //归集和提现的手续费 代币 数量配置
+    fee = estimateFee['gasCost']
+    value.fee = fee*1.5+''
+    console.log('提现手续费:', fee)
+
+
     withdraw_ignature = await generateSignature()
 
     //使用老账户进行提现操作
     spotWithdraw = await send(spot_withdraw, {
-        'fee': fee, 'nonce': withdraw_nonce,
+        'fee':  value.fee, 'nonce': withdraw_nonce,
         'userSignature': withdraw_ignature, 'receiver': main_address, 'asset': withdraw_asset, 'amount': withdraw_amount
     })
 
