@@ -47,7 +47,7 @@ var use_new_apikey = false
 
 const spot_get_nonce = { 'url': '/api/v1/getNonce', 'method': 'POST', 'params': {  'userOperationType': 'CREATE_API_KEY' } }
 const spot_create_apikey = { 'url': '/api/v1/createApiKey', 'method': 'POST', 'params': { 'userOperationType': 'CREATE_API_KEY' } }
-const spot_send_toAddress = { 'url': '/api/v1/spot/sendToAddress', 'method': 'POST', 'params': {} }
+const spot_send_toAddress = { 'url': '/api/v1/asset/sendToAddress', 'method': 'POST', 'params': {} }
 
 // #chainId: 1(ETH),56(BSC),42161(Arbi)
 const spot_withdraw_estimateFee = { 'url': '/api/v1/aster/withdraw/estimateFee', 'method': 'GET', 'params': { 'asset': withdraw_asset, "chainId": chainId } }
