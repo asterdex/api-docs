@@ -50,7 +50,7 @@ const spot_create_apikey = { 'url': '/api/v1/createApiKey', 'method': 'POST', 'p
 const spot_send_toAddress = { 'url': '/api/v1/spot/sendToAddress', 'method': 'POST', 'params': {} }
 
 // #chainId: 1(ETH),56(BSC),42161(Arbi)
-const spot_withdraw_estimateFee = { 'url': '/api/v1/aster/withdraw/estimateFee', 'method': 'GET', 'params': { 'asset': 'BNB', "chainId": chainId } }
+const spot_withdraw_estimateFee = { 'url': '/api/v1/aster/withdraw/estimateFee', 'method': 'GET', 'params': { 'asset': withdraw_asset, "chainId": chainId } }
 const spot_withdraw = { 'url': '/api/v1/aster/user-withdraw', 'method': 'POST', 'params': { "chainId": chainId } }
 
 
