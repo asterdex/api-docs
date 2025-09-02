@@ -2383,7 +2383,7 @@ newOrderRespType | ENUM    | NO       | "ACK", "RESULT", 默认 "ACK"
 ```
 
 ``
-POST /fapi/v1/asset/transfer  (HMAC SHA256)
+POST /fapi/v1/asset/wallet/transfer  (HMAC SHA256)
 ``
 
 **权重:**

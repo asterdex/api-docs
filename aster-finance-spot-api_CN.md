@@ -931,8 +931,8 @@ symbol | STRING | NO |
 ```javascript
 {
    "symbol": "APXUSDT",
-   "makerCommission": "0.000200",    
-   "takerCommission": "0.000700"
+   "makerCommissionRate": "0.000200",    
+   "takerCommissionRate": "0.000700"
 }
 ```
 ``
@@ -1319,7 +1319,7 @@ timestamp | LONG | YES |  
 ```
 
 ``
-POST /api/v1/asset/transfer  (HMAC SHA256)
+POST /api/v1/asset/wallet/transfer  (HMAC SHA256)
 ``
 
 **权重:**
@@ -1377,7 +1377,7 @@ timestamp	| LONG | YES	|	时间戳
 
 
 
-## 现货提现手续费 (USER_DATA)
+## 现货提现手续费 (NONe)
 > **响应**
 ```javascript
 {
@@ -1388,7 +1388,7 @@ timestamp	| LONG | YES	|	时间戳
 ```
 
 ``
-GET /api/v1/aster/withdraw/estimateFee (HMAC SHA256)
+GET /api/v1/aster/withdraw/estimateFee 
 ``
 
 **权重:** 
