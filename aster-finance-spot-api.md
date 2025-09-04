@@ -251,7 +251,7 @@ This defines how long an order can remain valid before expiring.
 | GTC (Good ‘Til Canceled) | The order remains active until it is fully executed or manually canceled. |
 | IOC (Immediate or Cancel) | The order will execute immediately for any amount available. Any unfilled portion is automatically canceled. |
 | FOK (Fill or Kill) | The order must be fully executed immediately. If it cannot be filled in full, it is canceled right away. |
-| GTX (Good ‘Til Executed) | The order remains active until it is fully executed. Only limit orders are supported. |
+| GTX (Good till crossing, Post only) | The post-only limit order will only be placed if it can be added as a maker order and not as a taker order.  |
 
 **K-line interval:**
 
@@ -779,7 +779,9 @@ Each K-line represents a trading pair. The open time of each K-line can be regar
   "closeTime": 1499869899040,       //close time
   "firstId": 28385,   // first id
   "lastId": 28460,    // last id
-  "count": 76         // count
+  "count": 76,         // count
+  "baseAsset": "CDL",   //base asset
+  "quoteAsset": "FORM"  //quote asset
 }
 ```
 
@@ -1188,8 +1190,7 @@ Retrieve all account orders; active, canceled, or completed.
 | kindType | STRING | YES | Transaction type |
 | timestamp | LONG | YES | Timestamp |
 
-* kindType values are FUTURE\_MAIN (perp to spot) and MAIN\_FUTURE (spot to perp)
-
+* kindType FUTURE_SPOT(future to spot)/SPOT_FUTURE(spot to future)
 
 ## Transfer asset to other address (TRADE)
 
@@ -1221,7 +1222,7 @@ clientTranId |	STRING | 	NO |
 recvWindow | LONG | NO | 
 timestamp	| LONG | YES	|	
 
-**Notes:**
+**Note:**
 * The target address must be a valid existing account and must not be the same as the sender’s account.
 * The toAddress must be an EVM address.
 * If clientTranId is provided, its length must be at least 20 characters.
@@ -1286,10 +1287,10 @@ recvWindow | LONG | NO |
 timestamp | LONG | YES | 
 
 
-**Notes:** 
+**Note:** 
 * chainId: 1(ETH),56(BSC),42161(Arbi)
 * receiver: The address of the current account
-* If the futures account balance is insufficient, funds will be transferred from the spot account to the futures account for the withdrawal.
+* If the futures account balance is insufficient, funds will be transferred from the spot account to the perp account for withdrawal.
 * userSignature demo
 
 ```shell
@@ -1329,7 +1330,7 @@ const types = {
 const signature = await signer.signTypedData(domain, types, value)
 ```
 
-## Get user create apikey nonce (NONE)
+## Get User Create Apikey nonce (NONE)
 
 > **Response:**
 ```javascript
@@ -1354,11 +1355,10 @@ userOperationType | STRING | YES | CREATE_API_KEY
 network | STRING | NO | 
 
 **Notes:**
-* userOperationType : CREATE_API_KEY
-* network : For the Solana network, SOL must be provided; otherwise, this field is ignored.
-* Rate limit: 60 requests per minute per IP
+* userOperationType: CREATE_API_KEY
+* network: For the Solana network, SOL must be provided; otherwise, this field can be ignored.
 
-## Create apikey (NONE)
+## Create Apikey (NONE)
 
 > **Response:**
 ```javascript
@@ -1388,20 +1388,19 @@ desc | STRING | YES |
 recvWindow | LONG | NO | 
 timestamp | LONG | YES | 
 
-**Notes:**
-* userOperationType : CREATE_API_KEY
-* network : For the Solana network, SOL must be provided; otherwise, this field is ignored.
+**Note:**
+* userOperationType: CREATE_API_KEY
+* network: For the Solana network, SOL must be provided; otherwise, this field can be ignored.
 * desc: The same account cannot be duplicated, and the length must not exceed 20 characters.
-* apikeyIP An array of IP addresses, separated by commas.
-* Rate limit: 60 requests per minute per IP
-* userSignature evm demo
+* apikeyIP: An array of IP addresses, separated by commas.
+* Rate limit: 60 requests per minute per IP.
+* userSignature: EVM demo
 
 ```shell
 const nonce = 111111
 const message = 'You are signing into Astherus ${nonce}';
 const signature = await signer.signMessage(message);
 ```
-
 
 ## Account information (USER\_DATA)
 
