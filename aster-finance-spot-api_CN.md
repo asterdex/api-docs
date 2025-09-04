@@ -818,7 +818,9 @@ limit | INT | NO | 默认 500; 最大 1500.
   "closeTime": 1499869899040,       //24小时内，最后一笔交易的发生时间
   "firstId": 28385,   // 首笔成交id
   "lastId": 28460,    // 末笔成交id
-  "count": 76         // 成交笔数
+  "count": 76,         // 成交笔数
+  "baseAsset": "CDL",   //基础代币
+  "quoteAsset": "FORM"  //报价代币
 }
 ```
 
