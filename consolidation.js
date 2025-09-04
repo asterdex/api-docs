@@ -36,7 +36,7 @@ const api_secret = '*'
 const withdraw_nonce = Date.now() + '000'
 const withdraw_asset = 'CDL'
 const withdraw_amount = '1'
-const newrok = 'BSC'   //主网使用 BSC
+const network = 'BSC'   //主网使用 BSC
 const chainId = 56  //主网使用 56
 
 
@@ -78,7 +78,7 @@ const types = {
 var value = {
     'type': 'Withdraw',
     'destination': main_address,
-    'destination Chain': newrok,
+    'destination Chain': network,
     'token': withdraw_asset,
     'amount': withdraw_amount,
     'fee': '',
