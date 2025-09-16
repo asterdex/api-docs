@@ -819,8 +819,8 @@ limit | INT | NO | 默认 500; 最大 1500.
   "firstId": 28385,   // 首笔成交id
   "lastId": 28460,    // 末笔成交id
   "count": 76,         // 成交笔数
-  "baseAsset": "CDL",   //基础代币
-  "quoteAsset": "FORM"  //报价代币
+  "baseAsset": "BTC",   //基础代币
+  "quoteAsset": "USDT"  //报价代币
 }
 ```
 
