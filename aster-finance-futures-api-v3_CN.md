@@ -328,14 +328,14 @@ long microsecond = now.getEpochSecond() * 1000000 + now.getNano() / 1000;
     my_dict['user'] = user
     my_dict['signer'] = signer
     my_dict['signature'] = '0x'+signed_message.signature.hex()
-    url ='http://127.0.0.1:9081/fapi/v3/order'
+    url ='https://fapi.asterdex.com/fapi/v3/order'
     headers = {
             'Content-Type': 'application/x-www-form-urlencoded',
             'User-Agent': 'PythonApp/1.0'
     }
     res = requests.post(url,data=my_dict,headers=headers)
     print(url)
-    #curl  -X POST 'http://127.0.0.1:9081/fapi/v3/order' -d 'symbol=SANDUSDT&positionSide=BOTH&type=LIMIT&side=BUY&timeInForce=GTC&quantity=190&price=0.28694&recvWindow=50000&timestamp=1749545309665&nonce=1748310859508867&user=0x63DD5aCC6b1aa0f563956C0e534DD30B6dcF7C4e&signer=0x21cF8Ae13Bb72632562c6Fff438652Ba1a151bb0&signature=0x0337dd720a21543b80ff861cd3c26646b75b3a6a4b5d45805d4c1d6ad6fc33e65f0722778dd97525466560c69fbddbe6874eb4ed6f5fa7e576e486d9b5da67f31b'   
+    #curl  -X POST 'https://fapi.asterdex.com/fapi/v3/order' -d 'symbol=SANDUSDT&positionSide=BOTH&type=LIMIT&side=BUY&timeInForce=GTC&quantity=190&price=0.28694&recvWindow=50000&timestamp=1749545309665&nonce=1748310859508867&user=0x63DD5aCC6b1aa0f563956C0e534DD30B6dcF7C4e&signer=0x21cF8Ae13Bb72632562c6Fff438652Ba1a151bb0&signature=0x0337dd720a21543b80ff861cd3c26646b75b3a6a4b5d45805d4c1d6ad6fc33e65f0722778dd97525466560c69fbddbe6874eb4ed6f5fa7e576e486d9b5da67f31b'   
 
 ```
 
@@ -439,11 +439,11 @@ my_dict = {'symbol':'SANDUSDT','side':"SELL","type":'LIMIT','orderId':2194215}
     my_dict['signer'] = signer
     my_dict['signature'] = '0x'+signed_message.signature.hex()
 
-    url ='http://127.0.0.1:9081/fapi/v3/order'
+    url ='https://fapi.asterdex.com/fapi/v3/order'
 
     res = requests.get(url, params=my_dict)
     print(url)
-    #curl  -X GET 'http://127.0.0.1:9081/fapi/v3/order?symbol=SANDUSDT&side=BUY&type=LIMIT&orderId=2194215&recvWindow=50000&timestamp=1749545309665&nonce=1748310859508867&user=0x63DD5aCC6b1aa0f563956C0e534DD30B6dcF7C4e&signer=0x21cF8Ae13Bb72632562c6Fff438652Ba1a151bb0&signature=0x4f5e36e91f0d4cf5b29b6559ebc2c808d3c808ebb13b2bcaaa478b98fb4195642c7473f0d1aa101359aaf278126af1a53bcb482fb05003bfb6bdc03de03c63151b'
+    #curl  -X GET 'https://fapi.asterdex.com/fapi/v3/order?symbol=SANDUSDT&side=BUY&type=LIMIT&orderId=2194215&recvWindow=50000&timestamp=1749545309665&nonce=1748310859508867&user=0x63DD5aCC6b1aa0f563956C0e534DD30B6dcF7C4e&signer=0x21cF8Ae13Bb72632562c6Fff438652Ba1a151bb0&signature=0x4f5e36e91f0d4cf5b29b6559ebc2c808d3c808ebb13b2bcaaa478b98fb4195642c7473f0d1aa101359aaf278126af1a53bcb482fb05003bfb6bdc03de03c63151b'
 
 ```
 ## 完整python脚本示例
@@ -467,7 +467,7 @@ from web3 import Web3
 user = '0x63DD5aCC6b1aa0f563956C0e534DD30B6dcF7C4e'
 signer='0x21cF8Ae13Bb72632562c6Fff438652Ba1a151bb0'
 priKey = "0x4fd0a42218f3eae43a6ce26d22544e986139a01e5b34a62db53757ffca81bae1"
-host = 'http://127.0.0.1:9081'
+host = 'https://fapi.asterdex.com'
 placeOrder = {'url': '/fapi/v3/order', 'method': 'POST',
               'params':{'symbol': 'SANDUSDT', 'positionSide': 'BOTH', 'type': 'LIMIT', 'side': 'BUY',
 	         'timeInForce': 'GTC', 'quantity': "30", 'price': 0.325,'reduceOnly': True}}
