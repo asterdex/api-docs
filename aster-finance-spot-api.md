@@ -780,8 +780,8 @@ Each K-line represents a trading pair. The open time of each K-line can be regar
   "firstId": 28385,   // first id
   "lastId": 28460,    // last id
   "count": 76,         // count
-  "baseAsset": "CDL",   //base asset
-  "quoteAsset": "FORM"  //quote asset
+  "baseAsset": "BTC",   //base asset
+  "quoteAsset": "USDT"  //quote asset
 }
 ```
 
