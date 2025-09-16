@@ -72,7 +72,7 @@
 	- [Get Current Multi-Assets Mode (USER_DATA)](#get-current-multi-assets-mode-user_data)
 	- [New Order  (TRADE)](#new-order--trade)
 	- [Place Multiple Orders  (TRADE)](#place-multiple-orders--trade)
-	- [Transfer Between Futures And Spot  (TRADE)](#transfer-between-futures-and-spot--trade)
+	- [Transfer Between Futures And Spot (USER_DATA)](#transfer-between-futures-and-spot-user_data)
 	- [Query Order (USER_DATA)](#query-order-user_data)
 	- [Cancel Order (TRADE)](#cancel-order-trade)
 	- [Cancel All Open Orders (TRADE)](#cancel-all-open-orders-trade)
@@ -2463,7 +2463,7 @@ newOrderRespType | ENUM    | NO       | "ACK", "RESULT", default "ACK"
 * Batch orders are processed concurrently, and the order of matching is not guaranteed.
 * The order of returned contents for batch orders is the same as the order of the order list.
 
-## Transfer Between Futures And Spot  (TRADE)
+## Transfer Between Futures And Spot (USER_DATA)
 
 > **Response:**
 
@@ -2475,7 +2475,7 @@ newOrderRespType | ENUM    | NO       | "ACK", "RESULT", default "ACK"
 ```
 
 ``
-POST /fapi/v1/asset/wallet/transfer  (HMAC SHA256)
+POST /fapi/v1/asset/wallet/transfer (HMAC SHA256)
 ``
 
 **Weight:**
