@@ -219,7 +219,7 @@ It is recommended to use a small recvWindow of 5000 or less!
 * After converting the API parameters to strings, sort them by their key values in ASCII order to generate the final string. Note: All parameter values must be treated as strings during the signing process.
 * After generating the string, combine it with the authentication signature parameters user, signer, and nonce, then use Web3’s ABI parameter encoding to generate the bytecode.
 * After generating the bytecode, use the Keccak algorithm to generate the hash.
-* Use the private key of the derived address to sign the hash using web3’s ECDSA signature algorithm, generating the final signature.
+* Use the private key of **API wallet address** to sign the hash using web3’s ECDSA signature algorithm, generating the final signature.
 
 ### Timing Security
 
