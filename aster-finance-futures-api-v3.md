@@ -114,6 +114,7 @@
 ## General API Information
 
 * This API may require the user's AGENT. To learn how to create an AGENT, please refer toSome endpoints will require an API Key. Please refer to [this page](https://www.asterdex.com/)
+* To create an agent please [click here](https://www.asterdex.com/en/api-wallet) and switch to `Pro API` at the top
 * The base endpoint is: **https://fapi.asterdex.com**
 * All endpoints return either a JSON object or array.
 * Data is returned in **ascending** order. Oldest first, newest last.
