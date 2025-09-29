@@ -112,8 +112,8 @@
 
 ## Rest 基本信息
 
-* 接口可能需要用户的AGENT，如何创建AGENT请参考[这里](https://www.asterdex.com/)
-* agent创建请[点击这里](https://www.asterdex.com/zh-CN/api-wallet) 并且切换到API管理上方的`专业API`
+* 接口可能需要用户的AGENT
+* AGENT创建请[点击这里](https://www.asterdex.com/zh-CN/api-wallet) 并且切换到API管理上方的`专业API`
 * 本篇列出REST接口的baseurl **https://fapi.asterdex.com**
 * 所有接口的响应都是JSON格式
 * 响应中如有数组，数组元素以时间升序排列，越早的数据越提前。
