@@ -230,11 +230,12 @@ signature | 签名
 
 #### 示例 : 以下参数为api注册信息,user,signer,privateKey仅供示范(privateKey为signer的私钥)
 
-Key | Value
------------- | ------------
-user | 0x63DD5aCC6b1aa0f563956C0e534DD30B6dcF7C4e
-signer | 0x21cF8Ae13Bb72632562c6Fff438652Ba1a151bb0
-privateKey | 0x4fd0a42218f3eae43a6ce26d22544e986139a01e5b34a62db53757ffca81bae1
+
+Key | Value | Desc
+------------ | ------------ | ------------
+user | 0x63DD5aCC6b1aa0f563956C0e534DD30B6dcF7C4e  | 登陆钱包地址
+signer | 0x21cF8Ae13Bb72632562c6Fff438652Ba1a151bb0 | [点击这里获取](https://www.asterdex.com/zh-CN/api-wallet)
+privateKey | 0x4fd0a42218f3eae43a6ce26d22544e986139a01e5b34a62db53757ffca81bae1 | [点击这里获取](https://www.asterdex.com/zh-CN/api-wallet)
 
 #### 示例 : nonce参数为当前系统微秒值,超过系统时间,或者落后系统时间超过5s为非法请求
 ```python
