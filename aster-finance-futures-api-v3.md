@@ -247,11 +247,11 @@ if (timestamp < (serverTime + 1000) && (serverTime - timestamp) <= recvWindow){
 
 #### The following parameters are API registration details. The values for user, signer, and privateKey are for demonstration purposes only (the privateKey corresponds to the signer).
 
-| Key        | Value                                                              |
-| ---------- | ------------------------------------------------------------------ |
-| user       | 0x63DD5aCC6b1aa0f563956C0e534DD30B6dcF7C4e                         |
-| signer     | 0x21cF8Ae13Bb72632562c6Fff438652Ba1a151bb0                         |
-| privateKey | 0x4fd0a42218f3eae43a6ce26d22544e986139a01e5b34a62db53757ffca81bae1 |
+| Key        | Value          | Desc                                                    
+| ---------- | ------------------------------------------------------------------ |  ---------- |
+| user       | 0x63DD5aCC6b1aa0f563956C0e534DD30B6dcF7C4e                         |Login wallet address |
+| signer     | 0x21cF8Ae13Bb72632562c6Fff438652Ba1a151bb0                         |[Click Here](https://www.asterdex.com/en/api-wallet)         | 
+| privateKey | 0x4fd0a42218f3eae43a6ce26d22544e986139a01e5b34a62db53757ffca81bae1 |[Click Here](https://www.asterdex.com/en/api-wallet)        | 
 
 #### The nonce parameter is the current system time in microseconds. If it exceeds the system time or lags behind it by more than 5 seconds, the request is considered invalid.
 
