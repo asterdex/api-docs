@@ -1139,6 +1139,36 @@ Retrieve all current open orders for trading pairs. Use calls without a trading 
 ]
 ```
 
+## Cancel All Open Orders (TRADE)
+
+> **Response**
+
+```javascript
+{
+    "code": 200,
+    "msg": "The operation of cancel all open order is done."
+}
+```
+
+``
+DEL /api/v1/allOpenOrders  (HMAC SHA256)
+``
+
+**Weight:**
+- ***1***
+
+**Parameters:**
+
+Name | Type | Mandatory | Description
+------------ | ------------ | ------------ | ------------
+symbol | STRING | YES |
+orderIdList | STRING | NO |  orderid array string
+origClientOrderIdList | STRING | NO | clientOrderId array string
+recvWindow | LONG | NO |
+timestamp | LONG | YES |
+
+
+
 `GET /api/v1/allOrders (HMAC SHA256)`
 
 Retrieve all account orders; active, canceled, or completed.
