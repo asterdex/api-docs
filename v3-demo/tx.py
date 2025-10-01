@@ -16,7 +16,12 @@ from eth_account import Account
 from eth_account.messages import encode_defunct
 from web3 import Web3
 
+#your main wallet address (eoa)
+#你的登陆钱包地址(erc20)
 user = '0x63DD5aCC6b1aa0f563956C0e534DD30B6dcF7C4e'
+
+#please get these parameters from  https://www.asterdex.com/en/api-wallet
+#下面这些参数在这里生成配置  https://www.asterdex.com/zh-CN/api-wallet
 signer='0x21cF8Ae13Bb72632562c6Fff438652Ba1a151bb0'
 priKey = "0x4fd0a42218f3eae43a6ce26d22544e986139a01e5b34a62db53757ffca81bae1"
 

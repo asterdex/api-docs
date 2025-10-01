@@ -14,9 +14,13 @@
 
 [Aster Finance Futures API V3 文档](./aster-finance-futures-api-v3_CN.md)
 
-# Aster Finance Futures API V3 DEMO
+# Aster Finance Futures API V3 PYTHON DEMO
 
-[Aster Finance Futures API V3 DEMO](./v3-demo/tx.py)
+[Aster Finance Futures API V3 PYTHON DEMO](./v3-demo/tx.py)
+
+# Aster Finance Futures API V3 GO DEMO
+
+[Aster Finance Futures API V3 GO DEMO](./v3-demo/main.go)
 
 # API Documentation for Aster Finance Spot
 
