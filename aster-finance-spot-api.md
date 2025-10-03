@@ -1112,33 +1112,6 @@ Retrieve all current open orders for trading pairs. Use calls without a trading 
 
 * If the symbol parameter is not provided, it will return the order books for all trading pairs.
 
-## Query all orders (USER\_DATA)
-
-**Response**
-
-```javascript
-[
-    {
-        "orderId": 349661, 
-        "symbol": "BNBUSDT", 
-        "status": "NEW", 
-        "clientOrderId": "LzypgiMwkf3TQ8wwvLo8RA", 
-        "price": "1.10000000", 
-        "avgPrice": "0.0000000000000000", 
-        "origQty": "5",  
-        "executedQty": "0", 
-        "cumQuote": "0", 
-        "timeInForce": "GTC", 
-        "type": "LIMIT", 
-        "side": "BUY",   
-        "stopPrice": "0", 
-        "origType": "LIMIT", 
-        "time": 1756252940207, 
-        "updateTime": 1756252940207, 
-    }
-]
-```
-
 ## Cancel All Open Orders (TRADE)
 
 > **Response**
@@ -1168,6 +1141,32 @@ recvWindow | LONG | NO |
 timestamp | LONG | YES |
 
 
+## Query all orders (USER\_DATA)
+
+**Response**
+
+```javascript
+[
+    {
+        "orderId": 349661, 
+        "symbol": "BNBUSDT", 
+        "status": "NEW", 
+        "clientOrderId": "LzypgiMwkf3TQ8wwvLo8RA", 
+        "price": "1.10000000", 
+        "avgPrice": "0.0000000000000000", 
+        "origQty": "5",  
+        "executedQty": "0", 
+        "cumQuote": "0", 
+        "timeInForce": "GTC", 
+        "type": "LIMIT", 
+        "side": "BUY",   
+        "stopPrice": "0", 
+        "origType": "LIMIT", 
+        "time": 1756252940207, 
+        "updateTime": 1756252940207, 
+    }
+]
+```
 
 `GET /api/v1/allOrders (HMAC SHA256)`
 
