@@ -1309,6 +1309,49 @@ timestamp | LONG | YES |  
 * 默认查询最近7天内的数据 
 
 
+
+``
+GET /api/v1/transactionHistory (HMAC SHA256)
+``
+> **响应**
+
+```javascript
+[
+   {
+    "tranId": 1759115482304540227, //划转ID
+    "tradeId": null,               //流水ID 
+    "asset": "ASTER",              //资产
+    "symbol": "",                  //交易对
+    "balanceDelta": "-500.00000000", //资金流数量，正数代表流入，负数代表流出
+    "balanceInfo": "TRADE_SOURCE",   //流水描述 
+    "time": 1759115482000,       // 时间
+    "type": "TRADE_SOURCE"      //资金流类型
+   }
+]
+```
+
+查询交易流水
+
+**权重:**
+30
+
+**参数:**
+
+名称 | 类型 | 是否必需 | 描述
+------------ | ------------ | ------------ | ------------
+asset | STRING | NO | 资产
+type | STRING | NO |  类别
+startTime | LONG | NO | 开始时间
+endTime | LONG | NO |  结束时间
+limit | LONG | NO | 返回的结果集数量 默认值:100 最大值:1000
+recvWindow | LONG | NO |  
+timestamp | LONG | YES |
+
+注意:
+
+*  `type` 取值 `TRADE_TARGET`,`TRADE_SOURCE`,`TRANSFER_SPOT_TO_FUTURE`,`TRANSFER_FUTURE_TO_SPOT`,`TRANSFER_SPOT_TO_SPOT`,`AIRDROP`,`DIVIDEND`,`TRANSFER_REFUND`,`INTERNAL_TRANSFER`,`TRANSFER`,`SWAP`,`COMMISSION_REBATE`,`CASH_BACK` 中的一种
+*  如果`startTime` 和 `endTime` 均未发送, 只会返回最近7天的数据。
+
 ## 期货现货互转 (TRADE)
 
 > **响应:**
