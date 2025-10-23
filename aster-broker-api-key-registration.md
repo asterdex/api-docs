@@ -42,27 +42,25 @@ You are signing into Aster DEX 501182
 
 ### request:
 ```shell
-curl 'https://www.apollox.finance/bapi/futures/v1/public/future/web3/loginReturnAccount' \
+curl -XPOST 'https://www.apollox.finance/bapi/futures/v1/public/future/web3/register-from-3party' \
 
   -H 'content-type: application/json' \
   --data-raw '{
   "signature":"0xafb84ca3bd36131970636a298677be2e1de4ed81b11101e417272d23f0b7f9af174efdf954ae7a63e844c83d16a4ad391e801c6766a422e647832b5c0c8aa1591c",
   "sourceAddr":"0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
   "chainId":56,
-  "sourceCode": "broker",
-  "agentCode": "ce6maa"
+  "sourceAgent": "broker"
   }'
 ```
 
 ### params:
 
-|param | type | required | description                            |
-|------|------|----------|----------------------------------------|
-| signature | string | yes | signature from previous step           |
-| sourceAddr | string | yes | the address used to sign the message   |
-| chainId | int | yes | blockchain network id, e.g. 56 for BSC |
-| sourceCode | string | no  | broker's name                          |
-| agentCode | string | no  | broker's referral code                 |
+| param       | type | required | description                            |
+|-------------|------|----------|----------------------------------------|
+| signature   | string | yes | signature from previous step           |
+| sourceAddr  | string | yes | the address used to sign the message   |
+| chainId     | int | yes | blockchain network id, e.g. 56 for BSC |
+| sourceAgent | string | no  | broker's name                          |
 
 ### response:
 
@@ -72,9 +70,12 @@ curl 'https://www.apollox.finance/bapi/futures/v1/public/future/web3/loginReturn
   "message": null,
   "messageDetail": null,
   "data": {
+    "apiKey": "D5M8792356G7H8J9K0L1N2B3V4C5X6Z7",
+    "apiSecret": "XXXXXXXX",
+    "keyId": 1234567,
     "uid": 12345678,
-    "fuid": 12345678,
-    "accountId": 12345678
+    "address": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+    "apiName": "SafePal-Authorized"
   },
   "success": true
 }
