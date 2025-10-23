@@ -243,7 +243,9 @@ curl -X POST "https://www.asterdex.com/bapi/futures/v1/private/future/aster/user
 ### request:
 
 ```shell
-curl 'https://fapi.asterdex.com/fapi/aster/user-withdraw?asset=USDT&amount=10.2&chainId=56&fee=0.01&nonce=1761029928213000&receiver=0x4C5EdB66CC7626a1C92d5178c3E5c45409BcE6D7&receiver=0x4C5EdB66CC7626a1C92d5178c3E5c45409BcE6D7&userSignature=0xc0299efe235ec194d070163b1f92ebf5d01bd820c1c08fa9730929c7a36172a9001b99203b2f9997aa7d41b7658348704e0515f4c40e76f1892f7a5b0af31daa1c'
+curl --location --request POST 'https://fapi.asterdex.com/fapi/apx/user-withdraw?chainId=56&asset=USDT&amount=31&fee=0.3&receiver=0x000ae314e2a2172a039b26378814c252734f556a&nonce=1761210000000000&userSignature=0xde4ca529eef20db136eed1daf1d072083431d5279e6d6e219600cf57161c5e6d1232af3c8a8ef37ba8b5963f439ef9cc2b475fe18dcc3732dda9fb93c94a3abd1c&recvWindow=60000&timestamp=1761230958410&signature=f5fd60da19be213d58914dd6f46bc400ada610fb916998dfc01dd346bfdad512' \
+--header 'Content-Type: application/json' \
+--header 'X-MBX-APIKEY: Your API KEY'
 ```
 
 ### params:
@@ -282,16 +284,9 @@ curl 'https://fapi.asterdex.com/fapi/aster/user-withdraw?asset=USDT&amount=10.2&
 ### request:
 
 ```shell
-curl -XPOST 'https://sapi.asterdex.com/api/v1/aster/user-withdraw' \
--d '{ \
-  "asset": "USDT"
-  "amount": "10.2",
-  "chainId": "56"
-  "fee": "0.01",
-  "nonce": "1761029928213000"
-  "receiver": "0x4C5EdB66CC7626a1C92d5178c3E5c45409BcE6D7",
-  "userSignature": "0xc0299efe235ec194d070163b1f92ebf5d01bd820c1c08fa9730929c7a36172a9001b99203b2f9997aa7d41b7658348704e0515f4c40e76f1892f7a5b0af31daa1c" \
-}'
+curl --location --request POST 'https://sapi.asterdex.com/api/v1/aster/user-withdraw?chainId=56&asset=ASTER&amount=1&fee=0.095&receiver=0x000ae314e2a2172a039b26378814c252734f556a&nonce=1761222960000000&userSignature=0x39051cc68de0fefb8e823259d3f7014fc787a8008b65d2a89d70defc48c3f91b35a4a819718c22ffcaeb143c8e1735621a0768d7c69e45ad8fbcf9bd315988423b&recvWindow=60000&timestamp=1761230958410&signature=f5fd60da19be213d58914dd6f46bc400ada610fb916998dfc01dd346bfdad51' \
+--header 'Content-Type: application/json' \
+--header 'X-MBX-APIKEY: Your API KEY'
 ```
 
 ### params:
