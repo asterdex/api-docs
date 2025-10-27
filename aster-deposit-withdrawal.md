@@ -243,7 +243,7 @@ curl -X POST "https://www.asterdex.com/bapi/futures/v1/private/future/aster/user
 ### request:
 
 ```shell
-curl --location --request POST 'https://fapi.asterdex.com/fapi/apx/user-withdraw?chainId=56&asset=USDT&amount=31&fee=0.3&receiver=0x000ae314e2a2172a039b26378814c252734f556a&nonce=1761210000000000&userSignature=0xde4ca529eef20db136eed1daf1d072083431d5279e6d6e219600cf57161c5e6d1232af3c8a8ef37ba8b5963f439ef9cc2b475fe18dcc3732dda9fb93c94a3abd1c&recvWindow=60000&timestamp=1761230958410&signature=f5fd60da19be213d58914dd6f46bc400ada610fb916998dfc01dd346bfdad512' \
+curl --location --request POST 'https://fapi.asterdex.com/fapi/aster/user-withdraw?chainId=56&asset=USDT&amount=31&fee=0.3&receiver=0x000ae314e2a2172a039b26378814c252734f556a&nonce=1761210000000000&userSignature=0xde4ca529eef20db136eed1daf1d072083431d5279e6d6e219600cf57161c5e6d1232af3c8a8ef37ba8b5963f439ef9cc2b475fe18dcc3732dda9fb93c94a3abd1c&recvWindow=60000&timestamp=1761230958410&signature=f5fd60da19be213d58914dd6f46bc400ada610fb916998dfc01dd346bfdad512' \
 --header 'Content-Type: application/json' \
 --header 'X-MBX-APIKEY: Your API KEY'
 ```
