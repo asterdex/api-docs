@@ -38,13 +38,6 @@
 
 [Aster 现货资产归集脚本示例](./consolidation.js)
 
-# Aster-Broker API Key 注册
-
-[Aster-Broker API Key 注册](./aster-broker-api-key-registration.md)
-
 # Aster 充值提现
 
 [Aster Deposit and Withdrawal](./aster-deposit-withdrawal.md)
-# Aster-Broker 充值提现
-
-[Aster-Broker Deposit and Withdrawal](./aster-broker-deposit-withdrawal.md)
