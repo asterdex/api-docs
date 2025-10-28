@@ -34,6 +34,10 @@
 
 [Aster Finance Spot Asset Consolidation](./consolidation.js)
 
+# Aster Api Key
+
+[Aster Api Key](./aster-api-key-registration.md)
+
 # Aster 现货资产归集脚本示例
 
 [Aster 现货资产归集脚本示例](./consolidation.js)
