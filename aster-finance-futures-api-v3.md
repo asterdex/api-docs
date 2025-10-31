@@ -857,7 +857,7 @@ Since `MARKET` orders have no price, the mark price is used.
 {}
 ```
 
-``GET /fapi/v1/ping``
+``GET /fapi/v3/ping``
 
 Test connectivity to the Rest API.
 
@@ -877,7 +877,7 @@ NONE
 }
 ```
 
-``GET /fapi/v1/time``
+``GET /fapi/v3/time``
 
 Test connectivity to the Rest API and get the current server time.
 
@@ -908,7 +908,7 @@ NONE
    			"rateLimitType": "ORDERS"
    		}
    	],
- 	"serverTime": 1565613908500,    // Ignore please. If you want to check current server time, please check via "GET /fapi/v1/time"
+ 	"serverTime": 1565613908500,    // Ignore please. If you want to check current server time, please check via "GET /fapi/v3/time"
  	"assets": [ // assets information
  		{
  			"asset": "BUSD",
@@ -1008,7 +1008,7 @@ NONE
 }
 ```
 
-``GET /fapi/v1/exchangeInfo``
+``GET /fapi/v3/exchangeInfo``
 
 Current exchange trading rules and symbol information
 
@@ -1042,7 +1042,7 @@ NONE
 }
 ```
 
-``GET /fapi/v1/depth``
+``GET /fapi/v3/depth``
 
 **Weight:**
 
@@ -1079,7 +1079,7 @@ Adjusted based on the limit:
 ]
 ```
 
-``GET /fapi/v1/trades``
+``GET /fapi/v3/trades``
 
 Get recent market trades
 
@@ -1112,7 +1112,7 @@ Get recent market trades
 ]
 ```
 
-``GET /fapi/v1/historicalTrades``
+``GET /fapi/v3/historicalTrades``
 
 Get older market historical trades.
 
@@ -1147,7 +1147,7 @@ Get older market historical trades.
 ]
 ```
 
-``GET /fapi/v1/aggTrades``
+``GET /fapi/v3/aggTrades``
 
 Get compressed, aggregate market trades. Market trades that fill at the time, from the same order, with the same price will have the quantity aggregated.
 
@@ -1191,7 +1191,7 @@ Get compressed, aggregate market trades. Market trades that fill at the time, fr
 ]
 ```
 
-``GET /fapi/v1/klines``
+``GET /fapi/v3/klines``
 
 Kline/candlestick bars for a symbol.
 Klines are uniquely identified by their open time.
@@ -1241,7 +1241,7 @@ Klines are uniquely identified by their open time.
 ]
 ```
 
-``GET /fapi/v1/indexPriceKlines``
+``GET /fapi/v3/indexPriceKlines``
 
 Kline/candlestick bars for the index price of a pair.
 
@@ -1292,7 +1292,7 @@ Klines are uniquely identified by their open time.
 ]
 ```
 
-``GET /fapi/v1/markPriceKlines``
+``GET /fapi/v3/markPriceKlines``
 
 Kline/candlestick bars for the mark price of a symbol.
 
@@ -1354,7 +1354,7 @@ Klines are uniquely identified by their open time.
 ]
 ```
 
-``GET /fapi/v1/premiumIndex``
+``GET /fapi/v3/premiumIndex``
 
 Mark Price and Funding Rate
 
@@ -1386,7 +1386,7 @@ Mark Price and Funding Rate
 ]
 ```
 
-``GET /fapi/v1/fundingRate``
+``GET /fapi/v3/fundingRate``
 
 **Weight:**
 1
@@ -1456,7 +1456,7 @@ Mark Price and Funding Rate
 ]
 ```
 
-``GET /fapi/v1/ticker/24hr``
+``GET /fapi/v3/ticker/24hr``
 
 24 hour rolling window price change statistics.
 **Careful** when accessing this with no symbol.
@@ -1497,7 +1497,7 @@ Mark Price and Funding Rate
 ]
 ```
 
-``GET /fapi/v1/ticker/price``
+``GET /fapi/v3/ticker/price``
 
 Latest price for a symbol or symbols.
 
@@ -1543,7 +1543,7 @@ Latest price for a symbol or symbols.
 ]
 ```
 
-``GET /fapi/v1/ticker/bookTicker``
+``GET /fapi/v3/ticker/bookTicker``
 
 Best price/qty on the order book for a symbol or symbols.
 
@@ -2181,7 +2181,7 @@ Bids and asks, pushed every 250 milliseconds, 500 milliseconds, 100 milliseconds
 
 1. Open a stream to **wss://fstream.asterdex.com/stream?streams=btcusdt@depth**.
 2. Buffer the events you receive from the stream. For same price, latest received update covers the previous one.
-3. Get a depth snapshot from **https://fapi.asterdex.com/fapi/v1/depth?symbol=BTCUSDT&limit=1000** .
+3. Get a depth snapshot from **https://fapi.asterdex.com/fapi/v3/depth?symbol=BTCUSDT&limit=1000** .
 4. Drop any event where `u` is < `lastUpdateId` in the snapshot.
 5. The first processed event should have `U` <= `lastUpdateId` **AND** `u` >= `lastUpdateId`
 6. While listening to the stream, each new event's `pu` should be equal to the previous event's `u`, otherwise initialize the process from step 3.
@@ -2206,7 +2206,7 @@ Considering the possible data latency from RESTful endpoints during an extremely
 }
 ```
 
-``POST /fapi/v1/positionSide/dual (HMAC SHA256)``
+``POST /fapi/v3/positionSide/dual (HMAC SHA256)``
 
 Change user's position mode (Hedge Mode or One-way Mode ) on ***EVERY symbol***
 
@@ -2231,7 +2231,7 @@ Change user's position mode (Hedge Mode or One-way Mode ) on ***EVERY symbol***
 }
 ```
 
-``GET /fapi/v1/positionSide/dual (HMAC SHA256)``
+``GET /fapi/v3/positionSide/dual (HMAC SHA256)``
 
 Get user's position mode (Hedge Mode or One-way Mode ) on ***EVERY symbol***
 
@@ -2256,7 +2256,7 @@ Get user's position mode (Hedge Mode or One-way Mode ) on ***EVERY symbol***
 }
 ```
 
-``POST /fapi/v1/multiAssetsMargin (HMAC SHA256)``
+``POST /fapi/v3/multiAssetsMargin (HMAC SHA256)``
 
 Change user's Multi-Assets mode (Multi-Assets Mode or Single-Asset Mode) on ***Every symbol***
 
@@ -2281,7 +2281,7 @@ Change user's Multi-Assets mode (Multi-Assets Mode or Single-Asset Mode) on ***E
 }
 ```
 
-``GET /fapi/v1/multiAssetsMargin (HMAC SHA256)``
+``GET /fapi/v3/multiAssetsMargin (HMAC SHA256)``
 
 Get user's Multi-Assets mode (Multi-Assets Mode or Single-Asset Mode) on ***Every symbol***
 
@@ -2327,7 +2327,7 @@ Get user's Multi-Assets mode (Multi-Assets Mode or Single-Asset Mode) on ***Ever
 }
 ```
 
-``POST /fapi/v1/order  (HMAC SHA256)``
+``POST /fapi/v3/order  (HMAC SHA256)``
 
 Send in a new order.
 
@@ -2374,7 +2374,7 @@ Additional mandatory parameters based on `type`:
   * If parameter`priceProtect`is sent as true:
     
     * when price reaches the `stopPrice` ，the difference rate between "MARK_PRICE" and "CONTRACT_PRICE" cannot be larger than the "triggerProtect" of the symbol
-    * "triggerProtect" of a symbol can be got from `GET /fapi/v1/exchangeInfo`
+    * "triggerProtect" of a symbol can be got from `GET /fapi/v3/exchangeInfo`
   * `STOP`, `STOP_MARKET`:
     
     * BUY: latest price ("MARK_PRICE" or "CONTRACT_PRICE") >= `stopPrice`
@@ -2440,7 +2440,7 @@ Additional mandatory parameters based on `type`:
 ]
 ```
 
-``POST /fapi/v1/batchOrders  (HMAC SHA256)``
+``POST /fapi/v3/batchOrders  (HMAC SHA256)``
 
 **Weight:**
 5
@@ -2545,7 +2545,7 @@ Notes:
 }
 ```
 
-``GET /fapi/v1/order (HMAC SHA256)``
+``GET /fapi/v3/order (HMAC SHA256)``
 
 Check an order's status.
 
@@ -2602,7 +2602,7 @@ Notes:
 }
 ```
 
-``DELETE /fapi/v1/order  (HMAC SHA256)``
+``DELETE /fapi/v3/order  (HMAC SHA256)``
 
 Cancel an active order.
 
@@ -2632,7 +2632,7 @@ Either `orderId` or `origClientOrderId` must be sent.
 }
 ```
 
-``DELETE /fapi/v1/allOpenOrders  (HMAC SHA256)``
+``DELETE /fapi/v3/allOpenOrders  (HMAC SHA256)``
 
 **Weight:**
 1
@@ -2682,7 +2682,7 @@ Either `orderId` or `origClientOrderId` must be sent.
 ]
 ```
 
-``DELETE /fapi/v1/batchOrders  (HMAC SHA256)``
+``DELETE /fapi/v3/batchOrders  (HMAC SHA256)``
 
 **Weight:**
 1
@@ -2712,7 +2712,7 @@ Either `orderIdList` or `origClientOrderIdList ` must be sent.
 
 Cancel all open orders of the specified symbol at the end of the specified countdown.
 
-``POST /fapi/v1/countdownCancelAll  (HMAC SHA256)``
+``POST /fapi/v3/countdownCancelAll  (HMAC SHA256)``
 
 **Weight:**
 10
@@ -2765,7 +2765,7 @@ Cancel all open orders of the specified symbol at the end of the specified count
 }
 ```
 
-``GET /fapi/v1/openOrder  (HMAC SHA256)``
+``GET /fapi/v3/openOrder  (HMAC SHA256)``
 
 **Weight:** 1
 
@@ -2816,7 +2816,7 @@ Cancel all open orders of the specified symbol at the end of the specified count
 ]
 ```
 
-``GET /fapi/v1/openOrders  (HMAC SHA256)``
+``GET /fapi/v3/openOrders  (HMAC SHA256)``
 
 Get all open orders on a symbol. **Careful** when accessing this with no symbol.
 
@@ -2867,7 +2867,7 @@ Get all open orders on a symbol. **Careful** when accessing this with no symbol.
 ]
 ```
 
-``GET /fapi/v1/allOrders (HMAC SHA256)``
+``GET /fapi/v3/allOrders (HMAC SHA256)``
 
 Get all account orders; active, canceled, or filled.
 
@@ -3032,7 +3032,7 @@ Get current account information.
 }
 ```
 
-``POST /fapi/v1/leverage (HMAC SHA256)``
+``POST /fapi/v3/leverage (HMAC SHA256)``
 
 Change user's initial leverage of specific symbol market.
 
@@ -3059,7 +3059,7 @@ Change user's initial leverage of specific symbol market.
 }
 ```
 
-``POST /fapi/v1/marginType (HMAC SHA256)``
+``POST /fapi/v3/marginType (HMAC SHA256)``
 
 **Weight:**
 1
@@ -3086,7 +3086,7 @@ Change user's initial leverage of specific symbol market.
 }
 ```
 
-``POST /fapi/v1/positionMargin (HMAC SHA256)``
+``POST /fapi/v3/positionMargin (HMAC SHA256)``
 
 **Weight:**
 1
@@ -3129,7 +3129,7 @@ Change user's initial leverage of specific symbol market.
 ]
 ```
 
-``GET /fapi/v1/positionMargin/history (HMAC SHA256)``
+``GET /fapi/v3/positionMargin/history (HMAC SHA256)``
 
 **Weight:**
 1
@@ -3252,7 +3252,7 @@ Please use with user data stream `ACCOUNT_UPDATE` to meet your timeliness and ac
 ]
 ```
 
-``GET /fapi/v1/userTrades  (HMAC SHA256)``
+``GET /fapi/v3/userTrades  (HMAC SHA256)``
 
 Get trades for a specific account and symbol.
 
@@ -3304,7 +3304,7 @@ Get trades for a specific account and symbol.
 ]
 ```
 
-``GET /fapi/v1/income (HMAC SHA256)``
+``GET /fapi/v3/income (HMAC SHA256)``
 
 **Weight:**
 30
@@ -3366,7 +3366,7 @@ Get trades for a specific account and symbol.
 }
 ```
 
-``GET /fapi/v1/leverageBracket``
+``GET /fapi/v3/leverageBracket``
 
 **Weight:** 1
 
@@ -3407,7 +3407,7 @@ Get trades for a specific account and symbol.
  ]
 ```
 
-``GET /fapi/v1/adlQuantile``
+``GET /fapi/v3/adlQuantile``
 
 **Weight:** 5
 
@@ -3480,7 +3480,7 @@ Get trades for a specific account and symbol.
 ]
 ```
 
-``GET /fapi/v1/forceOrders``
+``GET /fapi/v3/forceOrders``
 
 **Weight:** 20 with symbol, 50 without symbol
 
@@ -3511,7 +3511,7 @@ Get trades for a specific account and symbol.
 }
 ```
 
-``GET /fapi/v1/commissionRate (HMAC SHA256)``
+``GET /fapi/v3/commissionRate (HMAC SHA256)``
 
 **Weight:**
 20
@@ -3546,7 +3546,7 @@ Get trades for a specific account and symbol.
 }
 ```
 
-``POST /fapi/v1/listenKey``
+``POST /fapi/v3/listenKey``
 
 Start a new user data stream. The stream will close after 60 minutes unless a keepalive is sent. If the account has an active `listenKey`, that `listenKey` will be returned and its validity will be extended for 60 minutes.
 
@@ -3565,7 +3565,7 @@ None
 {}
 ```
 
-``PUT /fapi/v1/listenKey``
+``PUT /fapi/v3/listenKey``
 
 Keepalive a user data stream to prevent a time out. User data streams will close after 60 minutes. It's recommended to send a ping about every 60 minutes.
 
@@ -3584,7 +3584,7 @@ None
 {}
 ```
 
-``DELETE /fapi/v1/listenKey``
+``DELETE /fapi/v3/listenKey``
 
 Close out a user data stream.
 
