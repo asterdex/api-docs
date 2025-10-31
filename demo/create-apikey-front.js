@@ -13,8 +13,6 @@ const ae_login = { 'url': '/public/future/web3/ae/login', 'method': 'POST', 'par
 async function sendRequest(url, method,body) {
     headers = {}
     url = host+url
-    console.log(url)
-    console.log(body)
     if (method == 'POST') {
         headers = {
             'Content-Type': 'application/json',
@@ -58,8 +56,18 @@ async function main() {
     console.log("Address:", wallet.address);
     console.log("Private Key:", wallet.privateKey);
 
-    let nonce_res = await send(get_nonce, {'type':'CREATE_API_KEY','sourceAddr':wallet.address})
-    let nonce = nonce_res['data']['nonce']
+    let login_nonce_res = await send(get_nonce, {'type':'LOGIN','sourceAddr':wallet.address})
+    let nonce = login_nonce_res['data']['nonce']
+    console.log(nonce)
+    //地址登陆 header必传 'clientType':'web' 
+    let message = 'You are signing into Astherus ${nonce}'.replace('${nonce}', nonce)
+    let user_signature = await sign( wallet.privateKey,message)
+    console.log(user_signature)
+    let ae_login_res = await send(ae_login, {'signature':user_signature,'sourceAddr':wallet.address,'agentCode':'69Ae1D'})
+    console.log(ae_login_res)
+
+    let apikey_nonce_res = await send(get_nonce, {'type':'CREATE_API_KEY','sourceAddr':wallet.address})
+    nonce = apikey_nonce_res['data']['nonce']
     console.log(nonce)
     //给新地址创建api_key api_secret
     message = 'You are signing into Astherus ${nonce}'.replace('${nonce}', nonce)
@@ -67,17 +75,6 @@ async function main() {
     console.log(user_signature)
     let create_api_key_res = await send(create_apikey, {'signature':user_signature,'desc':'12','sourceAddr':wallet.address})
     console.log(create_api_key_res)
-
-
-    let login_nonce_res = await send(get_nonce, {'type':'LOGIN','sourceAddr':wallet.address})
-    nonce = login_nonce_res['data']['nonce']
-    console.log(nonce)
-    //地址登陆 header必传 'clientType':'web' 
-    message = 'You are signing into Astherus ${nonce}'.replace('${nonce}', nonce)
-    user_signature = await sign( wallet.privateKey,message)
-    console.log(user_signature)
-    let ae_login_res = await send(ae_login, {'signature':user_signature,'sourceAddr':wallet.address})
-    console.log(ae_login_res)
 
 }
 
