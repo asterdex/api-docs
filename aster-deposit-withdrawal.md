@@ -319,3 +319,38 @@ curl --location --request POST 'https://sapi.asterdex.com/api/v1/aster/user-with
 |-----------|--------------------------------------|
 |withdrawId | the withdraw request id, a unique id |
 |hash       | the digest of user's signature       |
+
+# 8. withdraw by API [futures]
+
+### request:
+
+```shell
+curl --location --request POST 'https://fapi.asterdex.com/fapi/aster/user-solana-withdraw?chainId=101&asset=USDT&amount=3&fee=0.6&receiver=4wTV1YmiEkRvAtNtsSGPtUrqRYQMe5SKy2uB4Jjaxnjf&recvWindow=60000&timestamp=1762440135477&signature=a773a7e83c2fe4581eb2dc0500000faa3138173ba6262316c0d83b3498dea319' \
+--header 'Content-Type: application/json' \
+--header 'X-MBX-APIKEY: Your API KEY'
+```
+
+### params:
+| param         | type   | required | description                                               |
+|---------------|--------|----------|-----------------------------------------------------------|
+| amount        | string | true     | Withdraw amount in token unit                             |
+| chainId       | int    | true     | fix value 101                                                  |
+| asset         | string | true     | Currency name, e.g., USDT                                |
+| fee           | string | true     | Withdraw fee in token unit                                |
+| receiver      | string | true     | Withdraw receipt address, should be the save in signature |
+
+### response:
+
+```json
+{
+  "code": "200",
+  "message": "success",
+  "messageDetail": null,
+  "data": {
+    "withdrawId": "1234567",
+    "hash": "0x9a40f0119b670fb6b155744b51981f91c4c4c8a20c333441a63853fe7d055c90"
+  },
+  "success": true
+}
+```
+- hash is not the transaction hash, just a unique value
