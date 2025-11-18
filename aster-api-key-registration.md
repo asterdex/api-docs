@@ -43,7 +43,7 @@ You are signing into Astherus 501182
 ### request:
 ```shell
 curl -XPOST 'https://www.asterdex.com/bapi/futures/v1/public/future/web3/ae/login' \
-
+  -H 'clientType: broker' \
   -H 'content-type: application/json' \
   --data-raw '{
   "signature":"0xafb84ca3bd36131970636a298677be2e1de4ed81b11101e417272d23f0b7f9af174efdf954ae7a63e844c83d16a4ad391e801c6766a422e647832b5c0c8aa1591c",
@@ -83,6 +83,7 @@ curl -XPOST 'https://www.asterdex.com/bapi/futures/v1/public/future/web3/ae/logi
 
 ```shell
 curl --location 'https://www.asterdex.com/bapi/futures/v1/public/future/web3/broker-create-api-key' \
+--header 'clientType: broker' \
 --header 'accept: */*' \
 --header 'Content-Type: application/json' \
 --data '{
