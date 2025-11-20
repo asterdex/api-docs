@@ -1063,7 +1063,7 @@ limit | INT | NO | Default 500; max 1500.
     "0	", 					// Ignore
     1591256459999,      	// Close time
     "0",    				// Ignore
-    60,                		// Number of bisic data
+    60,                		// Number of Data Points
     "0",    				// Ignore
     "0",      				// Ignore
     "0" 					// Ignore
@@ -1116,7 +1116,7 @@ limit     | INT    | NO       |  Default 500; max 1500.
     "0	", 					// Ignore
     1591256519999,      	// Close time
     "0",    				// Ignore
-    60,                	 	// Number of bisic data
+    60,                	 	// Number of Data Points
     "0",    				// Ignore
     "0",      			 	// Ignore
     "0" 					// Ignore

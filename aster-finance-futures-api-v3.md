@@ -1233,7 +1233,7 @@ Klines are uniquely identified by their open time.
     "0	", 					// Ignore
     1591256459999,      	// Close time
     "0",    				// Ignore
-    60,                		// Number of bisic data
+    60,                		// Number of Data Points
     "0",    				// Ignore
     "0",      				// Ignore
     "0" 					// Ignore
@@ -1284,7 +1284,7 @@ Klines are uniquely identified by their open time.
     "0	", 					// Ignore
     1591256519999,      	// Close time
     "0",    				// Ignore
-    60,                	 	// Number of bisic data
+    60,                	 	// Number of Data Points
     "0",    				// Ignore
     "0",      			 	// Ignore
     "0" 					// Ignore
