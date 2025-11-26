@@ -238,7 +238,7 @@ curl -X POST "https://www.asterdex.com/bapi/futures/v1/private/future/aster/user
 |withdrawId | the withdraw request id, a unique id |
 |hash       | the digest of user's signature       |
 
-# 6. withdraw by API [futures]
+# 6. withdraw by API [evm] [futures]
 
 ### request:
 
@@ -263,14 +263,8 @@ curl --location --request POST 'https://fapi.asterdex.com/fapi/aster/user-withdr
 
 ```json
 {
-  "code": "200",
-  "message": "success",
-  "messageDetail": null,
-  "data": {
     "withdrawId": "1234567",
     "hash": "0x9a40f0119b670fb6b155744b51981f91c4c4c8a20c333441a63853fe7d055c90"
-  },
-  "success": true
 }
 ```
 
@@ -279,7 +273,7 @@ curl --location --request POST 'https://fapi.asterdex.com/fapi/aster/user-withdr
 |withdrawId | the withdraw request id, a unique id |
 |hash       | the digest of user's signature       |
 
-# 7. withdraw by API [spot]
+# 7. withdraw by API [evm] [spot]
 
 ### request:
 
@@ -304,14 +298,8 @@ curl --location --request POST 'https://sapi.asterdex.com/api/v1/aster/user-with
 
 ```json
 {
-  "code": "200",
-  "message": "success",
-  "messageDetail": null,
-  "data": {
     "withdrawId": "1234567",
     "hash": "0x9a40f0119b670fb6b155744b51981f91c4c4c8a20c333441a63853fe7d055c90"
-  },
-  "success": true
 }
 ```
 
@@ -320,7 +308,7 @@ curl --location --request POST 'https://sapi.asterdex.com/api/v1/aster/user-with
 |withdrawId | the withdraw request id, a unique id |
 |hash       | the digest of user's signature       |
 
-# 8. withdraw by API [futures]
+# 8. withdraw by API [solana] [futures]
 
 ### request:
 
@@ -343,14 +331,8 @@ curl --location --request POST 'https://fapi.asterdex.com/fapi/aster/user-solana
 
 ```json
 {
-  "code": "200",
-  "message": "success",
-  "messageDetail": null,
-  "data": {
     "withdrawId": "1234567",
     "hash": "0x9a40f0119b670fb6b155744b51981f91c4c4c8a20c333441a63853fe7d055c90"
-  },
-  "success": true
 }
 ```
 - hash is not the transaction hash, just a unique value
