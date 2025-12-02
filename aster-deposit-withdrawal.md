@@ -336,3 +336,32 @@ curl --location --request POST 'https://fapi.asterdex.com/fapi/aster/user-solana
 }
 ```
 - hash is not the transaction hash, just a unique value
+
+# 9. withdraw by API [solana] [spot]
+
+### request:
+
+```shell
+curl --location --request POST 'https://sapi.asterdex.com/api/v1/aster/user-solana-withdraw?chainId=101&asset=USDT&amount=0.97&fee=0.5&receiver=BzsJhmtg2UtQWNw6764DkK5Y4GPjc1XMzRqAGqSziymK&recvWindow=60000&timestamp=1764663883270&signature=d2fbaef40388208b47e0326fafc50798206f5b198762110ce1bf8879b5d9da22' \
+--header 'Content-Type: application/json' \
+--header 'X-MBX-APIKEY: Your API KEY'
+```
+
+### params:
+| param         | type   | required | description                                               |
+|---------------|--------|----------|-----------------------------------------------------------|
+| amount        | string | true     | Withdraw amount in token unit                             |
+| chainId       | int    | true     | fix value 101                                                  |
+| asset         | string | true     | Currency name, e.g., USDT                                |
+| fee           | string | true     | Withdraw fee in token unit                                |
+| receiver      | string | true     | Withdraw receipt address, should be the save in signature |
+
+### response:
+
+```json
+{
+    "withdrawId": "1234567",
+    "hash": "0x9a40f0119b670fb6b155744b51981f91c4c4c8a20c333441a63853fe7d055c90"
+}
+```
+- hash is not the transaction hash, just a unique value
