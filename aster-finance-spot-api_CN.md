@@ -1385,43 +1385,6 @@ timestamp	| LONG | YES	|	时间戳
 注意:
 * kindType 取值为FUTURE_SPOT(期货转现货),SPOT_FUTURE(现货转期货)
 
-## 转账给其他地址账户 (TRADE)
-
-> **响应:**
-
-```javascript
-{
-    "tranId": 21841, //交易id
-    "status": "SUCCESS" //状态
-}
-```
-
-``
-POST /api/v1/asset/sendToAddress  (HMAC SHA256)
-``
-
-**权重:**
-1
-
-**参数:**
-
-
-名称              |  类型   | 是否必需   | 描述
----------------- | ------- | -------- | ----
-amount |	DECIMAL | 	YES |	数量
-asset |	STRING | 	YES |	资产
-toAddress |	STRING | 	YES |	目标地址
-clientTranId |	STRING | 	NO |	交易id 
-recvWindow | LONG | NO | 
-timestamp	| LONG | YES	|	时间戳
-
-注意:
-* toAddress必须存在, 且不能为发送方账户
-* toAddress为evm地址
-* clientTranId如果传入则长度最少为20
-
-
-
 ## 现货提现手续费 (NONe)
 > **响应**
 ```javascript
