@@ -258,6 +258,9 @@ curl --location --request POST 'https://fapi.asterdex.com/fapi/aster/user-withdr
 | nonce         | string | true     | Unique number, should be the save in signature            |
 | receiver      | string | true     | Withdraw receipt address, should be the save in signature |
 | userSignature | string | true    | EIP712 signature                                         |
+|timestamp|int| true| Current timestamp in milliseconds|
+|recvWindow|int| false| The number of milliseconds after timestamp the request is valid for|
+|signature|string| true| HMAC SHA256 signature of the request|
 
 ### response:
 
@@ -293,6 +296,9 @@ curl --location --request POST 'https://sapi.asterdex.com/api/v1/aster/user-with
 | nonce         | string | true     | Unique number, should be the save in signature            |
 | receiver      | string | true     | Withdraw receipt address, should be the save in signature |
 | userSignature | string | true    | EIP712 signature                                         |
+|timestamp|int| true| Current timestamp in milliseconds|
+|recvWindow|int| false| The number of milliseconds after timestamp the request is valid for|
+|signature|string| true| HMAC SHA256 signature of the request|
 
 ### response:
 
@@ -326,6 +332,9 @@ curl --location --request POST 'https://fapi.asterdex.com/fapi/aster/user-solana
 | asset         | string | true     | Currency name, e.g., USDT                                |
 | fee           | string | true     | Withdraw fee in token unit                                |
 | receiver      | string | true     | Withdraw receipt address, should be the save in signature |
+|timestamp|int| true| Current timestamp in milliseconds|
+|recvWindow|int| false| The number of milliseconds after timestamp the request is valid for|
+|signature|string| true| HMAC SHA256 signature of the request|
 
 ### response:
 
@@ -355,6 +364,9 @@ curl --location --request POST 'https://sapi.asterdex.com/api/v1/aster/user-sola
 | asset         | string | true     | Currency name, e.g., USDT                                |
 | fee           | string | true     | Withdraw fee in token unit                                |
 | receiver      | string | true     | Withdraw receipt address, should be the save in signature |
+|timestamp|int| true| Current timestamp in milliseconds|
+|recvWindow|int| false| The number of milliseconds after timestamp the request is valid for|
+|signature|string| true| HMAC SHA256 signature of the request|
 
 ### response:
 
