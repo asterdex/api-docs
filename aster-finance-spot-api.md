@@ -1193,7 +1193,6 @@ Retrieve all account orders; active, canceled, or completed.
 * By default, query data is from the last 7 days.
 
 
-
 ## Perp-spot transfer (TRADE)
 
 **Response:**
@@ -1220,42 +1219,6 @@ Retrieve all account orders; active, canceled, or completed.
 | timestamp | LONG | YES | Timestamp |
 
 * kindType FUTURE_SPOT(future to spot)/SPOT_FUTURE(spot to future)
-
-## Transfer asset to other address (TRADE)
-
-> **Response:**
-
-```javascript
-{
-    "tranId": 21841, 
-    "status": "SUCCESS" 
-}
-```
-
-``
-POST /api/v1/asset/sendToAddress  (HMAC SHA256)
-``
-
-**Weight:**
-5
-
-**Parameters:**
-
-
-Name | Type | Mandatory | Description
----------------- | ------- | -------- | ----
-amount |	DECIMAL | 	YES |	
-asset |	STRING | 	YES |	
-toAddress |	STRING | 	YES |	
-clientTranId |	STRING | 	NO |	 
-recvWindow | LONG | NO | 
-timestamp	| LONG | YES	|	
-
-**Note:**
-* The target address must be a valid existing account and must not be the same as the sender’s account.
-* The toAddress must be an EVM address.
-* If clientTranId is provided, its length must be at least 20 characters.
-
 
 ## Get withdraw fee (NONE)
 > **Response:**
