@@ -14,6 +14,10 @@
 
 [Aster Finance Futures API V3 文档](./aster-finance-futures-api-v3_CN.md)
 
+# Aster Finance Futures Testnet API V3 文档
+
+[Aster Finance Futures Testnet API V3 文档](./aster-finance-futures-api-testnet.md)
+
 # Aster Finance Futures API V3 PYTHON DEMO
 
 [Aster Finance Futures API V3 PYTHON DEMO](./v3-demo/tx.py)
@@ -29,6 +33,10 @@
 # Aster Finance Spot API 文档
 
 [Aster Finance Spot API 文档](./aster-finance-spot-api_CN.md)
+
+# Aster Finance Spot Testnet API V3 文档
+
+[Aster Finance Spot Testnet API V3 文档](./aster-finance-spot-api-testnet.md)
 
 # Aster Finance Spot Asset Consolidation
 
