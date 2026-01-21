@@ -94,6 +94,7 @@
 	- [持仓ADL队列估算 (USER_DATA)](#持仓adl队列估算-user_data)
 	- [用户强平单历史 (USER_DATA)](#用户强平单历史-user_data)
 	- [用户手续费率 (USER_DATA)](#用户手续费率-user_data)
+    - [剩余可开仓名义价值 (USER_DATA)](#剩余可开仓名义价值-user_data)
 - [Websocket 账户信息推送](#websocket-账户信息推送)
 	- [生成listenKey (USER_STREAM)](#生成listenkey-user_stream)
 	- [延长listenKey有效期 (USER_STREAM)](#延长listenkey有效期-user_stream)
@@ -3508,6 +3509,32 @@ recvWindow | LONG | NO
 timestamp | LONG | YES
 
 
+## 剩余可开仓名义价值 (USER_DATA)
+
+> **响应:**
+
+```javascript
+{
+	"remainingOpenableNotionalValue": 200 //用户当前可开仓名义价值，单位USDT
+}
+```
+
+``
+GET /fapi/v1/remainingOpenableNotionalValue (HMAC SHA256)
+``
+
+**权重:**
+20
+
+
+**参数:**
+
+名称  |  类型  | 是否必需 |  描述
+------------ | ------------ | ------------ | ------------
+symbol | STRING | YES	
+leverage | INT | YES	
+recvWindow | LONG | NO	
+timestamp | LONG | YES
 
 
 
