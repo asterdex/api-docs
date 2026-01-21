@@ -94,6 +94,7 @@
 	- [Position ADL Quantile Estimation (USER_DATA)](#position-adl-quantile-estimation-user_data)
 	- [User's Force Orders (USER_DATA)](#users-force-orders-user_data)
 	- [User Commission Rate (USER_DATA)](#user-commission-rate-user_data)
+    - [Remaining Openable Notional Value (USER_DATA)](#remaining-openable-notional-value-user_data)
 - [User Data Streams](#user-data-streams)
 	- [Start User Data Stream (USER_STREAM)](#start-user-data-stream-user_stream)
 	- [Keepalive User Data Stream (USER_STREAM)](#keepalive-user-data-stream-user_stream)
@@ -3620,6 +3621,34 @@ GET /fapi/v1/commissionRate (HMAC SHA256)
 Name | Type | Mandatory | Description
 ------------ | ------------ | ------------ | ------------
 symbol | STRING | YES	
+recvWindow | LONG | NO	
+timestamp | LONG | YES
+
+
+## Remaining Openable Notional Value (USER_DATA)
+
+> **Response:**
+
+```javascript
+{
+	"remainingOpenableNotionalValue": 200 // User's current ramaining openable notional value,USDT
+}
+```
+
+``
+GET /fapi/v1/remainingOpenableNotionalValue (HMAC SHA256)
+``
+
+**Weight:**
+20
+
+
+**Parameters:**
+
+Name | Type | Mandatory | Description
+------------ | ------------ | ------------ | ------------
+symbol | STRING | YES	
+leverage | INT | YES	
 recvWindow | LONG | NO	
 timestamp | LONG | YES
 
