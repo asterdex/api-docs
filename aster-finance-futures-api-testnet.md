@@ -27,6 +27,7 @@
     - [PERCENT_PRICE](#percent_price)
     - [MIN_NOTIONAL](#min_notional)
 - [Market Data Endpoints](#market-data-endpoints)
+  - [Noop](#noop)
   - [Test Connectivity](#test-connectivity)
   - [Check Server Time](#check-server-time)
   - [Exchange Information](#exchange-information)
@@ -661,6 +662,26 @@ Since `MARKET` orders have no price, the mark price is used.
 ---
 
 # Market Data Endpoints
+
+## Noop
+
+> **Response:**
+
+```javascript
+{
+	"code": 200,
+	"msg": "success"
+}
+```
+
+``POST /fapi/v3/noop``
+
+By using this request, it is possible to efficiently cancel previously sent transactions that are still in the queue and have not completed the on chain operation (Nonce should be equal to this request)
+
+**Weight:**
+1
+
+**Parameters:**
 
 ## Test Connectivity
 
