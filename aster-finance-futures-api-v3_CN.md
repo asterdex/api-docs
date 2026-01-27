@@ -11,8 +11,6 @@
 	- [需要签名的接口](#需要签名的接口)
 	- [时间同步安全](#时间同步安全)
 	- [POST /fapi/v3/order 的示例](#post-fapiv3order-的示例)
-	- [GET /fapi/v3/order 的示例](#get-fapiv3order-的示例)
-	- [完整python脚本示例](#完整python脚本示例)
 	- [公开API参数](#公开api参数)
 		- [术语解释](#术语解释)
 		- [枚举定义](#枚举定义)
@@ -250,302 +248,111 @@ Instant now = Instant.now();
 long microsecond = now.getEpochSecond() * 1000000 + now.getNano() / 1000;
 ```
 
-#### 示例 : 以下参数为业务请求参数 
+#### 示例 : 下单 (方法以python为例) 
 
 ```python
-    my_dict = {'symbol': 'SANDUSDT', 'positionSide': 'BOTH', 'type': 'LIMIT', 'side': 'BUY',
-	         'timeInForce': 'GTC', 'quantity': "190", 'price': 0.28694}
-```
-
-#### 示例 : 所有参数通过 form body 发送(方法以python为例) 
-
-> **第一步将所有业务参数转字符串后按照ascII排序生成字符串:**
-
-```python
-    #定义所有元素取值转换为字符串
-    def _trim_dict(my_dict) :
-    # 假设待删除的字典为d
-     for key in my_dict:
-        value = my_dict[key]
-        if isinstance(value, list):
-            new_value = []
-            for item in value:
-                if isinstance(item, dict):
-                    new_value.append(json.dumps(_trim_dict(item)))
-                else:
-                    new_value.append(str(item))
-            my_dict[key] = json.dumps(new_value)
-            continue
-        if isinstance(value, dict):
-            my_dict[key] = json.dumps(_trim_dict(value))
-            continue
-        my_dict[key] = str(value)
-
-    return my_dict
-
-    #移除空值元素
-    my_dict = {key: value for key, value in my_dict.items() if  value is not None}
-    my_dict['recvWindow'] = 50000
-    my_dict['timestamp'] = int(round(time.time()*1000))
-    # my_dict['timestamp'] = 1749545309665
-    #将元素转换为字符串
-    _trim_dict(my_dict)
-    #根据ASCII排序生成字符串并移除特殊字符
-    json_str = json.dumps(my_dict, sort_keys=True).replace(' ', '').replace('\'','\"')
-    print(json_str)
-    {"positionSide":"BOTH","price":"0.28694","quantity":"190","recvWindow":"50000","side":"BUY","symbol":"SANDUSDT","timeInForce":"GTC","timestamp":"1749545309665","type":"LIMIT"}
-```
-
-> **第二步将第一步生成的字符串与账户信息以及nonce进行abi编码生成hash字符串:**
-
-```python
-   from eth_abi import encode
-   from web3 import Web3
-   #使用WEB3 ABI对生成的字符串和user, signer, nonce进行编码
-   encoded = encode(['string', 'address', 'address', 'uint256'], [json_str, user, signer, nonce])
-   print(encoded.hex())
-   #000000000000000000000000000000000000000000000000000000000000008000000000000000000000000063dd5acc6b1aa0f563956c0e534dd30b6dcf7c4e00000000000000000000000021cf8ae13bb72632562c6fff438652ba1a151bb00000000000000000000000000000000000000000000000000006361457bcec8300000000000000000000000000000000000000000000000000000000000000af7b22706f736974696f6e53696465223a22424f5448222c227072696365223a22302e3238363934222c227175616e74697479223a22313930222c227265637657696e646f77223a223530303030222c2273696465223a22425559222c2273796d626f6c223a2253414e4455534454222c2274696d65496e466f726365223a22475443222c2274696d657374616d70223a2231373439353435333039363635222c2274797065223a224c494d4954227d0000000000000000000000000000000000
-   #keccak hex
-   keccak_hex =Web3.keccak(encoded).hex()
-   print(keccak_hex)
-   #9e0273fc91323f5cdbcb00c358be3dee2854afb2d3e4c68497364a2f27a377fc
-```
-> **第三步将第二步生成的hash用privateKey进行签名:**
-```python
-    from eth_account import Account
-    from eth_abi import encode
-    from web3 import Web3, EthereumTesterProvider
-    from eth_account.messages import encode_defunct
-
-    signable_msg = encode_defunct(hexstr=keccak_hex)
-    signed_message = Account.sign_message(signable_message=signable_msg, private_key=priKey)
-    signature =  '0x'+signed_message.signature.hex()
-    print(signature)
-    #0x0337dd720a21543b80ff861cd3c26646b75b3a6a4b5d45805d4c1d6ad6fc33e65f0722778dd97525466560c69fbddbe6874eb4ed6f5fa7e576e486d9b5da67f31b
-```
-> **第四步将所有参数以及第三步生成的signature组装成请求体:**
-
-```python
-    my_dict['nonce'] = nonce
-    my_dict['user'] = user
-    my_dict['signer'] = signer
-    my_dict['signature'] = '0x'+signed_message.signature.hex()
-    url ='https://fapi.asterdex.com/fapi/v3/order'
-    headers = {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'User-Agent': 'PythonApp/1.0'
-    }
-    res = requests.post(url,data=my_dict,headers=headers)
-    print(url)
-    #curl  -X POST 'https://fapi.asterdex.com/fapi/v3/order' -d 'symbol=SANDUSDT&positionSide=BOTH&type=LIMIT&side=BUY&timeInForce=GTC&quantity=190&price=0.28694&recvWindow=50000&timestamp=1749545309665&nonce=1748310859508867&user=0x63DD5aCC6b1aa0f563956C0e534DD30B6dcF7C4e&signer=0x21cF8Ae13Bb72632562c6Fff438652Ba1a151bb0&signature=0x0337dd720a21543b80ff861cd3c26646b75b3a6a4b5d45805d4c1d6ad6fc33e65f0722778dd97525466560c69fbddbe6874eb4ed6f5fa7e576e486d9b5da67f31b'   
-
-```
-
-## GET /fapi/v3/order 的示例 
-#### 示例 : 所有参数通过 query string 发送(Python 3.9.6) 
-
-#### 示例 : 以下参数为api注册信息,user,signer,privateKey仅供示范(privateKey为agent的私钥)
-
-Key | Value
------------- | ------------
-user | 0x63DD5aCC6b1aa0f563956C0e534DD30B6dcF7C4e
-signer | 0x21cF8Ae13Bb72632562c6Fff438652Ba1a151bb0
-privateKey | 0x4fd0a42218f3eae43a6ce26d22544e986139a01e5b34a62db53757ffca81bae1
-
-#### 示例 : nonce参数为当前系统微秒值,超过系统时间50s,或者落后系统时间超过5s为非法请求
-```python
-#python
-nonce = math.trunc(time.time()*1000000)
-print(nonce)
-#1748310859508867
-```
-```java
-//java
-Instant now = Instant.now();
-long microsecond = now.getEpochSecond() * 1000000 + now.getNano() / 1000;
-```
-
-#### 示例 : 以下参数为业务请求参数 
-```python
-my_dict = {'symbol':'SANDUSDT','side':"SELL","type":'LIMIT','orderId':2194215}
-```
-
-> **第一步将所有业务参数转字符串后按照ascII排序生成字符串:**
-
-```python
-    #定义所有元素取值转换为字符串
-    def _trim_dict(my_dict) :
-      for key in my_dict:
-        value = my_dict[key]
-        if isinstance(value, list):
-            new_value = []
-            for item in value:
-                if isinstance(item, dict):
-                    new_value.append(json.dumps(_trim_dict(item)))
-                else:
-                    new_value.append(str(item))
-            my_dict[key] = json.dumps(new_value)
-            continue
-        if isinstance(value, dict):
-            my_dict[key] = json.dumps(_trim_dict(value))
-            continue
-        my_dict[key] = str(value)
-
-    return my_dict
-
-    #移除空值元素
-    my_dict = {key: value for key, value in my_dict.items() if  value is not None}
-    my_dict['recvWindow'] = 50000
-    my_dict['timestamp'] = int(round(time.time()*1000))
-    # my_dict['timestamp'] = 1749545309665
-    #将元素转换为字符串
-    _trim_dict(my_dict)
-    #根据ASCII排序生成字符串并移除特殊字符
-    json_str = json.dumps(my_dict, sort_keys=True).replace(' ', '').replace('\'','\"')
-    print(json_str)
-    #{"orderId":"2194215","recvWindow":"50000","side":"BUY","symbol":"SANDUSDT","timestamp":"1749545309665","type":"LIMIT"}
-```
-
-> **第二步将第一步生成的字符串与账户信息以及nonce进行abi编码生成hash字符串:**
-
-```python
-   from eth_abi import encode
-   from web3 import Web3
-
-   #使用WEB3 ABI对生成的字符串和user, signer, nonce进行编码
-   encoded = encode(['string', 'address', 'address', 'uint256'], [json_str, user, signer, nonce])
-   print(encoded.hex())
-   #000000000000000000000000000000000000000000000000000000000000008000000000000000000000000063dd5acc6b1aa0f563956c0e534dd30b6dcf7c4e00000000000000000000000021cf8ae13bb72632562c6fff438652ba1a151bb00000000000000000000000000000000000000000000000000006361457bcec8300000000000000000000000000000000000000000000000000000000000000767b226f726465724964223a2232313934323135222c227265637657696e646f77223a223530303030222c2273696465223a22425559222c2273796d626f6c223a2253414e4455534454222c2274696d657374616d70223a2231373439353435333039363635222c2274797065223a224c494d4954227d00000000000000000000
-   keccak_hex =Web3.keccak(encoded).hex()
-   print(keccak_hex)
-   #6ad9569ea1355bf62de1b09b33b267a9404239af6d9227fa59e3633edae19e2a
-```
-> **第三步将第二步生成的hash用privateKey进行签名:**
-```python
-    from eth_account import Account
-    from eth_abi import encode
-    from web3 import Web3, EthereumTesterProvider
-    from eth_account.messages import encode_defunct
-
-    signable_msg = encode_defunct(hexstr=keccak_hex)
-    signed_message = Account.sign_message(signable_message=signable_msg, private_key=priKey)
-    signature =  '0x'+signed_message.signature.hex()
-    print(signature)
-    #0x4f5e36e91f0d4cf5b29b6559ebc2c808d3c808ebb13b2bcaaa478b98fb4195642c7473f0d1aa101359aaf278126af1a53bcb482fb05003bfb6bdc03de03c63151b
-```
-> **第四步将所有参数以及第三步生成的signature组装成请求体:**
-
-```python
-    my_dict['nonce'] = nonce
-    my_dict['user'] = user
-    my_dict['signer'] = signer
-    my_dict['signature'] = '0x'+signed_message.signature.hex()
-
-    url ='https://fapi.asterdex.com/fapi/v3/order'
-
-    res = requests.get(url, params=my_dict)
-    print(url)
-    #curl  -X GET 'https://fapi.asterdex.com/fapi/v3/order?symbol=SANDUSDT&side=BUY&type=LIMIT&orderId=2194215&recvWindow=50000&timestamp=1749545309665&nonce=1748310859508867&user=0x63DD5aCC6b1aa0f563956C0e534DD30B6dcF7C4e&signer=0x21cF8Ae13Bb72632562c6Fff438652Ba1a151bb0&signature=0x4f5e36e91f0d4cf5b29b6559ebc2c808d3c808ebb13b2bcaaa478b98fb4195642c7473f0d1aa101359aaf278126af1a53bcb482fb05003bfb6bdc03de03c63151b'
-
-```
-## 完整python脚本示例
-```python
-#Python 3.9.6
-#eth-account~=0.13.7
-#eth-abi~=5.2.0
-#web3~=7.11.0
-#requests~=2.32.3
-
-import json
-import math
 import time
 import requests
-
-from eth_abi import encode
+from eth_account.messages import  encode_structured_data
 from eth_account import Account
-from eth_account.messages import encode_defunct
-from web3 import Web3
 
-user = '0x63DD5aCC6b1aa0f563956C0e534DD30B6dcF7C4e'
-signer='0x21cF8Ae13Bb72632562c6Fff438652Ba1a151bb0'
-priKey = "0x4fd0a42218f3eae43a6ce26d22544e986139a01e5b34a62db53757ffca81bae1"
-host = 'https://fapi.asterdex.com'
-placeOrder = {'url': '/fapi/v3/order', 'method': 'POST',
-              'params':{'symbol': 'SANDUSDT', 'positionSide': 'BOTH', 'type': 'LIMIT', 'side': 'BUY',
-	         'timeInForce': 'GTC', 'quantity': "30", 'price': 0.325,'reduceOnly': True}}
-getOrder = {'url':'/fapi/v3/order','method':'GET','params':{'symbol':'SANDUSDT','side':"BUY","type":'LIMIT','orderId':2194215}}
+typed_data = {
+  "types": {
+    "EIP712Domain": [
+      {"name": "name", "type": "string"},
+      {"name": "version", "type": "string"},
+      {"name": "chainId", "type": "uint256"},
+      {"name": "verifyingContract", "type": "address"}
+    ],
+    "Message": [
+      { "name": "msg", "type": "string" }
+    ]
+  },
+  "primaryType": "Message",
+  "domain": {
+    "name": "AsterSignTransaction",
+    "version": "1",
+    "chainId": 1666,
+    "verifyingContract": "0x0000000000000000000000000000000000000000"
+  },
+  "message": {
+    "msg": "$msg"
+  }
+}
 
-def call(api):
-    nonce = math.trunc(time.time() * 1000000)
-    my_dict = api['params']
-    send(api['url'],api['method'],sign(my_dict,nonce))
+headers = {
+    'Content-Type': 'application/x-www-form-urlencoded',
+    'User-Agent': 'PythonApp/1.0'
+}
+order_url = 'https://fapi.asterdex.com/fapi/v3/order'
 
-def sign(my_dict,nonce):
-    my_dict = {key: value for key, value in my_dict.items() if  value is not None}
-    my_dict['recvWindow'] = 50000
-    my_dict['timestamp'] = int(round(time.time()*1000))
-    msg = trim_param(my_dict,nonce)
-    signable_msg = encode_defunct(hexstr=msg)
-    signed_message = Account.sign_message(signable_message=signable_msg, private_key=priKey)
-    my_dict['nonce'] = nonce
-    my_dict['user'] = user
-    my_dict['signer'] = signer
-    my_dict['signature'] = '0x'+signed_message.signature.hex()
+# config your user and agent info here
+user = '*'
+signer = '*'
+private_key = "*"
 
-    print(my_dict['signature'])
-    return  my_dict
+def get_url(my_dict) -> str:
+       return '&'.join(f'{key}={str(value)}'for key, value in my_dict.items())
 
-def trim_param(my_dict,nonce) -> str:
-    _trim_dict(my_dict)
-    json_str = json.dumps(my_dict, sort_keys=True).replace(' ', '').replace('\'','\"')
-    print(json_str)
-    encoded = encode(['string', 'address', 'address', 'uint256'], [json_str, user, signer, nonce])
-    print(encoded.hex())
-    keccak_hex =Web3.keccak(encoded).hex()
-    print(keccak_hex)
-    return keccak_hex
+_last_ms = 0
+_i = 0
 
-def _trim_dict(my_dict) :
-    for key in my_dict:
-        value = my_dict[key]
-        if isinstance(value, list):
-            new_value = []
-            for item in value:
-                if isinstance(item, dict):
-                    new_value.append(json.dumps(_trim_dict(item)))
-                else:
-                    new_value.append(str(item))
-            my_dict[key] = json.dumps(new_value)
-            continue
-        if isinstance(value, dict):
-            my_dict[key] = json.dumps(_trim_dict(value))
-            continue
-        my_dict[key] = str(value)
+def get_nonce():
+    global _last_ms, _i
+    now_ms = int(time.time())
 
-    return my_dict
+    if now_ms == _last_ms:
+        _i += 1
+    else:
+        _last_ms = now_ms
+        _i = 0
 
-def send(url, method, my_dict):
-    url = host + url
+    return now_ms * 1_000_000 + _i
+
+def send_by_url() :
+    param = 'symbol=ASTERUSDT&side=BUY&type=LIMIT&quantity=10&price=0.6&timeInForce=GTC'
+
+    param += '&nonce=' + str(get_nonce())
+    param += '&user=' + user
+    param += '&signer=' + signer
+
+    typed_data['message']['msg'] = param
+    message = encode_structured_data(typed_data)
+    signed = Account.sign_message(message, private_key=private_key)
+    print(signed.signature.hex())
+
+    url = order_url + '?' + param + '&signature=' + signed.signature.hex()
+
     print(url)
-    print(my_dict)
-    if method == 'POST':
-        headers = {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'User-Agent': 'PythonApp/1.0'
-        }
-        res = requests.post(url, data=my_dict, headers=headers)
-        print(res.text)
-    if method == 'GET':
-        res = requests.get(url, params=my_dict)
-        print(res.text)
-    if method == 'DELETE':
-        res = requests.delete(url, data=my_dict)
-        print(res.text)
+    res = requests.post(url, headers=headers)
+
+    print(res.text)
+
+def send_by_body() :
+       my_dict = {"symbol": "ASTERUSDT", "type": "LIMIT", "side": "BUY",
+                  "timeInForce": "GTC", "quantity": "10", "price": "0.6"}
+
+       my_dict['nonce'] = str(get_nonce())
+       my_dict['user'] = user
+       my_dict['signer'] = signer
+
+       content = get_url(my_dict)
+       typed_data['message']['msg'] = content
+       message = encode_structured_data(typed_data)
+
+       signed = Account.sign_message(message, private_key=private_key)
+       print(signed.signature.hex())
+
+       my_dict['signature'] = signed.signature.hex()
+
+       print(my_dict)
+       res = requests.post(order_url, data=my_dict, headers=headers)
+
+       print(res.text)
 
 if __name__ == '__main__':
-    call(placeOrder)
-    # call(getOrder)
-
+    send_by_url()
+    # send_by_body()
 ```
 
 ## 公开API参数
@@ -1396,6 +1203,45 @@ limit     | INT    | NO       | 默认值:100 最大值:1000
 
 * 如果 `startTime` 和 `endTime` 都未发送, 返回最近 `limit` 条数据.
 * 如果 `startTime` 和 `endTime` 之间的数据量大于 `limit`, 返回 `startTime` + `limit`情况下的数据。
+
+
+## 查询资金费率配置
+
+> **响应:**
+
+```javascript
+[
+	{
+		"symbol": "INJUSDT",            // 交易对
+		"interestRate": "0.00010000",   // 利率
+		"time": 1756197479000,          // 更新时间
+		"fundingIntervalHours": 8,      // 资金费间隔小时数
+		"fundingFeeCap": 0.03,          // 资金费上限
+		"fundingFeeFloor": -0.03        // 资金费下限
+	},
+	{
+		"symbol": "ZORAUSDT",
+		"interestRate": "0.00005000",
+		"time": 1756197479000,
+		"fundingIntervalHours": 4,
+		"fundingFeeCap": 0.02,
+		"fundingFeeFloor": -0.02
+	}
+]
+```
+
+``
+GET /fapi/v3/fundingInfo
+``
+
+**权重:**
+1
+
+**参数:**
+
+  名称    |  类型  | 是否必需 |                         描述
+--------- | ------ | -------- | -----------------------------------------------------
+symbol    | STRING | NO      | 交易对
 
 
 ## 24hr价格变动情况
@@ -2548,6 +2394,37 @@ newOrderRespType | ENUM    | NO       | "ACK", "RESULT", 默认 "ACK"
 * 批量下单的返回内容顺序，与订单列表顺序一致
 
 
+
+## 期货现货互转 (TRANSFER)
+
+> **响应:**
+
+```javascript
+{
+    "tranId": 21841, //交易id
+    "status": "SUCCESS" //状态
+}
+```
+
+``
+POST /fapi/v3/asset/wallet/transfer  (TRANSFER)
+``
+
+**权重:**
+5
+
+**参数:**
+
+
+名称              |  类型   | 是否必需   | 描述
+---------------- | ------- | -------- | ----
+amount |	DECIMAL | 	YES |	数量
+asset |	STRING | 	YES |	资产
+clientTranId |	STRING | 	YES |	交易id 
+kindType |	STRING | 	YES |	交易类型
+timestamp	| LONG | YES	|	时间戳
+
+* kindType 取值为FUTURE_SPOT(期货转现货),SPOT_FUTURE(现货转期货)
 
 
 ## 查询订单 (USER_DATA)
