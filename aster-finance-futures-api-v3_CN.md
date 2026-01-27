@@ -2395,6 +2395,37 @@ newOrderRespType | ENUM    | NO       | "ACK", "RESULT", 默认 "ACK"
 
 
 
+## 期货现货互转 (TRANSFER)
+
+> **响应:**
+
+```javascript
+{
+    "tranId": 21841, //交易id
+    "status": "SUCCESS" //状态
+}
+```
+
+``
+POST /fapi/v3/asset/wallet/transfer  (TRANSFER)
+``
+
+**权重:**
+5
+
+**参数:**
+
+
+名称              |  类型   | 是否必需   | 描述
+---------------- | ------- | -------- | ----
+amount |	DECIMAL | 	YES |	数量
+asset |	STRING | 	YES |	资产
+clientTranId |	STRING | 	YES |	交易id 
+kindType |	STRING | 	YES |	交易类型
+timestamp	| LONG | YES	|	时间戳
+
+* kindType 取值为FUTURE_SPOT(期货转现货),SPOT_FUTURE(现货转期货)
+
 
 ## 查询订单 (USER_DATA)
 

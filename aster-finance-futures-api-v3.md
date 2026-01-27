@@ -2316,7 +2316,7 @@ Additional mandatory parameters based on `type`:
 * The order of returned contents for batch orders is the same as the order of the order list.
 
 
-## Transfer Between Futures And Spot (USER_DATA)
+## Transfer Between Futures And Spot (TRANSFER)
 
 > **Response:**
 
@@ -2328,7 +2328,7 @@ Additional mandatory parameters based on `type`:
 ```
 
 ``
-POST /fapi/v3/asset/wallet/transfer  (HMAC SHA256)
+POST /fapi/v3/asset/wallet/transfer  (TRANSFER)
 ``
 
 **Weight:**
