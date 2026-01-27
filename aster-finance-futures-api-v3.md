@@ -302,7 +302,7 @@ headers = {
     'Content-Type': 'application/x-www-form-urlencoded',
     'User-Agent': 'PythonApp/1.0'
 }
-order_url = 'https://fapi.asterdex-testnet.com/fapi/v3/order'
+order_url = 'https://fapi.asterdex.com/fapi/v3/order'
 
 # config your user and agent info here
 user = '*'
