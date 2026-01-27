@@ -2372,7 +2372,7 @@ newOrderRespType | ENUM    | NO       | "ACK", "RESULT", 默认 "ACK"
 * 批量下单采取并发处理，不保证订单撮合顺序
 * 批量下单的返回内容顺序，与订单列表顺序一致
 
-## 期货现货互转 (TRADE)
+## 期货现货互转 (TRANSFER)
 
 > **响应:**
 

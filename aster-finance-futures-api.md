@@ -2464,7 +2464,7 @@ newOrderRespType | ENUM    | NO       | "ACK", "RESULT", default "ACK"
 * Batch orders are processed concurrently, and the order of matching is not guaranteed.
 * The order of returned contents for batch orders is the same as the order of the order list.
 
-## Transfer Between Futures And Spot (USER_DATA)
+## Transfer Between Futures And Spot (TRANSFER)
 
 > **Response:**
 
