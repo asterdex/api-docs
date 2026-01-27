@@ -1201,6 +1201,47 @@ Mark Price and Funding Rate
 * If the number of data between `startTime` and `endTime` is larger than `limit`, return as `startTime` + `limit`.
 * In ascending order.
 
+
+## Get Funding Rate Config
+
+> **Response:**
+
+```javascript
+[
+	{
+		"symbol": "INJUSDT",
+		"interestRate": "0.00010000",
+		"time": 1756197479000,
+		"fundingIntervalHours": 8,
+		"fundingFeeCap": 0.03,
+		"fundingFeeFloor": -0.03
+	},
+	{
+		"symbol": "ZORAUSDT",
+		"interestRate": "0.00005000",
+		"time": 1756197479000,
+		"fundingIntervalHours": 4,
+		"fundingFeeCap": 0.02,
+		"fundingFeeFloor": -0.02
+	}
+]
+```
+
+``
+GET /fapi/v3/fundingInfo
+``
+
+
+**Weight:**
+1
+
+**Parameters:**
+
+Name | Type | Mandatory | Description
+------------ | ------------ | ------------ | ------------
+symbol | STRING | NO |
+
+
 ## 24hr Ticker Price Change Statistics
 
 > **Response:**
