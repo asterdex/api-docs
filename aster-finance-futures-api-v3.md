@@ -9,7 +9,6 @@
   - [Order Rate Limits](#order-rate-limits)
 - [API authentication type](#api-authentication-type)
 - [Authentication signature payload](#authentication-signature-payload)
-- [Timing Security](#timing-security)
 - [Endpoints requiring signature](#endpoints-requiring-signature)
   - [POST /fapi/v3/order example](#example-of-post-fapiv3order)
 - [Public Endpoints Info](#public-endpoints-info)
@@ -181,16 +180,6 @@ It is strongly recommended to use websocket stream for getting data as much as p
 * Rejected/unsuccessful orders are not guaranteed to have `X-MBX-ORDER-COUNT-**` headers in the response.
 * **The order rate limit is counted against each account**.
 
-**Serious trading is about timing.** Networks can be unstable and unreliable,
-which can lead to requests taking varying amounts of time to reach the
-servers. With `recvWindow`, you can specify that the request must be
-processed within a certain number of milliseconds or be rejected by the
-server.
-
-<aside class="notice">
-It is recommended to use a small recvWindow of 5000 or less!
-</aside>
-
 ## API authentication type
 
 * Each API has its own authentication type, which determines what kind of authentication is required when accessing it.
@@ -215,29 +204,10 @@ It is recommended to use a small recvWindow of 5000 or less!
 
 ## Endpoints requiring signature 
 * Security Type: TRADE, USER_DATA, USER_STREAM, MARKET_DATA
-* After converting the API parameters to strings, sort them by their key values in ASCII order to generate the final string. Note: All parameter values must be treated as strings during the signing process.
 * After generating the string, combine it with the authentication signature parameters user, signer, and nonce, then use Web3’s ABI parameter encoding to generate the bytecode.
 * After generating the bytecode, use the Keccak algorithm to generate the hash.
 * Use the private key of **API wallet address** to sign the hash using web3’s ECDSA signature algorithm, generating the final signature.
 
-### Timing Security
-
-* A `SIGNED` endpoint also requires a parameter, `timestamp`, to be sent which
-  should be the millisecond timestamp of when the request was created and sent.
-* An additional parameter, `recvWindow`, may be sent to specify the number of
-  milliseconds after `timestamp` the request is valid for. If `recvWindow`
-  is not sent, **it defaults to 5000**.
-
-> The logic is as follows:
-
-```javascript
-if (timestamp < (serverTime + 1000) && (serverTime - timestamp) <= recvWindow){
-    // process request
-  } 
-  else {
-    // reject request
-  }
-```
 
 ## Example of POST /fapi/v3/order
 
@@ -270,6 +240,7 @@ long microsecond = now.getEpochSecond() * 1000000 + now.getNano() / 1000;
 
 ```python
 import time
+
 import requests
 from eth_account.messages import  encode_structured_data
 from eth_account import Account
@@ -302,15 +273,23 @@ headers = {
     'Content-Type': 'application/x-www-form-urlencoded',
     'User-Agent': 'PythonApp/1.0'
 }
-order_url = 'https://fapi.asterdex.com/fapi/v3/order'
+host = 'https://fapi3.asterdex.com'
 
 # config your user and agent info here
 user = '*'
 signer = '*'
 private_key = "*"
 
+place_order = {"url":"/fapi/v3/order","method":"POST","params":{"symbol": "SOLUSDT", "type": "LIMIT", "side": "BUY",
+                  "timeInForce": "GTC", "quantity": "0.1", "price": "71"}}
+batch_orders = {"url":"/fapi/v3/batchOrders","method":"POST","params":{"symbol": "SOLUSDT",
+          "batchOrders":"[{'symbol':'SOLUSDT','type':'LIMIT','side':'BUY','timeInForce':'GTC','quantity':'0.1','price':'71'},{'symbol':'SOLUSDT','type':'LIMIT','side':'BUY','timeInForce':'GTC','quantity':'0.1','price':'71'}]" }}
+
 def get_url(my_dict) -> str:
-       return '&'.join(f'{key}={str(value)}'for key, value in my_dict.items())
+    content = ''
+    for key, value in my_dict.items():
+        content += key + '=' + str(value) + '&'
+    return content.rstrip('&')
 
 _last_ms = 0
 _i = 0
@@ -327,29 +306,29 @@ def get_nonce():
 
     return now_ms * 1_000_000 + _i
 
-def send_by_url() :
-    param = 'symbol=ASTERUSDT&side=BUY&type=LIMIT&quantity=10&price=0.6&timeInForce=GTC'
+def send_by_url(api) :
+    my_dict = api['params']
+    url = host + api['url']
 
+    param = get_url(my_dict)
     param += '&nonce=' + str(get_nonce())
     param += '&user=' + user
     param += '&signer=' + signer
 
+    print(param)
     typed_data['message']['msg'] = param
     message = encode_structured_data(typed_data)
     signed = Account.sign_message(message, private_key=private_key)
-    print(signed.signature.hex())
 
-    url = order_url + '?' + param + '&signature=' + signed.signature.hex()
-
+    url = url + '?' + param + '&signature=' + signed.signature.hex()
     print(url)
     res = requests.post(url, headers=headers)
 
     print(res.text)
 
-def send_by_body() :
-       my_dict = {"symbol": "ASTERUSDT", "type": "LIMIT", "side": "BUY",
-                  "timeInForce": "GTC", "quantity": "10", "price": "0.6"}
-
+def send_by_body(api) :
+       my_dict = api['params']
+       url = host +api['url']
        my_dict['nonce'] = str(get_nonce())
        my_dict['user'] = user
        my_dict['signer'] = signer
@@ -364,13 +343,15 @@ def send_by_body() :
        my_dict['signature'] = signed.signature.hex()
 
        print(my_dict)
-       res = requests.post(order_url, data=my_dict, headers=headers)
+       res = requests.post(url, data=my_dict, headers=headers)
 
        print(res.text)
 
 if __name__ == '__main__':
-    send_by_url()
-    # send_by_body()
+    # send_by_url(place_order)
+    send_by_url(batch_orders)
+    # send_by_body(place_order)
+    # send_by_body(batch_orders)
 ```
 
 ## Public Endpoints Info
@@ -2056,8 +2037,6 @@ Change user's position mode (Hedge Mode or One-way Mode ) on ***EVERY symbol***
 | Name             | Type   | Mandatory | Description                               |
 | ---------------- | ------ | --------- | ----------------------------------------- |
 | dualSidePosition | STRING | YES       | "true": Hedge Mode; "false": One-way Mode |
-| recvWindow       | LONG   | NO        |                                           |
-| timestamp        | LONG   | YES       |                                           |
 
 ## Get Current Position Mode(USER_DATA)
 
@@ -2080,8 +2059,6 @@ Get user's position mode (Hedge Mode or One-way Mode ) on ***EVERY symbol***
 
 | Name       | Type | Mandatory | Description |
 | ---------- | ---- | --------- | ----------- |
-| recvWindow | LONG | NO        |             |
-| timestamp  | LONG | YES       |             |
 
 ## Change Multi-Assets Mode (TRADE)
 
