@@ -9,7 +9,6 @@
 	- [接口鉴权类型](#接口鉴权类型)
 	- [鉴权签名体](#鉴权签名体)
 	- [需要签名的接口](#需要签名的接口)
-	- [时间同步安全](#时间同步安全)
 	- [POST /fapi/v3/order 的示例](#post-fapiv3order-的示例)
 	- [公开API参数](#公开api参数)
 		- [术语解释](#术语解释)
@@ -171,15 +170,7 @@
 ### 下单频率限制
 * 每个下单请求回报将包含一个`X-MBX-ORDER-COUNT-(intervalNum)(intervalLetter)`的头，其中包含当前账户已用的下单限制数量。
 * 被拒绝或不成功的下单并不保证回报中包含以上头内容。
-* **下单频率限制是基于每个账户计数的。**
-
-**关于交易时效性** 
-互联网状况并不100%可靠，不可完全依赖,因此你的程序本地到服务器的时延会有抖动.
-这是我们设置`recvWindow`的目的所在，如果你从事高频交易，对交易时效性有较高的要求，可以灵活设置recvWindow以达到你的要求。
-
-<aside class="notice">
-不推荐使用5秒以上的recvWindow
-</aside>
+* **下单频率限制是基于每个账户计数的。**>
 
 ## 接口鉴权类型
 * 每个接口都有自己的鉴权类型，鉴权类型决定了访问时应当进行何种鉴权
@@ -206,21 +197,7 @@ signature | 签名
 * 接口参数转字符串后按照key值ASCII编码后生成的字符串 请注意所有参数取值请以字符串的方式进行签名
 * 生成字符串后在与鉴权签名参数的user,signer,nonce使用web3的abi参数编码生成字节码
 * 生成字节码后使用Keccak算法生成hash
-* 使用派生地址的私钥用web3的ecdsa签名算法对该hash进行签名生成signature
-
-### 时间同步安全
-* 签名接口均需要传递`timestamp`参数,其值应当是请求发送时刻的unix时间戳(毫秒)
-* 服务器收到请求时会判断请求中的时间戳,如果是5000毫秒之前发出的,则请求会被认为无效。这个时间窗口值可以通过发送可选参数`recvWindow`来自定义。
-
-> 逻辑伪代码：
-  
-  ```javascript
-  if (timestamp < (serverTime + 1000) && (serverTime - timestamp) <= recvWindow) {
-    // process request
-  } else {
-    // reject request
-  }
-  ```
+* 使用派生地址的私钥用web3的ecdsa签名算法对该hash进行签名生成signature`
 
 ## POST /fapi/v3/order 的示例 
 
@@ -252,6 +229,7 @@ long microsecond = now.getEpochSecond() * 1000000 + now.getNano() / 1000;
 
 ```python
 import time
+
 import requests
 from eth_account.messages import  encode_structured_data
 from eth_account import Account
@@ -284,15 +262,23 @@ headers = {
     'Content-Type': 'application/x-www-form-urlencoded',
     'User-Agent': 'PythonApp/1.0'
 }
-order_url = 'https://fapi.asterdex.com/fapi/v3/order'
+host = 'https://fapi3.asterdex.com'
 
 # config your user and agent info here
 user = '*'
 signer = '*'
 private_key = "*"
 
+place_order = {"url":"/fapi/v3/order","method":"POST","params":{"symbol": "SOLUSDT", "type": "LIMIT", "side": "BUY",
+                  "timeInForce": "GTC", "quantity": "0.1", "price": "71"}}
+batch_orders = {"url":"/fapi/v3/batchOrders","method":"POST","params":{"symbol": "SOLUSDT",
+          "batchOrders":"[{'symbol':'SOLUSDT','type':'LIMIT','side':'BUY','timeInForce':'GTC','quantity':'0.1','price':'71'},{'symbol':'SOLUSDT','type':'LIMIT','side':'BUY','timeInForce':'GTC','quantity':'0.1','price':'71'}]" }}
+
 def get_url(my_dict) -> str:
-       return '&'.join(f'{key}={str(value)}'for key, value in my_dict.items())
+    content = ''
+    for key, value in my_dict.items():
+        content += key + '=' + str(value) + '&'
+    return content.rstrip('&')
 
 _last_ms = 0
 _i = 0
@@ -309,29 +295,29 @@ def get_nonce():
 
     return now_ms * 1_000_000 + _i
 
-def send_by_url() :
-    param = 'symbol=ASTERUSDT&side=BUY&type=LIMIT&quantity=10&price=0.6&timeInForce=GTC'
+def send_by_url(api) :
+    my_dict = api['params']
+    url = host + api['url']
 
+    param = get_url(my_dict)
     param += '&nonce=' + str(get_nonce())
     param += '&user=' + user
     param += '&signer=' + signer
 
+    print(param)
     typed_data['message']['msg'] = param
     message = encode_structured_data(typed_data)
     signed = Account.sign_message(message, private_key=private_key)
-    print(signed.signature.hex())
 
-    url = order_url + '?' + param + '&signature=' + signed.signature.hex()
-
+    url = url + '?' + param + '&signature=' + signed.signature.hex()
     print(url)
     res = requests.post(url, headers=headers)
 
     print(res.text)
 
-def send_by_body() :
-       my_dict = {"symbol": "ASTERUSDT", "type": "LIMIT", "side": "BUY",
-                  "timeInForce": "GTC", "quantity": "10", "price": "0.6"}
-
+def send_by_body(api) :
+       my_dict = api['params']
+       url = host +api['url']
        my_dict['nonce'] = str(get_nonce())
        my_dict['user'] = user
        my_dict['signer'] = signer
@@ -346,13 +332,15 @@ def send_by_body() :
        my_dict['signature'] = signed.signature.hex()
 
        print(my_dict)
-       res = requests.post(order_url, data=my_dict, headers=headers)
+       res = requests.post(url, data=my_dict, headers=headers)
 
        print(res.text)
 
 if __name__ == '__main__':
-    send_by_url()
-    # send_by_body()
+    # send_by_url(place_order)
+    send_by_url(batch_orders)
+    # send_by_body(place_order)
+    # send_by_body(batch_orders)
 ```
 
 ## 公开API参数
@@ -2090,8 +2078,6 @@ POST /fapi/v3/positionSide/dual (HMAC SHA256)
    名称    |  类型  | 是否必需 |       描述
 ---------- | ------ | -------- | -----------------
 dualSidePosition | STRING   | YES      | "true": 双向持仓模式；"false": 单向持仓模式
-recvWindow | LONG   | NO       |
-timestamp  | LONG   | YES      |
 
 
 
@@ -2113,14 +2099,6 @@ GET /fapi/v3/positionSide/dual (HMAC SHA256)
 
 **权重:**
 30
-
-**参数:**
-
-   名称    |  类型  | 是否必需 |       描述
----------- | ------ | -------- | -----------------
-recvWindow | LONG   | NO       |
-timestamp  | LONG   | YES      |
-
 
 ## 更改联合保证金模式(TRADE)
 
