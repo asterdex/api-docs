@@ -271,7 +271,7 @@ private_key = "*"
 
 place_order = {"url":"/fapi/v3/order","method":"POST","params":{"symbol": "SOLUSDT", "type": "LIMIT", "side": "BUY",
                   "timeInForce": "GTC", "quantity": "0.1", "price": "71"}}
-batch_orders = {"url":"/fapi/v3/batchOrders","method":"POST","params":{"symbol": "SOLUSDT",
+batch_orders = {"url":"/fapi/v3/batchOrders","method":"POST","params":{
           "batchOrders":"[{'symbol':'SOLUSDT','type':'LIMIT','side':'BUY','timeInForce':'GTC','quantity':'0.1','price':'71'},{'symbol':'SOLUSDT','type':'LIMIT','side':'BUY','timeInForce':'GTC','quantity':'0.1','price':'71'}]" }}
 
 def get_url(my_dict) -> str:
