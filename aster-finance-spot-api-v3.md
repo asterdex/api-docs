@@ -25,7 +25,7 @@ If an API Key is accidentally exposed, immediately delete that Key and generate 
 
 ### API error codes
 
-* When using the endpoint `/api/v1`, any endpoint may throw exceptions;
+* When using the endpoint `/api/v3`, any endpoint may throw exceptions;
 
 The API error codes are returned in the following format:
 
@@ -48,7 +48,7 @@ The API error codes are returned in the following format:
 
 ### Basic information on access restrictions
 
-* The `rateLimits` array in `/api/v1/exchangeInfo` contains objects related to REQUEST\_WEIGHT and ORDERS rate limits for trading. These are further defined in the `enum definitions` section under `rateLimitType`.  
+* The `rateLimits` array in `/api/v3/exchangeInfo` contains objects related to REQUEST\_WEIGHT and ORDERS rate limits for trading. These are further defined in the `enum definitions` section under `rateLimitType`.  
 * A 429 will be returned when any of the rate limits are violated.
 
 ### IP access limits
@@ -66,7 +66,7 @@ You are advised to use WebSocket messages to obtain the corresponding data as mu
 ### Order rate limits
 
 * Each successful order response will include a `X-MBX-ORDER-COUNT-(intervalNum)(intervalLetter)` header containing the number of order limit units currently used by the account.  
-* When the number of orders exceeds the limit, you will receive a response with status 429 but without the `Retry-After` header. Please check the order rate limits in `GET api/v1/exchangeInfo` (rateLimitType \= ORDERS) and wait until the ban period ends.  
+* When the number of orders exceeds the limit, you will receive a response with status 429 but without the `Retry-After` header. Please check the order rate limits in `GET api/v3/exchangeInfo` (rateLimitType \= ORDERS) and wait until the ban period ends.  
 * Rejected or unsuccessful orders are not guaranteed to include the above header in the response.  
 * **Order placement rate limits are counted per account.**
 
@@ -86,108 +86,157 @@ You are advised to use WebSocket messages to obtain the corresponding data as mu
 * Each API has its own authentication type, which determines what kind of authentication should be performed when accessing it.  
 * The authentication type will be indicated next to each endpoint name in this document; if not specifically stated, it defaults to `NONE`.  
 
-| Authentication type | Description |
-| :---- | :---- |
-| NONE | APIs that do not require authentication |
-| TRADE | A valid API-Key and signature are required |
-| USER\_DATA | A valid API-Key and signature are required |
-| USER\_STREAM | A valid API-Key is required |
-| MARKET\_DATA | A valid API-Key is required |
-
-* The `TRADE` and `USER_DATA` endpoints are signed (SIGNED) endpoints.
+| Security Type | Description                               |
+| ------------- | ----------------------------------------- |
+| NONE          | API that does not require authentication  |
+| SPOT_TRADE         | A valid signer and signature are required |
+| USER_DATA     | A valid signer and signature are required |
+| USER_STREAM   | A valid signer and signature are required |
+| MARKET_DATA   | A valid signer and signature are required |
 
 ---
 
 ## SIGNED (TRADE AND USER\_DATA) Endpoint security
 
-* When calling a `SIGNED` endpoint, in addition to the parameters required by the endpoint itself, you must also pass a `signature` parameter in the `query string` or `request body`.  
-* The signature uses the `HMAC SHA256` algorithm. The API-Secret corresponding to the API-KEY is used as the key for `HMAC SHA256`, and all other parameters are used as the data for the `HMAC SHA256` operation; the output is the signature.  
-* The `signature` is **case-insensitive**.  
-* "totalParams" is defined as the "query string" concatenated with the "request body".
+* After generating the string, combine it with the authentication signature parameters user, signer, and nonce, then use Web3’s ABI parameter encoding to generate the bytecode.
+* After generating the bytecode, use the Keccak algorithm to generate the hash.
+* Use the private key of **API wallet address** to sign the hash using web3’s ECDSA signature algorithm, generating the final signature.
 
-### Time synchronization safety
 
-* Signed endpoints must include the `timestamp` parameter, whose value should be the unix timestamp (milliseconds) at the moment the request is sent.  
-* When the server receives a request it will check the timestamp; if it was sent more than 5,000 milliseconds earlier, the request will be considered invalid. This time window value can be defined by sending the optional `recvWindow` parameter.
+## Example of POST /api/v3/order
 
-The logical pseudocode is as follows:
 
-```javascript
-  if (timestamp < (serverTime + 1000) && (serverTime - timestamp) <= recvWindow)
-  {
-    // process request
-  } 
-  else 
-  {
-    // reject request
+#### The following parameters are API registration details. The values for user, signer, and privateKey are for demonstration purposes only (the privateKey corresponds to the signer).
+
+| Key        | Value          | Desc                                                    
+| ---------- | ------------------------------------------------------------------ |  ---------- |
+| user       | 0x63DD5aCC6b1aa0f563956C0e534DD30B6dcF7C4e                         |Login wallet address |
+| signer     | 0x21cF8Ae13Bb72632562c6Fff438652Ba1a151bb0                         |[Click Here](https://www.asterdex.com/en/api-wallet)         | 
+| privateKey | 0x4fd0a42218f3eae43a6ce26d22544e986139a01e5b34a62db53757ffca81bae1 |[Click Here](https://www.asterdex.com/en/api-wallet)        | 
+
+#### The nonce parameter is the current system time in microseconds. If it exceeds the system time or lags behind it by more than 10 seconds, the request is considered invalid.
+```python
+#python
+nonce = math.trunc(time.time()*1000000)
+print(nonce)
+#1748310859508867
+```
+```java
+#python
+//java
+Instant now = Instant.now();
+long microsecond = now.getEpochSecond() * 1000000 + now.getNano() / 1000;
+```
+
+#### Example: Post an order (using Python as an example).
+
+
+```python
+import time
+import urllib
+
+import requests
+from eth_account.messages import  encode_structured_data
+from eth_account import Account
+
+typed_data = {
+  "types": {
+    "EIP712Domain": [
+      {"name": "name", "type": "string"},
+      {"name": "version", "type": "string"},
+      {"name": "chainId", "type": "uint256"},
+      {"name": "verifyingContract", "type": "address"}
+    ],
+    "Message": [
+      { "name": "msg", "type": "string" }
+    ]
+  },
+  "primaryType": "Message",
+  "domain": {
+    "name": "AsterSignTransaction",
+    "version": "1",
+    "chainId": 1666,
+    "verifyingContract": "0x0000000000000000000000000000000000000000"
+  },
+  "message": {
+    "msg": "$msg"
   }
+}
+
+headers = {
+    'Content-Type': 'application/x-www-form-urlencoded',
+    'User-Agent': 'PythonApp/1.0'
+}
+host = 'https://sapi.asterdex.com'
+
+# config your user and agent info here
+user = '*'
+signer = '*'
+private_key = "*"
+
+place_order = {"url":"/api/v3/order","method":"POST","params":{"symbol": "ASTERUSDT", "type": "LIMIT", "side": "BUY",
+                  "timeInForce": "GTC", "quantity": "100", "price": "0.4"}}
+_last_ms = 0
+_i = 0
+
+def get_nonce():
+    global _last_ms, _i
+    now_ms = int(time.time())
+
+    if now_ms == _last_ms:
+        _i += 1
+    else:
+        _last_ms = now_ms
+        _i = 0
+
+    return now_ms * 1_000_000 + _i
+
+def send_by_url(api) :
+    my_dict = api['params']
+    url = host + api['url']
+
+    my_dict['nonce'] = str(get_nonce())
+    my_dict['user'] = user
+    my_dict['signer'] = signer
+
+    param = urllib.parse.urlencode(my_dict)
+    print(param)
+    typed_data['message']['msg'] = param
+    message = encode_structured_data(typed_data)
+    signed = Account.sign_message(message, private_key=private_key)
+
+    url = url + '?' + param + '&signature=' + signed.signature.hex()
+    print(url)
+    res = requests.post(url, headers=headers)
+
+    print(res.text)
+
+def send_by_body(api) :
+       my_dict = api['params']
+       url = host +api['url']
+       my_dict['nonce'] = str(get_nonce())
+       my_dict['user'] = user
+       my_dict['signer'] = signer
+
+       param = urllib.parse.urlencode(my_dict)
+       typed_data['message']['msg'] = param
+       message = encode_structured_data(typed_data)
+
+       signed = Account.sign_message(message, private_key=private_key)
+       print(signed.signature.hex())
+
+       my_dict['signature'] = signed.signature.hex()
+
+       print(my_dict)
+       res = requests.post(url, data=my_dict, headers=headers)
+
+       print(res.text)
+
+if __name__ == '__main__':
+    send_by_url(place_order)
+    # send_by_body(place_order)
+
 ```
-
-**About trade timeliness** Internet conditions are not completely stable or reliable, so the latency from your client to Aster's servers will experience jitter. This is why we provide `recvWindow`; if you engage in high-frequency trading and have strict requirements for timeliness, you can adjust `recvWindow` flexibly to meet your needs.
-
-It is recommended to use a recvWindow of under 5 seconds. It must not exceed 60 seconds.
-
-### Example of POST /api/v1/order
-
-Below is an example of placing an order by calling the API using echo, openssl, and curl tools in a Linux bash environment. The apiKey and secretKey are for demonstration only.
-
-| Key | Value |
-| :---- | :---- |
-| apiKey | 4452d7e2ed4da80b74105e02d06328c71a34488c9fdd60a5a0900d42d584b795 |
-| secretKey | fdde510a2b71fa43a43bff3e3cf7819c8c66df34633d338050f4f59664b3b313 |
-
-| Parameters | Values |
-| :---- | :---- |
-| symbol | BNBUSDT |
-| side | BUY |
-| type | LIMIT |
-| timeInForce | GTC |
-| quantity | 5 |
-| price | 1.1 |
-| recvWindow | 5000 |
-| timestamp | 1756187806000 |
-
-#### Example 1: All parameters are sent through the request body
-
-**Example 1** **HMAC SHA256 signature:**
-
-```shell
-    $ echo -n "symbol=BNBUSDT&side=BUY&type=LIMIT&timeInForce=GTC&quantity=5&price=1.1&recvWindow=5000&timestamp=1756187806000" | openssl dgst -sha256 -hmac "fdde510a2b71fa43a43bff3e3cf7819c8c66df34633d338050f4f59664b3b313"
-    (stdin)= e09169bf6c02ec4b29fa1bdc3a967f92c8c6cfcde0551ba1d477b2d3cf4c51b0
-```
-
-**curl command:**
-
-```shell
-    (HMAC SHA256)
-    $ curl -H "X-MBX-APIKEY: 4452d7e2ed4da80b74105e02d06328c71a34488c9fdd60a5a0900d42d584b795" -X POST 'https://sapi.asterdex.com/api/v1/order' -d 'symbol=BNBUSDT&side=BUY&type=LIMIT&timeInForce=GTC&quantity=5&price=1.1&recvWindow=5000&timestamp=1756187806000&signature=e09169bf6c02ec4b29fa1bdc3a967f92c8c6cfcde0551ba1d477b2d3cf4c51b0'
-```
-
-* **requestBody:**
-
-symbol=BNBUSDT \&side=BUY \&type=LIMIT \&timeInForce=GTC \&quantity=5 \&price=1.1 \&recvWindow=5000 \&timestamp=1756187806000
-
-#### Example 2: All parameters sent through the query string
-
-**Example 2** **HMAC SHA256 signature:**
-
-```shell
-    $ echo -n "symbol=BNBUSDT&side=BUY&type=LIMIT&timeInForce=GTC&quantity=5&price=1.1&recvWindow=5000&timestamp=1756187806000" | openssl dgst -sha256 -hmac "fdde510a2b71fa43a43bff3e3cf7819c8c66df34633d338050f4f59664b3b313"
-    (stdin)= e09169bf6c02ec4b29fa1bdc3a967f92c8c6cfcde0551ba1d477b2d3cf4c51b0 
-```
-
-**curl command:**
-
-```shell
-    (HMAC SHA256)
-   $ curl -H "X-MBX-APIKEY: 4452d7e2ed4da80b74105e02d06328c71a34488c9fdd60a5a0900d42d584b795" -X POST 'https://sapi.asterdex.com/api/v1/order?symbol=BNBUSDT&side=BUY&type=LIMIT&timeInForce=GTC&quantity=5&price=1.1&recvWindow=5000&timestamp=1756187806000&signature=e09169bf6c02ec4b29fa1bdc3a967f92c8c6cfcde0551ba1d477b2d3cf4c51b0'
-```
-
-* **queryString:**
-
-symbol=BNBUSDT \&side=BUY \&type=LIMIT \&timeInForce=GTC \&quantity=5 \&price=1.1 \&recvWindow=5000 \&timestamp=1756187806000
-
----
 
 ## Public API parameters
 
@@ -417,7 +466,7 @@ In order to comply with the `market lot size`, the `quantity` must satisfy the f
 {}
 ```
 
-`GET /api/v1/ping`
+`GET /api/v3/ping`
 
 Test whether the REST API can be reached.
 
@@ -435,7 +484,7 @@ Test whether the REST API can be reached.
 }
 ```
 
-`GET /api/v1/time`
+`GET /api/v3/time`
 
 Test if the REST API can be reached and retrieve the server time.
 
@@ -562,7 +611,7 @@ Test if the REST API can be reached and retrieve the server time.
 }
 ```
 
-`GET /api/v1/exchangeInfo`
+`GET /api/v3/exchangeInfo`
 
 Retrieve trading rules and trading pair information.
 
@@ -594,7 +643,7 @@ Retrieve trading rules and trading pair information.
 }
 ```
 
-`GET /api/v1/depth`
+`GET /api/v3/depth`
 
 **Weight:**
 
@@ -631,7 +680,7 @@ Based on limit adjustments:
 ]
 ```
 
-`GET /api/v1/trades`
+`GET /api/v3/trades`
 
 Get recent trades
 
@@ -661,7 +710,7 @@ Get recent trades
 ]
 ```
 
-`GET /api/v1/historicalTrades`
+`GET /api/v3/historicalTrades`
 
 Retrieve historical trades
 
@@ -693,7 +742,7 @@ Retrieve historical trades
 ]
 ```
 
-`GET /api/v1/aggTrades`
+`GET /api/v3/aggTrades`
 
 The difference between aggregated trades and individual trades is that trades with the same price, same side, and same time are combined into a single entry.
 
@@ -734,7 +783,7 @@ The difference between aggregated trades and individual trades is that trades wi
 ]
 ```
 
-`GET /api/v1/klines`
+`GET /api/v3/klines`
 
 Each K-line represents a trading pair. The open time of each K-line can be regarded as a unique ID.
 
@@ -782,7 +831,7 @@ Each K-line represents a trading pair. The open time of each K-line can be regar
 }
 ```
 
-`GET /api/v1/ticker/24hr`
+`GET /api/v3/ticker/24hr`
 
 24-hour rolling window price change data. Please note that omitting the symbol parameter will return data for all trading pairs; in that case the returned data is an example array for the respective pairs, which is not only large in volume but also has a very high weight.
 
@@ -820,7 +869,7 @@ OR
 ]
 ```
 
-`GET /api/v1/ticker/price`
+`GET /api/v3/ticker/price`
 
 Get the latest price for a trading pair
 
@@ -864,7 +913,7 @@ OR
 ]
 ```
 
-`GET /api/v1/ticker/bookTicker`
+`GET /api/v3/ticker/bookTicker`
 
 Return the current best orders (highest bid, lowest ask)
 
@@ -890,7 +939,7 @@ Return the current best orders (highest bid, lowest ask)
 }
 ```
 
-`GET /api/v1/commissionRate`
+`GET /api/v3/commissionRate`
 
 Get symbol fees
 
@@ -931,7 +980,7 @@ Get symbol fees
 }
 ```
 
-`POST /api/v1/order (HMAC SHA256)`
+`POST /api/v3/order (HMAC SHA256)`
 
 Send order
 
@@ -995,7 +1044,7 @@ Other information:
 }
 ```
 
-`DELETE /api/v1/order (HMAC SHA256)`
+`DELETE /api/v3/order (HMAC SHA256)`
 
 Cancel active orders
 
@@ -1038,7 +1087,7 @@ At least one of `orderId` or `origClientOrderId` must be sent.
 } 
 ```
 
-`GET /api/v1/order (HMAC SHA256)`
+`GET /api/v3/order (HMAC SHA256)`
 
 Query order status
 
@@ -1090,7 +1139,7 @@ Note:
 ]
 ```
 
-`GET /api/v1/openOrders (HMAC SHA256)`
+`GET /api/v3/openOrders (HMAC SHA256)`
 
 Retrieve all current open orders for trading pairs. Use calls without a trading pair parameter with caution.
 
@@ -1121,7 +1170,7 @@ Retrieve all current open orders for trading pairs. Use calls without a trading 
 ```
 
 ``
-DEL /api/v1/allOpenOrders  (HMAC SHA256)
+DEL /api/v3/allOpenOrders  (HMAC SHA256)
 ``
 
 **Weight:**
@@ -1165,7 +1214,7 @@ timestamp | LONG | YES |
 ]
 ```
 
-`GET /api/v1/allOrders (HMAC SHA256)`
+`GET /api/v3/allOrders (HMAC SHA256)`
 
 Retrieve all account orders; active, canceled, or completed.
 
@@ -1201,7 +1250,7 @@ Retrieve all account orders; active, canceled, or completed.
 }
 ```
 
-`POST /api/v1/asset/wallet/transfer  (HMAC SHA256)`
+`POST /api/v3/asset/wallet/transfer  (HMAC SHA256)`
 
 **Weight:** 5
 
@@ -1228,7 +1277,7 @@ Retrieve all account orders; active, canceled, or completed.
 ```
 
 ``
-GET /api/v1/aster/withdraw/estimateFee 
+GET /api/v3/aster/withdraw/estimateFee 
 ``
 
 **Weight:**
@@ -1255,7 +1304,7 @@ asset | STRING | YES |
 ```
 
 ``
-POST /api/v1/aster/user-withdraw (HMAC SHA256)
+POST /api/v3/aster/user-withdraw (HMAC SHA256)
 ``
 
 **Weight:**
@@ -1329,7 +1378,7 @@ const signature = await signer.signTypedData(domain, types, value)
 ```
 
 ``
-POST /api/v1/getNonce 
+POST /api/v3/getNonce 
 ``
 
 **Weight:**
@@ -1358,7 +1407,7 @@ network | STRING | NO |
 ```
 
 ``
-POST /api/v1/createApiKey
+POST /api/v3/createApiKey
 ``
 
 **Weight:**
@@ -1418,7 +1467,7 @@ const signature = await signer.signMessage(message);
 }
 ```
 
-`GET /api/v1/account (HMAC SHA256)`
+`GET /api/v3/account (HMAC SHA256)`
 
 Retrieve current account information
 
@@ -1456,7 +1505,7 @@ Retrieve current account information
 ] 
 ```
 
-`GET /api/v1/userTrades (HMAC SHA256)`
+`GET /api/v3/userTrades (HMAC SHA256)`
 
 Retrieve the trade history for a specified trading pair of an account
 
@@ -1891,7 +1940,7 @@ Pushes the changed parts of the orderbook (if any) every second or every 100 mil
 
 1. Subscribe to **wss://sstream.asterdex.com/ws/bnbbtc@depth**  
 2. Start caching the received updates. For the same price level, later updates overwrite earlier ones.  
-3. Fetch the REST endpoint [**https://sapi.asterdex.com/api/v1/depth?symbol=BNBBTC\&limit=1000**](https://sapi.asterdex.com/api/v1/depth?symbol=BNBBTC&limit=1000) to obtain a 1000-level depth snapshot  
+3. Fetch the REST endpoint [**https://sapi.asterdex.com/api/v3/depth?symbol=BNBBTC\&limit=1000**](https://sapi.asterdex.com/api/v3/depth?symbol=BNBBTC&limit=1000) to obtain a 1000-level depth snapshot  
 4. Discard from the currently cached messages those with `u` \<= the `lastUpdateId` obtained in step 3 (drop older, expired information)  
 5. Apply the depth snapshot to your local order book copy, and resume updating the local copy from the first WebSocket event whose `U` \<= `lastUpdateId`\+1 **and** `u` \>= `lastUpdateId`\+1  
 6. Each new event’s `U` should equal exactly the previous event’s `u`\+1; otherwise packets may have been lost \- restart initialization from step 3  
@@ -1921,7 +1970,7 @@ Pushes the changed parts of the orderbook (if any) every second or every 100 mil
 }
 ```
 
-`POST /api/v1/listenKey`
+`POST /api/v3/listenKey`
 
 Start a new data stream. The data stream will be closed after 60 minutes unless a keepalive is sent. If the account already has a valid `listenKey`, that `listenKey` will be returned and its validity extended by 60 minutes.
 
@@ -1937,7 +1986,7 @@ Start a new data stream. The data stream will be closed after 60 minutes unless 
 {}
 ```
 
-`PUT /api/v1/listenKey`
+`PUT /api/v3/listenKey`
 
 Validity extended to 60 minutes after this call. It is recommended to send a ping every 30 minutes.
 
@@ -1957,7 +2006,7 @@ Validity extended to 60 minutes after this call. It is recommended to send a pin
 {}
 ```
 
-`DELETE /api/v1/listenKey`
+`DELETE /api/v3/listenKey`
 
 Close user data stream
 

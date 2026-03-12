@@ -24,6 +24,7 @@
     - [PERCENT_PRICE](#percent_price)
     - [MIN_NOTIONAL](#min_notional)
 - [Market Data Endpoints](#market-data-endpoints)
+  - [Noop](#noop)
   - [Test Connectivity](#test-connectivity)
   - [Check Server Time](#check-server-time)
   - [Exchange Information](#exchange-information)
@@ -240,6 +241,7 @@ long microsecond = now.getEpochSecond() * 1000000 + now.getNano() / 1000;
 
 ```python
 import time
+import urllib
 
 import requests
 from eth_account.messages import  encode_structured_data
@@ -280,16 +282,10 @@ user = '*'
 signer = '*'
 private_key = "*"
 
-place_order = {"url":"/fapi/v3/order","method":"POST","params":{"symbol": "SOLUSDT", "type": "LIMIT", "side": "BUY",
-                  "timeInForce": "GTC", "quantity": "0.1", "price": "71"}}
+place_order = {"url":"/fapi/v3/order","method":"POST","params":{"symbol": "ASTERUSDT", "type": "LIMIT", "side": "BUY",
+                  "timeInForce": "GTC", "quantity": "20", "price": "0.5"}}
 batch_orders = {"url":"/fapi/v3/batchOrders","method":"POST","params":{
-          "batchOrders":"[{'symbol':'SOLUSDT','type':'LIMIT','side':'BUY','timeInForce':'GTC','quantity':'0.1','price':'71'},{'symbol':'SOLUSDT','type':'LIMIT','side':'BUY','timeInForce':'GTC','quantity':'0.1','price':'71'}]" }}
-
-def get_url(my_dict) -> str:
-    content = ''
-    for key, value in my_dict.items():
-        content += key + '=' + str(value) + '&'
-    return content.rstrip('&')
+          "batchOrders":"[{'symbol':'ASTERUSDT','type':'LIMIT','side':'BUY','timeInForce':'GTC','quantity':'20','price':'0.5'},{'symbol':'ASTERUSDT','type':'LIMIT','side':'BUY','timeInForce':'GTC','quantity':'20','price':'0.5'}]" }}
 
 _last_ms = 0
 _i = 0
@@ -310,10 +306,11 @@ def send_by_url(api) :
     my_dict = api['params']
     url = host + api['url']
 
-    param = get_url(my_dict)
-    param += '&nonce=' + str(get_nonce())
-    param += '&user=' + user
-    param += '&signer=' + signer
+    my_dict['nonce'] = str(get_nonce())
+    my_dict['user'] = user
+    my_dict['signer'] = signer
+
+    param = urllib.parse.urlencode(my_dict)
 
     print(param)
     typed_data['message']['msg'] = param
@@ -333,8 +330,8 @@ def send_by_body(api) :
        my_dict['user'] = user
        my_dict['signer'] = signer
 
-       content = get_url(my_dict)
-       typed_data['message']['msg'] = content
+       param = urllib.parse.urlencode(my_dict)
+       typed_data['message']['msg'] = param
        message = encode_structured_data(typed_data)
 
        signed = Account.sign_message(message, private_key=private_key)
@@ -348,8 +345,8 @@ def send_by_body(api) :
        print(res.text)
 
 if __name__ == '__main__':
-    # send_by_url(place_order)
-    send_by_url(batch_orders)
+    send_by_url(place_order)
+    # send_by_url(batch_orders)
     # send_by_body(place_order)
     # send_by_body(batch_orders)
 ```
@@ -626,6 +623,25 @@ Since `MARKET` orders have no price, the mark price is used.
 ---
 
 # Market Data Endpoints
+
+## Noop
+
+> **Response:**
+
+```javascript
+{
+	"code": 200,
+	"msg": "success"
+}
+```
+
+``POST /fapi/v3/noop``
+
+By using this request, it is possible to efficiently cancel previously sent transactions that are still in the queue and have not completed the on chain operation (Nonce should be equal to this request，no guarantee of success
+)
+
+**Weight:**
+1
 
 ## Test Connectivity
 
