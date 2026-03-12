@@ -458,6 +458,25 @@ In order to comply with the `market lot size`, the `quantity` must satisfy the f
 
 # Market data API
 
+## Noop
+
+> **Response:**
+
+```javascript
+{
+	"code": 200,
+	"msg": "success"
+}
+```
+
+``POST /api/v3/noop``
+
+By using this request, it is possible to efficiently cancel previously sent transactions that are still in the queue and have not completed the on chain operation (Nonce should be equal to this request，no guarantee of success
+)
+
+**Weight:**
+1
+
 ## Test server connectivity
 
 **Response**
