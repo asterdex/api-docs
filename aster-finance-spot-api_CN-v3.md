@@ -87,7 +87,7 @@ NONE | 不需要鉴权的接口
 SPOT_TRADE | 需要有效的signer和签名
 USER_DATA | 需要有效的signer和签名
 USER_STREAM | 需要有效的signer和签名
-MARKET_DATA | 需要有效的signer和签名
+MARKET_DATA | 不需要鉴权的接口
 
 
 ### POST /api/v3/order 的示例

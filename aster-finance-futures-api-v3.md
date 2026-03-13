@@ -192,7 +192,7 @@ It is strongly recommended to use websocket stream for getting data as much as p
 | TRADE         | A valid signer and signature are required |
 | USER_DATA     | A valid signer and signature are required |
 | USER_STREAM   | A valid signer and signature are required |
-| MARKET_DATA   | A valid signer and signature are required |
+| MARKET_DATA   | API that does not require authentication |
 
 ## Authentication signature payload
 
@@ -204,7 +204,7 @@ It is strongly recommended to use websocket stream for getting data as much as p
 | signature | Signature                          |
 
 ## Endpoints requiring signature 
-* Security Type: TRADE, USER_DATA, USER_STREAM, MARKET_DATA
+* Security Type: TRADE, USER_DATA, USER_STREAM
 * After generating the string, combine it with the authentication signature parameters user, signer, and nonce, then use Web3’s ABI parameter encoding to generate the bytecode.
 * After generating the bytecode, use the Keccak algorithm to generate the hash.
 * Use the private key of **API wallet address** to sign the hash using web3’s ECDSA signature algorithm, generating the final signature.
