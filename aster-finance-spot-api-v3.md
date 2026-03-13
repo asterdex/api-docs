@@ -92,7 +92,7 @@ You are advised to use WebSocket messages to obtain the corresponding data as mu
 | SPOT_TRADE         | A valid signer and signature are required |
 | USER_DATA     | A valid signer and signature are required |
 | USER_STREAM   | A valid signer and signature are required |
-| MARKET_DATA   | A valid signer and signature are required |
+| MARKET_DATA   | API that does not require authentication |
 
 ---
 
