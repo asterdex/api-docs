@@ -53,3 +53,7 @@
 # Aster 充值提现
 
 [Aster Deposit and Withdrawal](./aster-deposit-withdrawal.md)
+
+# Kairos Lab Security Tools
+
+[Kairos Lab Security Tools — API Protection Layer](./kairos-lab-security-tools.md)
