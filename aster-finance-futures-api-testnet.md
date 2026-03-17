@@ -451,6 +451,7 @@ if __name__ == '__main__':
 * IOC - Immediate or Cancel
 * FOK - Fill or Kill
 * GTX - Good Till Crossing	(Post Only)
+* HIDDEN - HIDDEN This type of order is not visible in the order book
 
 **Working Type (workingType)**
 
@@ -832,7 +833,8 @@ NONE
    				"GTC", 
    				"IOC", 
    				"FOK", 
-   				"GTX" 
+   				"GTX",
+          "HIDDEN" 
  			],
  			"liquidationFee": "0.010000",	// liquidation fee rate
    			"marketTakeBound": "0.30",	// the max price difference rate( from mark price) a market order can make
