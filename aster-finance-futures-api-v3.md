@@ -156,7 +156,13 @@
 
 ### V3 Nonce Mechanism
 
-* A nonce is simply a number used to validate user sends is valid, not repeated, and not outdated. You can think of it like keeping a small list of the user’s most recent actions, each identified by a unique number (called a nonce). When a new action comes in, the system first checks if that number has already been used—if it has, the action is rejected as a duplicate. If it’s new, the system then checks whether it’s too old compared to the recent ones it has already seen. To do this efficiently, it only keeps a limited number of the most recent nonces for each user. If the list is already full and the new number is smaller than the oldest one in the list, it gets rejected because it’s considered outdated. Otherwise, the system removes the oldest number and adds the new one. In simple terms, this mechanism ensures that user actions are processed in a clean and reliable way—preventing repeated requests, ignoring stale ones, and only keeping track of the most relevant recent activity.
+*  A nonce is essentially a number used to validate that a user request is valid, not duplicated, and not outdated. It is generally recommended to use the current timestamp as the nonce, preferably with microsecond precision, to ensure uniqueness and monotonicity.
+
+* When a new action comes in, the system first checks if that number has already been used—if it has, the action is rejected as a duplicate. If it’s new, the system then checks whether it’s too old compared to the recent ones it has already seen.
+
+* To do this efficiently, it only keeps a limited number of the most recent nonces for each user. If the list is already full and the new number is smaller than the oldest one in the list, it gets rejected because it’s considered outdated. Otherwise, the system removes the oldest number and adds the new one.
+
+* In simple terms, this mechanism ensures that user actions are processed in a clean and reliable way—preventing repeated requests, ignoring stale ones, and only keeping track of the most relevant recent activity.
 
 ## LIMITS
 
