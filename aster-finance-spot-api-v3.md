@@ -2,7 +2,6 @@
 
 * This document lists the base URL for the API endpoints: [**https://sapi.asterdex.com**](https://sapi.asterdex.com)  
 * All API responses are in JSON format.  
-* All times and timestamps are in UNIX time, in **milliseconds**.
 
 ## API Key settings
 
@@ -970,8 +969,6 @@ Get symbol fees
 | Name | Type | Is it required? | Description |
 | :---- | :---- | :---- | :---- |
 | symbol | STRING | YES |  |
-| recvWindow | LONG | NO | The assigned value cannot be greater than 60000 |
-| timestamp | LONG | YES |  |
 
 # Spot account and trading API
 
@@ -1019,8 +1016,6 @@ Send order
 | price | DECIMAL | NO |  |
 | newClientOrderId | STRING | NO | Client-customized unique order ID. If not provided, one will be generated automatically. |
 | stopPrice | DECIMAL | NO | Only STOP, STOP\_MARKET, TAKE\_PROFIT, TAKE\_PROFIT\_MARKET require this parameter |
-| recvWindow | LONG | NO | The value cannot be greater than 60000 |
-| timestamp | LONG | YES |  |
 
 Depending on the order `type`, certain parameters are mandatory:
 
@@ -1077,8 +1072,6 @@ Cancel active orders
 | symbol | STRING | YES |  |
 | orderId | LONG | NO |  |
 | origClientOrderId | STRING | NO |  |
-| recvWindow | LONG | NO |  |
-| timestamp | LONG | YES |  |
 
 At least one of `orderId` or `origClientOrderId` must be sent.
 
@@ -1125,8 +1118,6 @@ Query order status
 | symbol | STRING | YES |  |
 | orderId | LONG | NO |  |
 | origClientOrderId | STRING | NO |  |
-| recvWindow | LONG | NO |  |
-| timestamp | LONG | YES |  |
 
 Note:
 
@@ -1173,8 +1164,6 @@ Retrieve all current open orders for trading pairs. Use calls without a trading 
 | Name | Type | Is it required? | Description |
 | :---- | :---- | :---- | :---- |
 | symbol | STRING | NO |  |
-| recvWindow | LONG | NO |  |
-| timestamp | LONG | YES |  |
 
 * If the symbol parameter is not provided, it will return the order books for all trading pairs.
 
@@ -1203,8 +1192,6 @@ Name | Type | Mandatory | Description
 symbol | STRING | YES |
 orderIdList | STRING | NO |  orderid array string
 origClientOrderIdList | STRING | NO | clientOrderId array string
-recvWindow | LONG | NO |
-timestamp | LONG | YES |
 
 
 ## Query all orders (USER\_DATA)
@@ -1252,8 +1239,6 @@ Retrieve all account orders; active, canceled, or completed.
 | startTime | LONG | NO |  |
 | endTime | LONG | NO |  |
 | limit | INT | NO | Default 500; maximum 1000 |
-| recvWindow | LONG | NO |  |
-| timestamp | LONG | YES |  |
 
 * The maximum query time range must not exceed 7 days.  
 * By default, query data is from the last 7 days.
@@ -1282,7 +1267,6 @@ Retrieve all account orders; active, canceled, or completed.
 | asset | STRING | YES | Asset |
 | clientTranId | STRING | YES | Transaction ID |
 | kindType | STRING | YES | Transaction type |
-| timestamp | LONG | YES | Timestamp |
 
 * kindType FUTURE_SPOT(future to spot)/SPOT_FUTURE(spot to future)
 
@@ -1341,8 +1325,6 @@ fee | STRING | YES |
 receiver | STRING | YES |  The address of the current account
 nonce | STRING | YES |  The current time in microseconds 
 userSignature | STRING | YES | 
-recvWindow | LONG | NO | 
-timestamp | LONG | YES | 
 
 
 **Note:** 
@@ -1443,8 +1425,6 @@ network | STRING | NO |
 userSignature | STRING | YES | 
 apikeyIP | STRING | NO | 
 desc | STRING | YES | 
-recvWindow | LONG | NO | 
-timestamp | LONG | YES | 
 
 **Note:**
 * userOperationType: CREATE_API_KEY
@@ -1497,8 +1477,6 @@ Retrieve current account information
 
 | Name | Type | Is it required? | Description |
 | :---- | :---- | :---- | :---- |
-| recvWindow | LONG | NO |  |
-| timestamp | LONG | YES |  |
 
 ## Account trade history (USER\_DATA)
 
@@ -1541,8 +1519,6 @@ Retrieve the trade history for a specified trading pair of an account
 | endTime | LONG | NO |  |
 | fromId | LONG | NO | Starting trade ID. Defaults to fetching the most recent trade. |
 | limit | INT | NO | Default 500; maximum 1000 |
-| recvWindow | LONG | NO |  |
-| timestamp | LONG | YES |  |
 
 * If both `startTime` and `endTime` are not sent, only data from the last 7 days will be returned.  
 * The maximum interval between startTime and endTime is 7 days.  
@@ -2177,11 +2153,6 @@ Errors consist of two parts: an error code and a message. The code is standardiz
 ### \-1020 UNSUPPORTED\_OPERATION
 
 * This operation is not supported.
-
-### \-1021 INVALID\_TIMESTAMP
-
-* Timestamp for this request is outside of the recvWindow.  
-* The timestamp for this request was 1000ms ahead of the server's time.
 
 ### \-1022 INVALID\_SIGNATURE
 
