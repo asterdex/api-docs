@@ -104,6 +104,7 @@
 	- [Balance和Position更新推送](#balance和position更新推送)
 	- [订单/交易 更新推送](#订单交易-更新推送)
 	- [杠杆倍数等账户配置 更新推送](#杠杆倍数等账户配置-更新推送)
+	- [Event: TradePro](#event-tradepro)
 - [错误代码](#错误代码)
 	- [10xx - 常规服务器或网络问题](#10xx---常规服务器或网络问题)
 	- [11xx - Request issues](#11xx---request-issues)
@@ -3907,7 +3908,49 @@ None
 
 当用户联合保证金状态发生变化时推送消息体会包含对象`ai`表示用户账户配置，其中`j`代表用户联合保证金状态
 
+## Event: TradePro
 
+> **Topic Subscribe:**
+
+```javascript
+{
+  "method": "SUBSCRIBE",
+  "params": [
+    "btcusdt@tradepro"
+  ],
+  "id": 3
+}
+```
+
+> **Payload:**
+
+```javascript
+{
+    "stream": "btcusdt@tradepro",
+    "data": {
+        "e": "tradepro",
+        "E": 1773751963081,
+        "T": 1773751963079,
+        "s": "BTCUSDT",
+        "t": 128884613,
+        "p": "73685.5",
+        "q": "0.297",
+        "h": "0X0000000000000000000000000000000000000000000000000000000000000000",
+        "m": [
+            "hidden",
+            "hidden"
+        ]
+    }
+}
+```
+
+* h: 该笔交易的交易哈希（Transaction hash）
+
+* m: 包含交易参与方地址的数组：
+
+    * m[0]: Taker 地址（主动成交方）
+
+    * m[1]: Maker 地址（挂单方）
 
 # 错误代码
 
