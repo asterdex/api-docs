@@ -40,6 +40,15 @@
 * `POST`, `PUT`, 和 `DELETE` 方法的接口,参数可以在内容形式为`application/x-www-form-urlencoded`的 `query string` 中发送，也可以在 `request body` 中发送。 
 * 对参数的顺序不做要求。
 
+### V3 Nonce 机制
+
+* nonce 本质上是一个用于校验用户请求是否有效、是否重复以及是否过期的数字。通常建议用户直接使用当前时间戳（timestamp）作为 nonce，并使用微秒级（microsecond）精度，以确保其唯一性和递增性。
+* 当一个新的请求到来时，系统会先检查这个 nonce 是否已经被使用过——如果是，就会将该请求判定为重复请求并拒绝。如果是新的 nonce，系统会进一步判断它是否相对于当前已记录的那些 nonce 来说过旧。
+
+* 为了提高效率，系统只会为每个用户保存有限数量的最近 nonce。如果这个列表已经满了，而新的 nonce 又比列表中最旧的那个还小，那么该请求就会被拒绝，因为它被认为是过期的。否则，系统会移除最旧的 nonce，并将新的 nonce 加入列表。
+
+* 简单来说，这种机制可以确保用户请求以一种干净、可靠的方式被处理——既能防止重复请求，又能忽略过期请求，同时只保留最相关的近期操作记录。
+
 ---
 ## 访问限制
 ### 访问限制基本信息
@@ -2282,6 +2291,49 @@ listenKey | STRING | YES
 
 
 
+## Event: TradePro
+
+> **Topic Subscribe:**
+
+```javascript
+{
+  "method": "SUBSCRIBE",
+  "params": [
+    "btcusdt@tradepro"
+  ],
+  "id": 3
+}
+```
+
+> **Payload:**
+
+```javascript
+{
+    "stream": "btcusdt@tradepro",
+    "data": {
+        "e": "tradepro",
+        "E": 1773751963081,
+        "T": 1773751963079,
+        "s": "BTCUSDT",
+        "t": 128884613,
+        "p": "73685.5",
+        "q": "0.297",
+        "h": "0X0000000000000000000000000000000000000000000000000000000000000000",
+        "m": [
+            "hidden",
+            "hidden"
+        ]
+    }
+}
+```
+
+* h: 该笔交易的交易哈希（Transaction hash）
+
+* m: 包含交易参与方地址的数组：
+
+    * m[0]: Taker 地址（主动成交方）
+
+    * m[1]: Maker 地址（挂单方）
 
 
 
