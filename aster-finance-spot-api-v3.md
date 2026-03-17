@@ -14,6 +14,16 @@ If an API Key is accidentally exposed, immediately delete that Key and generate 
 ### Attention
 * TESTUSDT or any other symbols starting with TEST are symbols used for Aster’s INTERNAL TESTING ONLY. Please DO NOT trade on these symbols starting with TEST. Aster does not hold any accountability for loss of funds due to trading on these symbols. However, if you run into issues, you may contact support about this any time, we will try to help you recover your funds.
 
+### V3 Nonce Mechanism
+
+*  A nonce is essentially a number used to validate that a user request is valid, not duplicated, and not outdated. It is generally recommended to use the current timestamp as the nonce, preferably with microsecond precision, to ensure uniqueness and monotonicity.
+
+* When a new action comes in, the system first checks if that number has already been used—if it has, the action is rejected as a duplicate. If it’s new, the system then checks whether it’s too old compared to the recent ones it has already seen.
+
+* To do this efficiently, it only keeps a limited number of the most recent nonces for each user. If the list is already full and the new number is smaller than the oldest one in the list, it gets rejected because it’s considered outdated. Otherwise, the system removes the oldest number and adds the new one.
+
+* In simple terms, this mechanism ensures that user actions are processed in a clean and reliable way—preventing repeated requests, ignoring stale ones, and only keeping track of the most relevant recent activity.
+
 ### HTTP return codes
 
 * HTTP `4XX` status codes are used to indicate errors in the request content, behavior, or format. The problem lies with the requester.  
@@ -2086,6 +2096,51 @@ Orders are updated via the `executionReport` event
 * REJECTED \- New order was rejected  
 * TRADE \- Order had a new fill  
 * EXPIRED \- Order expired (based on the order's Time In Force parameter)
+
+## Event: TradePro
+
+> **Topic Subscribe:**
+
+```javascript
+{
+  "method": "SUBSCRIBE",
+  "params": [
+    "btcusdt@tradepro"
+  ],
+  "id": 3
+}
+```
+
+> **Payload:**
+
+```javascript
+{
+    "stream": "btcusdt@tradepro",
+    "data": {
+        "e": "tradepro",
+        "E": 1773751963081,
+        "T": 1773751963079,
+        "s": "BTCUSDT",
+        "t": 128884613,
+        "p": "73685.5",
+        "q": "0.297",
+        "h": "0X0000000000000000000000000000000000000000000000000000000000000000",
+        "m": [
+            "hidden",
+            "hidden"
+        ]
+    }
+}
+```
+
+* h: Transaction hash of the trade.
+
+* m: Array containing the participant addresses:
+
+    * m[0]: Taker address
+
+    * m[1]: Maker address
+
 
 \#错误代码
 
