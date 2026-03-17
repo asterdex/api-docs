@@ -104,6 +104,7 @@
 	- [Event: Balance and Position Update](#event-balance-and-position-update)
 	- [Event: Order Update](#event-order-update)
 	- [Event: Account Configuration Update previous Leverage Update](#event-account-configuration-update-previous-leverage-update)
+	- [Event: TradePro](#event-tradepro)
 - [Error Codes](#error-codes)
 	- [10xx - General Server or Network issues](#10xx---general-server-or-network-issues)
 	- [11xx - Request issues](#11xx---request-issues)
@@ -4035,6 +4036,49 @@ When the leverage of a trade pair changes, the payload will contain the object `
 When the user Multi-Assets margin mode changes the payload will contain the object `ai` representing the user account configuration, where `j` represents the user Multi-Assets margin mode
 
 
+## Event: TradePro
+
+> **Topic Subscribe:**
+
+```javascript
+{
+  "method": "SUBSCRIBE",
+  "params": [
+    "btcusdt@tradepro"
+  ],
+  "id": 3
+}
+```
+
+> **Payload:**
+
+```javascript
+{
+    "stream": "btcusdt@tradepro",
+    "data": {
+        "e": "tradepro",
+        "E": 1773751963081,
+        "T": 1773751963079,
+        "s": "BTCUSDT",
+        "t": 128884613,
+        "p": "73685.5",
+        "q": "0.297",
+        "h": "0X0000000000000000000000000000000000000000000000000000000000000000",
+        "m": [
+            "hidden",
+            "hidden"
+        ]
+    }
+}
+```
+
+* h: Transaction hash of the trade.
+
+* m: Array containing the participant addresses:
+
+    * m[0]: Taker address
+
+    * m[1]: Maker address
 
 # Error Codes
 

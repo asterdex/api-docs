@@ -4,6 +4,7 @@
   - [HTTP Return Codes](#http-return-codes)
   - [Error Codes and Messages](#error-codes-and-messages)
   - [General Information on Endpoints](#general-information-on-endpoints)
+  - [V3 Nonce Mechanism](#v3-nonce-mechanism)
 - [LIMITS](#limits)
   - [IP Limits](#ip-limits)
   - [Order Rate Limits](#order-rate-limits)
@@ -101,6 +102,7 @@
   - [Event: Balance and Position Update](#event-balance-and-position-update)
   - [Event: Order Update](#event-order-update)
   - [Event: Account Configuration Update previous Leverage Update](#event-account-configuration-update-previous-leverage-update)
+  - [Event: TradePro](#event-tradepro)
 - [Error Codes](#error-codes)
   - [10xx - General Server or Network issues](#10xx---general-server-or-network-issues)
   - [11xx - Request issues](#11xx---request-issues)
@@ -151,6 +153,10 @@
 * For `GET` endpoints, parameters must be sent as a `query string`.
 * For POST, PUT, and DELETE method APIs, send data in the request body (content type application/x-www-form-urlencoded)
 * Parameters may be sent in any order.
+
+### V3 Nonce Mechanism
+
+* A nonce is simply a number used to validate user sends is valid, not repeated, and not outdated. You can think of it like keeping a small list of the user’s most recent actions, each identified by a unique number (called a nonce). When a new action comes in, the system first checks if that number has already been used—if it has, the action is rejected as a duplicate. If it’s new, the system then checks whether it’s too old compared to the recent ones it has already seen. To do this efficiently, it only keeps a limited number of the most recent nonces for each user. If the list is already full and the new number is smaller than the oldest one in the list, it gets rejected because it’s considered outdated. Otherwise, the system removes the oldest number and adds the new one. In simple terms, this mechanism ensures that user actions are processed in a clean and reliable way—preventing repeated requests, ignoring stale ones, and only keeping track of the most relevant recent activity.
 
 ## LIMITS
 
@@ -3748,6 +3754,50 @@ When the account configuration is changed, the event type will be pushed as `ACC
 When the leverage of a trade pair changes, the payload will contain the object `ac` to represent the account configuration of the trade pair, where `s` represents the specific trade pair and `l` represents the leverage
 
 When the user Multi-Assets margin mode changes the payload will contain the object `ai` representing the user account configuration, where `j` represents the user Multi-Assets margin mode
+
+## Event: TradePro
+
+> **Topic Subscribe:**
+
+```javascript
+{
+  "method": "SUBSCRIBE",
+  "params": [
+    "btcusdt@tradepro"
+  ],
+  "id": 3
+}
+```
+
+> **Payload:**
+
+```javascript
+{
+    "stream": "btcusdt@tradepro",
+    "data": {
+        "e": "tradepro",
+        "E": 1773751963081,
+        "T": 1773751963079,
+        "s": "BTCUSDT",
+        "t": 128884613,
+        "p": "73685.5",
+        "q": "0.297",
+        "h": "0X0000000000000000000000000000000000000000000000000000000000000000",
+        "m": [
+            "hidden",
+            "hidden"
+        ]
+    }
+}
+```
+
+* h: Transaction hash of the trade.
+
+* m: Array containing the participant addresses:
+
+    * m[0]: Taker address
+
+    * m[1]: Maker address
 
 # Error Codes
 
