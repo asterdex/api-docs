@@ -53,3 +53,7 @@
 # Aster 充值提现
 
 [Aster Deposit and Withdrawal](./aster-deposit-withdrawal.md)
+
+# Aster Chain RPC
+
+[Aster Chain RPC](./aster-chain-rpc.md)
