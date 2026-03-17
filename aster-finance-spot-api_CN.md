@@ -258,6 +258,7 @@ Status | Description
 `IOC` | 无法立即成交的部分就撤销 <br> 订单在失效前会尽量多的成交。
 `FOK` | 无法全部立即成交就撤销 <br> 如果无法全部成交，订单会失效。
 `GTX` | 直到挂单成交 <br> 限价只挂单。
+`HIDDEN` |  该类型订单在订单薄里不可见
 
 **K线间隔:**
 
@@ -576,7 +577,8 @@ NONE
 			"GTC",
 			"IOC",
 			"FOK",
-			"GTX"
+			"GTX",
+      "HIDDEN"
 		],
 		"symbol": "BNBUSDT",
 		"ocoAllowed": false

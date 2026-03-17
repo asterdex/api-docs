@@ -620,7 +620,8 @@ NONE
 			"GTC",
 			"IOC",
 			"FOK",
-			"GTX"
+			"GTX",
+      "HIDDEN"
 		],
 		"symbol": "BNBUSDT",
 		"ocoAllowed": false
@@ -993,8 +994,6 @@ GET /api/v3/commissionRate
 名称 | 类型 | 是否必需 | 描述
 ------------ | ------------ | ------------ | ------------
 symbol | STRING | YES |
-recvWindow | LONG | NO |赋值不能大于 ```60000```
-timestamp | LONG | YES |
 
 
 
@@ -1050,8 +1049,6 @@ quoteOrderQty|DECIMAL|NO|
 price | DECIMAL | NO |
 newClientOrderId | STRING | NO | 客户自定义的唯一订单ID。 如果未发送，则自动生成
 stopPrice | DECIMAL | NO | 仅 `STOP`, `STOP_MARKET` , `TAKE_PROFIT`,`TAKE_PROFIT_MARKET` 需要此参数。
-recvWindow | LONG | NO |赋值不能大于 ```60000```
-timestamp | LONG | YES |
 
 基于订单 `type`不同，强制要求某些参数:
 
@@ -1114,8 +1111,6 @@ DELETE /api/v3/order  (HMAC SHA256)
 symbol | STRING | YES |
 orderId | LONG | NO |
 origClientOrderId | STRING | NO |
-recvWindow | LONG | NO | 
-timestamp | LONG | YES |
 
 `orderId` 或 `origClientOrderId` 必须至少发送一个
 
@@ -1164,8 +1159,6 @@ GET /api/v3/order (HMAC SHA256)
 symbol | STRING | YES |
 orderId | LONG | NO |
 origClientOrderId | STRING | NO |
-recvWindow | LONG | NO |  
-timestamp | LONG | YES |
 
 注意:
 
@@ -1212,8 +1205,6 @@ GET /api/v3/openOrder (HMAC SHA256)
 symbol | STRING | YES |
 orderId | LONG | NO |
 origClientOrderId | STRING | NO |
-recvWindow | LONG | NO |  
-timestamp | LONG | YES |
 
 注意:
 
@@ -1262,8 +1253,6 @@ GET /api/v3/openOrders  (HMAC SHA256)
 名称 | 类型 | 是否必需 | 描述
 ------------ | ------------ | ------------ | ------------
 symbol | STRING | NO |
-recvWindow | LONG | NO |
-timestamp | LONG | YES |
 
 * 不带symbol参数，会返回所有交易对的挂单
 
@@ -1294,8 +1283,6 @@ DEL /api/v3/allOpenOrders  (HMAC SHA256)
 symbol | STRING | YES |
 orderIdList | STRING | NO | id数组字符串
 origClientOrderIdList | STRING | NO | clientOrderId数组字符串
-recvWindow | LONG | NO |
-timestamp | LONG | YES |
 
 
 ## 查询所有订单 (USER_DATA)
@@ -1344,8 +1331,6 @@ orderId | LONG | NO |
 startTime | LONG | NO |
 endTime | LONG | NO |
 limit | INT | NO | 默认 500; 最大 1000.
-recvWindow | LONG | NO | 
-timestamp | LONG | YES |  
 
 * 查询时间范围最大不得超过7天
 * 默认查询最近7天内的数据 
@@ -1386,8 +1371,6 @@ type | STRING | NO |  类别
 startTime | LONG | NO | 开始时间
 endTime | LONG | NO |  结束时间
 limit | LONG | NO | 返回的结果集数量 默认值:100 最大值:1000
-recvWindow | LONG | NO |  
-timestamp | LONG | YES |
 
 注意:
 
@@ -1421,8 +1404,6 @@ amount |	DECIMAL | 	YES |	数量
 asset |	STRING | 	YES |	资产
 clientTranId |	STRING | 	YES |	交易id 
 kindType |	STRING | 	YES |	交易类型
-recvWindow | LONG | NO | 
-timestamp	| LONG | YES	|	时间戳
 
 注意:
 * kindType 取值为FUTURE_SPOT(期货转现货),SPOT_FUTURE(现货转期货)
@@ -1482,8 +1463,6 @@ fee | STRING | YES |
 receiver | STRING | YES | 
 nonce | STRING | YES |  当前时间的微秒值 
 userSignature | STRING | YES | 
-recvWindow | LONG | NO | 
-timestamp | LONG | YES | 
 
 注意:
 * chainId: 1(ETH),56(BSC),42161(Arbi)
@@ -1583,8 +1562,6 @@ network | STRING | NO |
 userSignature | STRING | YES | 
 apikeyIP | STRING | NO | 
 desc | STRING | YES | 
-recvWindow | LONG | NO | 
-timestamp | LONG | YES | 
 
 注意:
 * userOperationType 仅可取值: CREATE_API_KEY
@@ -1641,8 +1618,6 @@ GET /api/v3/account (HMAC SHA256)
 
 名称 | 类型 | 是否必需| 描述
 ------------ | ------------ | ------------ | ------------
-recvWindow | LONG | NO | 
-timestamp | LONG | YES |
 
 
 ## 账户成交历史 (USER_DATA)
@@ -1687,8 +1662,6 @@ startTime | LONG | NO |
 endTime | LONG | NO |
 fromId | LONG | NO | 起始Trade id。 默认获取最新交易。
 limit | INT | NO | 默认 500; 最大 1000.
-recvWindow | LONG | NO | 
-timestamp | LONG | YES |
 
 * 如果`startTime` 和 `endTime` 均未发送, 只会返回最近7天的数据。
 * startTime 和 endTime 的最大间隔为7天
@@ -2382,12 +2355,6 @@ listenKey | STRING | YES
 ### -1020 UNSUPPORTED_OPERATION
  * This operation is not supported.
  * 不支持此操作。
-
-### -1021 INVALID_TIMESTAMP
- * Timestamp for this request is outside of the recvWindow.
-  * 此请求的时间戳在recvWindow之外。
- * Timestamp for this request was 1000ms ahead of the server's time.
- * 此请求的时间戳比服务器时间提前1000毫秒。
 
 ### -1022 INVALID_SIGNATURE
  * Signature for this request is not valid.
