@@ -116,7 +116,6 @@
 * The base endpoint is: **https://fapi.asterdex.com**
 * All endpoints return either a JSON object or array.
 * Data is returned in **ascending** order. Oldest first, newest last.
-* All time and timestamp related fields are in milliseconds.
 * All data types adopt definition in JAVA.
 
 ### HTTP Return Codes
@@ -2202,8 +2201,6 @@ Change user's Multi-Assets mode (Multi-Assets Mode or Single-Asset Mode) on ***E
 | Name              | Type   | Mandatory | Description                                           |
 | ----------------- | ------ | --------- | ----------------------------------------------------- |
 | multiAssetsMargin | STRING | YES       | "true": Multi-Assets Mode; "false": Single-Asset Mode |
-| recvWindow        | LONG   | NO        |                                                       |
-| timestamp         | LONG   | YES       |                                                       |
 
 ## Get Current Multi-Assets Mode (USER_DATA)
 
@@ -2226,8 +2223,6 @@ Get user's Multi-Assets mode (Multi-Assets Mode or Single-Asset Mode) on ***Ever
 
 | Name       | Type | Mandatory | Description |
 | ---------- | ---- | --------- | ----------- |
-| recvWindow | LONG | NO        |             |
-| timestamp  | LONG | YES       |             |
 
 ## New Order  (TRADE)
 
@@ -2288,8 +2283,6 @@ Send in a new order.
 | workingType      | ENUM    | NO        | stopPrice triggered by: "MARK_PRICE", "CONTRACT_PRICE". Default "CONTRACT_PRICE"                                                       |
 | priceProtect     | STRING  | NO        | "TRUE" or "FALSE", default "FALSE". Used with`STOP/STOP_MARKET` or `TAKE_PROFIT/TAKE_PROFIT_MARKET` orders.                            |
 | newOrderRespType | ENUM    | NO        | "ACK", "RESULT", default "ACK"                                                                                                         |
-| recvWindow       | LONG    | NO        |                                                                                                                                        |
-| timestamp        | LONG    | YES       |                                                                                                                                        |
 
 Additional mandatory parameters based on `type`:
 
@@ -2384,8 +2377,6 @@ Additional mandatory parameters based on `type`:
 | Name        | Type       | Mandatory | Description              |
 | ----------- | ---------- | --------- | ------------------------ |
 | batchOrders | LIST | YES       | order list. Max 5 orders |
-| recvWindow  | LONG       | NO        |                          |
-| timestamp   | LONG       | YES       |                          |
 
 **Where ``batchOrders`` is the list of order parameters in JSON**
 
@@ -2438,7 +2429,6 @@ amount |	DECIMAL | 	YES |	amount
 asset |	STRING | 	YES |	asset
 clientTranId |	STRING | 	YES |	transaction id 
 kindType |	STRING | 	YES |	kindType
-timestamp	| LONG | YES	|	timestamp
 
 Notes:
 
@@ -2498,8 +2488,6 @@ Check an order's status.
 | symbol            | STRING | YES       |             |
 | orderId           | LONG   | NO        |             |
 | origClientOrderId | STRING | NO        |             |
-| recvWindow        | LONG   | NO        |             |
-| timestamp         | LONG   | YES       |             |
 
 Notes:
 
@@ -2550,8 +2538,6 @@ Cancel an active order.
 | symbol            | STRING | YES       |             |
 | orderId           | LONG   | NO        |             |
 | origClientOrderId | STRING | NO        |             |
-| recvWindow        | LONG   | NO        |             |
-| timestamp         | LONG   | YES       |             |
 
 Either `orderId` or `origClientOrderId` must be sent.
 
@@ -2576,8 +2562,6 @@ Either `orderId` or `origClientOrderId` must be sent.
 | Name       | Type   | Mandatory | Description |
 | ---------- | ------ | --------- | ----------- |
 | symbol     | STRING | YES       |             |
-| recvWindow | LONG   | NO        |             |
-| timestamp  | LONG   | YES       |             |
 
 ## Cancel Multiple Orders (TRADE)
 
@@ -2628,8 +2612,6 @@ Either `orderId` or `origClientOrderId` must be sent.
 | symbol                | STRING         | YES       |                                                                                                 |
 | orderIdList           | LIST\   | NO        | max length 10 e.g. [1234567,2345678]                                                      |
 | origClientOrderIdList | LIST\ | NO        | max length 10 e.g. ["my_id_1","my_id_2"], encode the double quotes. No space after comma. |
-| recvWindow            | LONG           | NO        |                                                                                                 |
-| timestamp             | LONG           | YES       |                                                                                                 |
 
 Either `orderIdList` or `origClientOrderIdList ` must be sent.
 
@@ -2657,8 +2639,6 @@ Cancel all open orders of the specified symbol at the end of the specified count
 | ------------- | ------ | --------- | -------------------------------------------------------- |
 | symbol        | STRING | YES       |                                                          |
 | countdownTime | LONG   | YES       | countdown time, 1000 for 1 second. 0 to cancel the timer |
-| recvWindow    | LONG   | NO        |                                                          |
-| timestamp     | LONG   | YES       |                                                          |
 
 * The endpoint should be called repeatedly as heartbeats so that the existing countdown time can be canceled and replaced by a new one.
 * Example usage:
@@ -2710,8 +2690,6 @@ Cancel all open orders of the specified symbol at the end of the specified count
 | symbol            | STRING | YES       |             |
 | orderId           | LONG   | NO        |             |
 | origClientOrderId | STRING | NO        |             |
-| recvWindow        | LONG   | NO        |             |
-| timestamp         | LONG   | YES       |             |
 
 * Either`orderId` or `origClientOrderId` must be sent
 * If the queried order has been filled or cancelled, the error message "Order does not exist" will be returned.
@@ -2762,8 +2740,6 @@ Get all open orders on a symbol. **Careful** when accessing this with no symbol.
 | Name       | Type   | Mandatory | Description |
 | ---------- | ------ | --------- | ----------- |
 | symbol     | STRING | NO        |             |
-| recvWindow | LONG   | NO        |             |
-| timestamp  | LONG   | YES       |             |
 
 * If the symbol is not sent, orders for all symbols will be returned in an array.
 
@@ -2822,8 +2798,6 @@ Get all account orders; active, canceled, or filled.
 | startTime  | LONG   | NO        |                        |
 | endTime    | LONG   | NO        |                        |
 | limit      | INT    | NO        | Default 500; max 1000. |
-| recvWindow | LONG   | NO        |                        |
-| timestamp  | LONG   | YES       |                        |
 
 **Notes:**
 
@@ -2859,8 +2833,6 @@ Get all account orders; active, canceled, or filled.
 
 | Name       | Type | Mandatory | Description |
 | ---------- | ---- | --------- | ----------- |
-| recvWindow | LONG | NO        |             |
-| timestamp  | LONG | YES       |             |
 
 ## Account Information v3 (USER_DATA)
 
@@ -2951,8 +2923,6 @@ Get current account information.
 
 | Name       | Type | Mandatory | Description |
 | ---------- | ---- | --------- | ----------- |
-| recvWindow | LONG | NO        |             |
-| timestamp  | LONG | YES       |             |
 
 ## Change Initial Leverage (TRADE)
 
@@ -2979,8 +2949,6 @@ Change user's initial leverage of specific symbol market.
 | ---------- | ------ | --------- | ------------------------------------------ |
 | symbol     | STRING | YES       |                                            |
 | leverage   | INT    | YES       | target initial leverage: int from 1 to 125 |
-| recvWindow | LONG   | NO        |                                            |
-| timestamp  | LONG   | YES       |                                            |
 
 ## Change Margin Type (TRADE)
 
@@ -3004,8 +2972,6 @@ Change user's initial leverage of specific symbol market.
 | ---------- | ------ | --------- | ----------------- |
 | symbol     | STRING | YES       |                   |
 | marginType | ENUM   | YES       | ISOLATED, CROSSED |
-| recvWindow | LONG   | NO        |                   |
-| timestamp  | LONG   | YES       |                   |
 
 ## Modify Isolated Position Margin (TRADE)
 
@@ -3033,8 +2999,6 @@ Change user's initial leverage of specific symbol market.
 | positionSide | ENUM    | NO        | Default`BOTH` for One-way Mode ; `LONG` or `SHORT` for Hedge Mode. It must be sent with Hedge Mode. |
 | amount       | DECIMAL | YES       |                                                                                                     |
 | type         | INT     | YES       | 1: Add position margin，2: Reduce position margin                                                   |
-| recvWindow   | LONG    | NO        |                                                                                                     |
-| timestamp    | LONG    | YES       |                                                                                                     |
 
 * Only for isolated symbol
 
@@ -3077,8 +3041,6 @@ Change user's initial leverage of specific symbol market.
 | startTime  | LONG   | NO        |                                                   |
 | endTime    | LONG   | NO        |                                                   |
 | limit      | INT    | NO        | Default: 500                                      |
-| recvWindow | LONG   | NO        |                                                   |
-| timestamp  | LONG   | YES       |                                                   |
 
 ## Position Information v3 (USER_DATA)
 
@@ -3155,8 +3117,6 @@ Get current position information.
 | Name       | Type   | Mandatory | Description |
 | ---------- | ------ | --------- | ----------- |
 | symbol     | STRING | NO        |             |
-| recvWindow | LONG   | NO        |             |
-| timestamp  | LONG   | YES       |             |
 
 **Note**
 Please use with user data stream `ACCOUNT_UPDATE` to meet your timeliness and accuracy needs.
@@ -3202,8 +3162,6 @@ Get trades for a specific account and symbol.
 | endTime    | LONG   | NO        |                                                          |
 | fromId     | LONG   | NO        | Trade id to fetch from. Default gets most recent trades. |
 | limit      | INT    | NO        | Default 500; max 1000.                                   |
-| recvWindow | LONG   | NO        |                                                          |
-| timestamp  | LONG   | YES       |                                                          |
 
 * If `startTime` and `endTime` are both not sent, then the last 7 days' data will be returned.
 * The time between `startTime` and `endTime` cannot be longer than 7 days.
@@ -3252,8 +3210,6 @@ Get trades for a specific account and symbol.
 | startTime  | LONG   | NO        | Timestamp in ms to get funding from INCLUSIVE.                                                                                   |
 | endTime    | LONG   | NO        | Timestamp in ms to get funding until INCLUSIVE.                                                                                  |
 | limit      | INT    | NO        | Default 100; max 1000                                                                                                            |
-| recvWindow | LONG   | NO        |                                                                                                                                  |
-| timestamp  | LONG   | YES       |                                                                                                                                  |
 
 * If neither `startTime` nor `endTime` is sent, the recent 7-day data will be returned.
 * If `incomeType ` is not sent, all kinds of flow will be returned
@@ -3309,8 +3265,6 @@ Get trades for a specific account and symbol.
 | Name       | Type   | Mandatory | Description |
 | ---------- | ------ | --------- | ----------- |
 | symbol     | STRING | NO        |             |
-| recvWindow | LONG   | NO        |             |
-| timestamp  | LONG   | YES       |             |
 
 ## Position ADL Quantile Estimation (USER_DATA)
 
@@ -3350,8 +3304,6 @@ Get trades for a specific account and symbol.
 | Name       | Type   | Mandatory | Description |
 | ---------- | ------ | --------- | ----------- |
 | symbol     | STRING | NO        |             |
-| recvWindow | LONG   | NO        |             |
-| timestamp  | LONG   | YES       |             |
 
 * Values update every 30s.
 * Values 0, 1, 2, 3, 4 shows the queue position and possibility of ADL from low to high.
@@ -3427,8 +3379,6 @@ Get trades for a specific account and symbol.
 | startTime     | LONG   | NO        |                                                             |
 | endTime       | LONG   | NO        |                                                             |
 | limit         | INT    | NO        | Default 50; max 100.                                        |
-| recvWindow    | LONG   | NO        |                                                             |
-| timestamp     | LONG   | YES       |                                                             |
 
 * If "autoCloseType" is not sent, orders with both of the types will be returned
 * If "startTime" is not sent, data within 7 days before "endTime" can be queried
@@ -3455,8 +3405,6 @@ Get trades for a specific account and symbol.
 | Name       | Type   | Mandatory | Description |
 | ---------- | ------ | --------- | ----------- |
 | symbol     | STRING | YES       |             |
-| recvWindow | LONG   | NO        |             |
-| timestamp  | LONG   | YES       |             |
 
 # User Data Streams
 
@@ -3880,11 +3828,6 @@ Codes are universal,but messages can vary.
 > -1020 UNSUPPORTED_OPERATION
 
 * This operation is not supported.
-
-> -1021 INVALID_TIMESTAMP
-
-* Timestamp for this request is outside of the recvWindow.
-* Timestamp for this request was 1000ms ahead of the server's time.
 
 > -1022 INVALID_SIGNATURE
 
