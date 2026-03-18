@@ -2155,7 +2155,7 @@ Considering the possible data latency from RESTful endpoints during an extremely
 }
 ```
 
-``POST /fapi/v3/positionSide/dual (HMAC SHA256)``
+``POST /fapi/v3/positionSide/dual``
 
 Change user's position mode (Hedge Mode or One-way Mode ) on ***EVERY symbol***
 
@@ -2178,7 +2178,7 @@ Change user's position mode (Hedge Mode or One-way Mode ) on ***EVERY symbol***
 }
 ```
 
-``GET /fapi/v3/positionSide/dual (HMAC SHA256)``
+``GET /fapi/v3/positionSide/dual``
 
 Get user's position mode (Hedge Mode or One-way Mode ) on ***EVERY symbol***
 
@@ -2201,7 +2201,7 @@ Get user's position mode (Hedge Mode or One-way Mode ) on ***EVERY symbol***
 }
 ```
 
-``POST /fapi/v3/multiAssetsMargin (HMAC SHA256)``
+``POST /fapi/v3/multiAssetsMargin``
 
 Change user's Multi-Assets mode (Multi-Assets Mode or Single-Asset Mode) on ***Every symbol***
 
@@ -2224,7 +2224,7 @@ Change user's Multi-Assets mode (Multi-Assets Mode or Single-Asset Mode) on ***E
 }
 ```
 
-``GET /fapi/v3/multiAssetsMargin (HMAC SHA256)``
+``GET /fapi/v3/multiAssetsMargin``
 
 Get user's Multi-Assets mode (Multi-Assets Mode or Single-Asset Mode) on ***Every symbol***
 
@@ -2268,7 +2268,7 @@ Get user's Multi-Assets mode (Multi-Assets Mode or Single-Asset Mode) on ***Ever
 }
 ```
 
-``POST /fapi/v3/order  (HMAC SHA256)``
+``POST /fapi/v3/order ``
 
 Send in a new order.
 
@@ -2379,7 +2379,7 @@ Additional mandatory parameters based on `type`:
 ]
 ```
 
-``POST /fapi/v3/batchOrders  (HMAC SHA256)``
+``POST /fapi/v3/batchOrders ``
 
 **Weight:**
 5
@@ -2481,7 +2481,7 @@ Notes:
 }
 ```
 
-``GET /fapi/v3/order (HMAC SHA256)``
+``GET /fapi/v3/order``
 
 Check an order's status.
 
@@ -2536,7 +2536,7 @@ Notes:
 }
 ```
 
-``DELETE /fapi/v3/order  (HMAC SHA256)``
+``DELETE /fapi/v3/order ``
 
 Cancel an active order.
 
@@ -2564,7 +2564,7 @@ Either `orderId` or `origClientOrderId` must be sent.
 }
 ```
 
-``DELETE /fapi/v3/allOpenOrders  (HMAC SHA256)``
+``DELETE /fapi/v3/allOpenOrders ``
 
 **Weight:**
 1
@@ -2612,7 +2612,7 @@ Either `orderId` or `origClientOrderId` must be sent.
 ]
 ```
 
-``DELETE /fapi/v3/batchOrders  (HMAC SHA256)``
+``DELETE /fapi/v3/batchOrders ``
 
 **Weight:**
 1
@@ -2640,7 +2640,7 @@ Either `orderIdList` or `origClientOrderIdList ` must be sent.
 
 Cancel all open orders of the specified symbol at the end of the specified countdown.
 
-``POST /fapi/v3/countdownCancelAll  (HMAC SHA256)``
+``POST /fapi/v3/countdownCancelAll ``
 
 **Weight:**
 10
@@ -2691,7 +2691,7 @@ Cancel all open orders of the specified symbol at the end of the specified count
 }
 ```
 
-``GET /fapi/v3/openOrder  (HMAC SHA256)``
+``GET /fapi/v3/openOrder ``
 
 **Weight:** 1
 
@@ -2740,7 +2740,7 @@ Cancel all open orders of the specified symbol at the end of the specified count
 ]
 ```
 
-``GET /fapi/v3/openOrders  (HMAC SHA256)``
+``GET /fapi/v3/openOrders ``
 
 Get all open orders on a symbol. **Careful** when accessing this with no symbol.
 
@@ -2789,7 +2789,7 @@ Get all open orders on a symbol. **Careful** when accessing this with no symbol.
 ]
 ```
 
-``GET /fapi/v3/allOrders (HMAC SHA256)``
+``GET /fapi/v3/allOrders``
 
 Get all account orders; active, canceled, or filled.
 
@@ -2836,7 +2836,7 @@ Get all account orders; active, canceled, or filled.
 ]
 ```
 
-``GET /fapi/v3/balance (HMAC SHA256)``
+``GET /fapi/v3/balance``
 
 **Weight:**
 5
@@ -2924,7 +2924,7 @@ Get all account orders; active, canceled, or filled.
 }
 ```
 
-``GET /fapi/v3/account (HMAC SHA256)``
+``GET /fapi/v3/account``
 
 Get current account information.
 
@@ -2948,7 +2948,7 @@ Get current account information.
 }
 ```
 
-``POST /fapi/v3/leverage (HMAC SHA256)``
+``POST /fapi/v3/leverage``
 
 Change user's initial leverage of specific symbol market.
 
@@ -2973,7 +2973,7 @@ Change user's initial leverage of specific symbol market.
 }
 ```
 
-``POST /fapi/v3/marginType (HMAC SHA256)``
+``POST /fapi/v3/marginType``
 
 **Weight:**
 1
@@ -2998,7 +2998,7 @@ Change user's initial leverage of specific symbol market.
 }
 ```
 
-``POST /fapi/v3/positionMargin (HMAC SHA256)``
+``POST /fapi/v3/positionMargin``
 
 **Weight:**
 1
@@ -3039,7 +3039,7 @@ Change user's initial leverage of specific symbol market.
 ]
 ```
 
-``GET /fapi/v3/positionMargin/history (HMAC SHA256)``
+``GET /fapi/v3/positionMargin/history``
 
 **Weight:**
 1
@@ -3117,7 +3117,7 @@ Change user's initial leverage of specific symbol market.
 ]
 ```
 
-``GET /fapi/v3/positionRisk (HMAC SHA256)``
+``GET /fapi/v3/positionRisk``
 
 Get current position information.
 
@@ -3158,7 +3158,7 @@ Please use with user data stream `ACCOUNT_UPDATE` to meet your timeliness and ac
 ]
 ```
 
-``GET /fapi/v3/userTrades  (HMAC SHA256)``
+``GET /fapi/v3/userTrades ``
 
 Get trades for a specific account and symbol.
 
@@ -3208,7 +3208,7 @@ Get trades for a specific account and symbol.
 ]
 ```
 
-``GET /fapi/v3/income (HMAC SHA256)``
+``GET /fapi/v3/income``
 
 **Weight:**
 30
@@ -3407,7 +3407,7 @@ Get trades for a specific account and symbol.
 }
 ```
 
-``GET /fapi/v3/commissionRate (HMAC SHA256)``
+``GET /fapi/v3/commissionRate``
 
 **Weight:**
 20
