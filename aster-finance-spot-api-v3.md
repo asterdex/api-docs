@@ -1189,8 +1189,7 @@ Retrieve all current open orders for trading pairs. Use calls without a trading 
 ```
 
 ``
-DEL /api/v3/allOpenOrders  (HMAC SHA256)
-``
+DEL /api/v3/allOpenOrders ``
 
 **Weight:**
 - ***1***
@@ -1318,8 +1317,7 @@ asset | STRING | YES |
 ```
 
 ``
-POST /api/v3/aster/user-withdraw (HMAC SHA256)
-``
+POST /api/v3/aster/user-withdraw``
 
 **Weight:**
 1
