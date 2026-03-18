@@ -1037,8 +1037,7 @@ symbol | STRING | YES |
 ```
 
 ``
-POST /api/v3/order  (HMAC SHA256)
-``
+POST /api/v3/order ``
 
 发送下单。
 
@@ -1105,8 +1104,7 @@ stopPrice | DECIMAL | NO | 仅 `STOP`, `STOP_MARKET` , `TAKE_PROFIT`,`TAKE_PROFI
 ```
 
 ``
-DELETE /api/v3/order  (HMAC SHA256)
-``
+DELETE /api/v3/order ``
 
 取消有效订单。
 
@@ -1148,8 +1146,7 @@ origClientOrderId | STRING | NO |
 ```
 
 ``
-GET /api/v3/order (HMAC SHA256)
-``
+GET /api/v3/order``
 
 查询订单状态。
 
@@ -1199,8 +1196,7 @@ origClientOrderId | STRING | NO |
 ```
 
 ``
-GET /api/v3/openOrder (HMAC SHA256)
-``
+GET /api/v3/openOrder``
 
 查询订单状态。
 
@@ -1248,8 +1244,7 @@ origClientOrderId | STRING | NO |
 ```
 
 ``
-GET /api/v3/openOrders  (HMAC SHA256)
-``
+GET /api/v3/openOrders ``
 
 获取交易对的所有当前挂单， 请小心使用不带交易对参数的调用。
 
@@ -1279,8 +1274,7 @@ symbol | STRING | NO |
 ```
 
 ``
-DEL /api/v3/allOpenOrders  (HMAC SHA256)
-``
+DEL /api/v3/allOpenOrders ``
 
 **权重:**
 - ***1***
@@ -1320,8 +1314,7 @@ origClientOrderIdList | STRING | NO | clientOrderId数组字符串
 ```
 
 ``
-GET /api/v3/allOrders (HMAC SHA256)
-``
+GET /api/v3/allOrders``
 
 获取所有帐户订单； 有效，已取消或已完成。
 
@@ -1347,8 +1340,7 @@ limit | INT | NO | 默认 500; 最大 1000.
 
 
 ``
-GET /api/v3/transactionHistory (HMAC SHA256)
-``
+GET /api/v3/transactionHistory``
 > **响应**
 
 ```javascript
@@ -1398,8 +1390,7 @@ limit | LONG | NO | 返回的结果集数量 默认值:100 最大值:1000
 ```
 
 ``
-POST /api/v3/asset/wallet/transfer  (HMAC SHA256)
-``
+POST /api/v3/asset/wallet/transfer ``
 
 **权重:**
 5
@@ -1455,8 +1446,7 @@ asset | STRING | YES |
 ```
 
 ``
-POST /api/v3/aster/user-withdraw (HMAC SHA256)
-``
+POST /api/v3/aster/user-withdraw``
 
 **权重:** 
 5
@@ -1615,8 +1605,7 @@ const signature = await signer.signMessage(message);
 ```
 
 ``
-GET /api/v3/account (HMAC SHA256)
-``
+GET /api/v3/account``
 
 获取当前账户信息。
 
@@ -1653,8 +1642,7 @@ GET /api/v3/account (HMAC SHA256)
 ```
 
 ``
-GET /api/v3/userTrades  (HMAC SHA256)
-``
+GET /api/v3/userTrades ``
 
 获取账户指定交易对的成交历史
 
