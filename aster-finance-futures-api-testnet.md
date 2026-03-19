@@ -283,111 +283,121 @@ typed_data = {
 > **Step 1:  As a query string**
 
 ```python
-import random
 import time
+import urllib
 
 import requests
-from eth_account.messages import encode_typed_data
+from eth_account.messages import  encode_structured_data
 from eth_account import Account
 
-from eip712 import typed_data
+typed_data = {
+  "types": {
+    "EIP712Domain": [
+      {"name": "name", "type": "string"},
+      {"name": "version", "type": "string"},
+      {"name": "chainId", "type": "uint256"},
+      {"name": "verifyingContract", "type": "address"}
+    ],
+    "Message": [
+      { "name": "msg", "type": "string" }
+    ]
+  },
+  "primaryType": "Message",
+  "domain": {
+    "name": "AsterSignTransaction",
+    "version": "1",
+    "chainId": 714,
+    "verifyingContract": "0x0000000000000000000000000000000000000000"
+  },
+  "message": {
+    "msg": "$msg"
+  }
+}
 
+headers = {
+    'Content-Type': 'application/x-www-form-urlencoded',
+    'User-Agent': 'PythonApp/1.0'
+}
 
-def get_url(my_dict) -> str:
-       return '&'.join(f'{key}={str(value)}'for key, value in my_dict.items())
+# config your user and agent info here
+user = '*'
+signer = '*'
+private_key = "*"
 
-def send_by_url() :
-    import random
-    import time
+host = 'https://fapi.asterdex-testnet.com'
 
-    import requests
-    from eth_account.messages import encode_typed_data
-    from eth_account import Account
+place_order = {"url":"/fapi/v3/order","method":"POST","params":{"symbol": "ASTERUSDT", "type": "LIMIT", "side": "BUY",
+                  "timeInForce": "GTC", "quantity": "20", "price": "0.5"}}
+batch_orders = {"url":"/fapi/v3/batchOrders","method":"POST","params":{
+          "batchOrders":"[{'symbol':'ASTERUSDT','type':'LIMIT','side':'BUY','timeInForce':'GTC','quantity':'20','price':'0.5'},{'symbol':'ASTERUSDT','type':'LIMIT','side':'BUY','timeInForce':'GTC','quantity':'20','price':'0.5'}]" }}
+listenKey = {"url":"/fapi/v3/listenKey","method":"POST","params":{}}
 
-    test_net_end_point = 'https://fapi.asterdex-testnet.com/fapi/v3/order'
-    param = 'symbol=BTCUSDT&side=BUY&type=LIMIT&quantity=1&price=9000&timeInForce=GTC'
+_last_ms = 0
+_i = 0
 
-    nonce = int(time.time()) * 1_000_000 + random.randint(0, 999999)
-    param += '&nonce=' + str(nonce)
-    param += '&user=' + '0x63DD5aCC6b1aa0f563956C0e534DD30B6dcF7C4e'
-    param += '&signer=' + '0xbEf084ad26b44F002C3b55DB3bf7241003dABdab'
+def get_nonce():
+    global _last_ms, _i
+    now_ms = int(time.time())
 
+    if now_ms == _last_ms:
+        _i += 1
+    else:
+        _last_ms = now_ms
+        _i = 0
+
+    return now_ms * 1_000_000 + _i
+
+def send_by_url(api) :
+    my_dict = api['params']
+    url = host + api['url']
+
+    my_dict['nonce'] = str(get_nonce())
+    my_dict['user'] = user
+    my_dict['signer'] = signer
+
+    param = urllib.parse.urlencode(my_dict)
+
+    print(param)
     typed_data['message']['msg'] = param
-
-    message = encode_typed_data(full_message=typed_data)
-
-    private_key = "*"
+    message = encode_structured_data(typed_data)
     signed = Account.sign_message(message, private_key=private_key)
-    print(signed.signature.hex())
 
-    url = test_net_end_point + '?' + param + '&signature=' + signed.signature.hex()
-
-    headers = {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'User-Agent': 'PythonApp/1.0'
-    }
+    url = url + '?' + param + '&signature=' + signed.signature.hex()
     print(url)
     res = requests.post(url, headers=headers)
 
     print(res.text)
 
-if __name__ == '__main__':
-    send_by_url()
+def send_by_body(api) :
+       my_dict = api['params']
+       url = host +api['url']
+       my_dict['nonce'] = str(get_nonce())
+       my_dict['user'] = user
+       my_dict['signer'] = signer
 
+       param = urllib.parse.urlencode(my_dict)
+       typed_data['message']['msg'] = param
+       message = encode_structured_data(typed_data)
 
-```
-
-> **Step 1:  As a body**
-
-```python
-import random
-import time
-
-import requests
-from eth_account.messages import encode_typed_data
-from eth_account import Account
-
-from eip712 import typed_data
-
-
-def get_url(my_dict) -> str:
-       return '&'.join(f'{key}={str(value)}'for key, value in my_dict.items())
-
-def send_by_body() :
-       my_dict = {"symbol": "BTCUSDT", "positionSide": "BOTH", "type": "LIMIT", "side": "BUY",
-                  "timeInForce": "GTC", "quantity": "0.01", "price": "81000"}
-
-       test_net_end_point = 'https://fapi.asterdex-testnet.com/fapi/v3/order'
-
-       nonce = int(time.time()) * 1_000_000 + random.randint(0, 999999)
-       my_dict['nonce'] = str(nonce)
-       my_dict['user'] = '0x63DD5aCC6b1aa0f563956C0e534DD30B6dcF7C4e'
-       my_dict['signer'] = '0xbEf084ad26b44F002C3b55DB3bf7241003dABdab'
-
-       content = get_url(my_dict)
-
-       typed_data['message']['msg'] = content
-
-       message = encode_typed_data(full_message=typed_data)
-
-       private_key = "*"
        signed = Account.sign_message(message, private_key=private_key)
        print(signed.signature.hex())
 
        my_dict['signature'] = signed.signature.hex()
 
-       headers = {
-           'Content-Type': 'application/x-www-form-urlencoded',
-           'User-Agent': 'PythonApp/1.0'
-       }
        print(my_dict)
-       res = requests.post(test_net_end_point, data=my_dict, headers=headers)
+       res = requests.post(url, data=my_dict, headers=headers)
 
        print(res.text)
 
 if __name__ == '__main__':
-    send_by_body()
+    send_by_url(place_order)
+    # send_by_url(batch_orders)
+    # send_by_body(place_order)
+    # send_by_body(batch_orders)
+    # send_by_body(listenKey)
+
 ```
+
 
 
 ## Public Endpoints Info
