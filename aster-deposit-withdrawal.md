@@ -198,7 +198,7 @@ curl 'https://fapi5.asterdex.com/fapi/v3/time'
 ### request:
 
 ```shell
-curl --location 'https://fapi.asterdex.com/fapi/aster/user-withdraw-info?timestamp=1742198400000&recvWindow=5000&signature=<signature>' \
+curl --location --request POST 'https://fapi.asterdex.com/fapi/aster/user-withdraw-info?timestamp=1742198400000&recvWindow=5000&signature=<signature>' \
   --header 'X-MBX-APIKEY: Your API KEY'
 ```
 
@@ -259,7 +259,7 @@ No additional parameters required beyond the standard V1 signature parameters (`
 ### request:
 
 ```shell
-curl --location 'https://fapi.asterdex.com/fapi/aster/deposit-withdraw-history?timestamp=1742198400000&recvWindow=5000&signature=<signature>' \
+curl --location --request POST 'https://fapi.asterdex.com/fapi/aster/deposit-withdraw-history?timestamp=1742198400000&recvWindow=5000&signature=<signature>' \
   --header 'X-MBX-APIKEY: Your API KEY'
 ```
 
