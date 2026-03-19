@@ -5,6 +5,8 @@
   - [get all withdraw assets](#get-all-withdraw-assets)
   - [estimate withdraw fee](#estimate-withdraw-fee)
   - [get server time](#get-server-time)
+  - [get user withdraw info](#get-user-withdraw-info)
+  - [get deposit and withdraw history](#get-deposit-and-withdraw-history)
 - [Signature](#signature)
   - [API-KEY Signature (V1)](#api-key-signature-v1)
   - [Pro API-KEY Signature (V3)](#pro-api-key-signature-v3)
@@ -188,6 +190,112 @@ curl 'https://fapi5.asterdex.com/fapi/v3/time'
 | field      | desc                                        |
 |------------|---------------------------------------------|
 | serverTime | Current server time in milliseconds (Unix)  |
+
+## get user withdraw info
+
+* Note: Follow the [API-KEY Signature (V1)](#api-key-signature-v1) instructions to generate the required request signature.
+
+### request:
+
+```shell
+curl --location 'https://fapi.asterdex.com/fapi/aster/user-withdraw-info?timestamp=1742198400000&recvWindow=5000&signature=<signature>' \
+  --header 'X-MBX-APIKEY: Your API KEY'
+```
+
+### params:
+
+No additional parameters required beyond the standard V1 signature parameters (`timestamp`, `recvWindow`, `signature`).
+
+### response:
+
+```json
+{
+    "userDailyLimit": "10000",
+    "userRemainingDailyLimit": "9000",
+    "totalDailyLimit": "1000000",
+    "totalRemainingDailyLimit": "980000",
+    "balances": {
+        "USDT": {
+            "currency": "USDT",
+            "spotTotalWithdrawAmount": "500",
+            "perpTotalWithdrawAmount": "300",
+            "dailyLimit": "9000",
+            "chainBalances": {
+                "56": {
+                    "chainId": 56,
+                    "spotMaxWithdrawAmount": "500",
+                    "perpMaxWithdrawAmount": "300",
+                    "chainLimit": "800",
+                    "withdrawFee": "0.5"
+                }
+            }
+        }
+    }
+}
+```
+
+| field                    | desc                                                              |
+|--------------------------|-------------------------------------------------------------------|
+| userDailyLimit           | User's daily withdrawal limit, denominated in USD                |
+| userRemainingDailyLimit  | User's remaining daily withdrawal limit, denominated in USD      |
+| totalDailyLimit          | Global daily withdrawal limit, denominated in USD                |
+| totalRemainingDailyLimit | Global remaining daily withdrawal limit, denominated in USD      |
+| balances                 | Map of non-zero asset balances, keyed by asset name              |
+| balances.currency        | Asset name                                                        |
+| balances.spotTotalWithdrawAmount | Total spot balance available for withdrawal               |
+| balances.perpTotalWithdrawAmount | Total futures balance available for withdrawal            |
+| balances.dailyLimit      | Remaining daily withdrawal limit for this asset, denominated in USD |
+| balances.chainBalances   | Per-chain balance info, keyed by chain ID                        |
+| balances.chainBalances.chainId           | Chain ID                                          |
+| balances.chainBalances.spotMaxWithdrawAmount | Max withdrawable spot amount on this chain        |
+| balances.chainBalances.perpMaxWithdrawAmount | Max withdrawable futures amount on this chain     |
+| balances.chainBalances.chainLimit        | Max withdrawable amount on this chain             |
+| balances.chainBalances.withdrawFee       | Withdrawal fee on this chain                      |
+
+## get deposit and withdraw history
+
+* Note: Follow the [API-KEY Signature (V1)](#api-key-signature-v1) instructions to generate the required request signature.
+
+### request:
+
+```shell
+curl --location 'https://fapi.asterdex.com/fapi/aster/deposit-withdraw-history?timestamp=1742198400000&recvWindow=5000&signature=<signature>' \
+  --header 'X-MBX-APIKEY: Your API KEY'
+```
+
+### params:
+
+No additional parameters required beyond the standard V1 signature parameters (`timestamp`, `recvWindow`, `signature`).
+
+### response:
+
+```json
+[
+    {
+        "id": "1234567",
+        "type": "DEPOSIT",
+        "asset": "USDT",
+        "amount": "100",
+        "state": "SUCCESS",
+        "txHash": "0x9a40f0119b670fb6b155744b51981f91c4c4c8a20c333441a63853fe7d055c90",
+        "time": 1742198400000,
+        "chainId": 56,
+        "accountType": "spot"
+    }
+]
+```
+
+| field       | desc                                                                 |
+|-------------|----------------------------------------------------------------------|
+| id          | Record ID                                                            |
+| type        | Record type: `DEPOSIT` or `WITHDRAW`                                 |
+| asset       | Asset name, e.g., USDT                                               |
+| amount      | Amount                                                               |
+| state       | Status: `PROCESSING`, `SUCCESS`, or `FAILED`                         |
+| txHash      | On-chain transaction hash                                            |
+| time        | Record time in milliseconds (Unix)                                   |
+| chainId     | Chain ID                                                             |
+| accountType | Account type: `spot` or `perp`                                       |
 
 ---
 
