@@ -1563,15 +1563,6 @@ Best price/qty on the order book for a symbol or symbols.
 }
 ```
 
-> **Error response (missing symbol):**
-
-```javascript
-{
-  "code": -1102,
-  "msg": "Mandatory parameter 'symbol' was not sent, was empty/null, or malformed."
-}
-```
-
 > **Error response (invalid symbol):**
 
 ```javascript

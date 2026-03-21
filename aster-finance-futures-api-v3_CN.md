@@ -1569,15 +1569,6 @@ symbol | STRING | NO       | 交易对
 }
 ```
 
-> **错误响应(未传 symbol):**
-
-```javascript
-{
-  "code": -1102,
-  "msg": "Mandatory parameter 'symbol' was not sent, was empty/null, or malformed."
-}
-```
-
 > **错误响应(无效交易对):**
 
 ```javascript
