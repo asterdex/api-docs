@@ -40,6 +40,7 @@
 	- [24hr价格变动情况](#24hr价格变动情况)
 	- [最新价格](#最新价格)
 	- [当前最优挂单](#当前最优挂单)
+	- [获取指数价格成分](#获取指数价格成分)
 - [Websocket 行情推送](#websocket-行情推送)
 	- [实时订阅/取消数据流](#实时订阅取消数据流)
 		- [订阅一个信息流](#订阅一个信息流)
@@ -1515,6 +1516,82 @@ symbol | STRING | NO       | 交易对
 * 不发送交易对参数，则会返回所有交易对信息
 
 
+## 获取指数价格成分
+
+> **响应:**
+
+```javascript
+{
+  "symbol": "BTCUSDT",         // 交易对
+  "time": 1774077572319,       // 数据时间
+  "references": [
+    {
+      "exchange": "binance",   // 来源交易所
+      "symbol": "BTCUSDT",     // 来源交易所交易对
+      "weight": "0.41441441"   // 权重
+    },
+    {
+      "exchange": "okex",
+      "symbol": "BTC-USDT",
+      "weight": "0.13513513"
+    },
+    {
+      "exchange": "coinbase",
+      "symbol": "BTC-USDT",
+      "weight": "0.13513513"
+    },
+    {
+      "exchange": "gateio",
+      "symbol": "BTC_USDT",
+      "weight": "0.04504504"
+    },
+    {
+      "exchange": "kucoin",
+      "symbol": "BTC-USDT",
+      "weight": "0.06756756"
+    },
+    {
+      "exchange": "mxc",
+      "symbol": "BTCUSDT",
+      "weight": "0.06756756"
+    },
+    {
+      "exchange": "bybit",
+      "symbol": "BTCUSDT",
+      "weight": "0.06756756"
+    },
+    {
+      "exchange": "bitget",
+      "symbol": "BTCUSDT",
+      "weight": "0.06756756"
+    }
+  ]
+}
+```
+
+> **错误响应(无效交易对):**
+
+```javascript
+{
+  "code": -1000,
+  "msg": "Invalid symbol."
+}
+```
+
+``
+GET /fapi/v3/indexreferences
+``
+
+查询指数价格的成分交易所及各交易所的权重
+
+**权重:**
+1
+
+**参数:**
+
+ 名称  |  类型  | 是否必需 |  描述
+------ | ------ | -------- | ------
+symbol | STRING | YES      | 交易对
 
 
 # Websocket 行情推送
