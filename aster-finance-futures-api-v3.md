@@ -41,6 +41,7 @@
   - [24hr Ticker Price Change Statistics](#24hr-ticker-price-change-statistics)
   - [Symbol Price Ticker](#symbol-price-ticker)
   - [Symbol Order Book Ticker](#symbol-order-book-ticker)
+  - [Index Price References](#index-price-references)
 - [Websocket Market Streams](#websocket-market-streams)
   - [Live Subscribing/Unsubscribing to streams](#live-subscribingunsubscribing-to-streams)
     - [Subscribe to a stream](#subscribe-to-a-stream)
@@ -1507,6 +1508,92 @@ Best price/qty on the order book for a symbol or symbols.
 | symbol | STRING | NO        |             |
 
 * If the symbol is not sent, bookTickers for all symbols will be returned in an array.
+
+
+## Index Price References
+
+> **Response:**
+
+```javascript
+{
+  "symbol": "BTCUSDT",       // Trading pair
+  "time": 1774077572319,     // Data timestamp
+  "references": [
+    {
+      "exchange": "binance", // Source exchange
+      "symbol": "BTCUSDT",   // Symbol on source exchange
+      "weight": "0.41441441" // Weight
+    },
+    {
+      "exchange": "okex",
+      "symbol": "BTC-USDT",
+      "weight": "0.13513513"
+    },
+    {
+      "exchange": "coinbase",
+      "symbol": "BTC-USDT",
+      "weight": "0.13513513"
+    },
+    {
+      "exchange": "gateio",
+      "symbol": "BTC_USDT",
+      "weight": "0.04504504"
+    },
+    {
+      "exchange": "kucoin",
+      "symbol": "BTC-USDT",
+      "weight": "0.06756756"
+    },
+    {
+      "exchange": "mxc",
+      "symbol": "BTCUSDT",
+      "weight": "0.06756756"
+    },
+    {
+      "exchange": "bybit",
+      "symbol": "BTCUSDT",
+      "weight": "0.06756756"
+    },
+    {
+      "exchange": "bitget",
+      "symbol": "BTCUSDT",
+      "weight": "0.06756756"
+    }
+  ]
+}
+```
+
+> **Error response (missing symbol):**
+
+```javascript
+{
+  "code": -1102,
+  "msg": "Mandatory parameter 'symbol' was not sent, was empty/null, or malformed."
+}
+```
+
+> **Error response (invalid symbol):**
+
+```javascript
+{
+  "code": -1000,
+  "msg": "Invalid symbol."
+}
+```
+
+``GET /fapi/v3/indexreferences``
+
+Get the component exchanges and their weights for the index price of a symbol.
+
+**Weight:**
+1
+
+**Parameters:**
+
+| Name   | Type   | Mandatory | Description  |
+| ------ | ------ | --------- | ------------ |
+| symbol | STRING | YES       | Trading pair |
+
 
 # Websocket Market Streams
 
