@@ -217,10 +217,6 @@ It is strongly recommended to use websocket stream for getting data as much as p
 
 ## Endpoints requiring signature 
 * Security Type: TRADE, USER_DATA, USER_STREAM
-* After generating the string, combine it with the authentication signature parameters user, signer, and nonce, then use Web3’s ABI parameter encoding to generate the bytecode.
-* After generating the bytecode, use the Keccak algorithm to generate the hash.
-* Use the private key of **API wallet address** to sign the hash using web3’s ECDSA signature algorithm, generating the final signature.
-
 
 ## Example of POST /fapi/v3/order
 

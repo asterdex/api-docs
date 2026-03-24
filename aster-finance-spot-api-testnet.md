@@ -101,10 +101,6 @@ You are advised to use WebSocket messages to obtain the corresponding data as mu
 
 ## Endpoints requiring signature 
 * Security Type: TRADE, USER_DATA, USER_STREAM, MARKET_DATA
-* After converting the API parameters to strings, sort them by their key values in ASCII order to generate the final string. Note: All parameter values must be treated as strings during the signing process.
-* After generating the string, combine it with the authentication signature parameters user, signer, and nonce, then use Web3’s ABI parameter encoding to generate the bytecode.
-* After generating the bytecode, use the Keccak algorithm to generate the hash.
-* Use the private key of **API wallet address** to sign the hash using web3’s ECDSA signature algorithm, generating the final signature.
 
 ## Example of POST /api/v3/order
 
