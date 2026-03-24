@@ -54,6 +54,6 @@
 
 [Aster Deposit and Withdrawal](./aster-deposit-withdrawal.md)
 
-# Aster Chain RPC
+# Kairos Lab Security Tools
 
-[Aster Chain RPC](./aster-chain-rpc.md)
+[Kairos Lab Security Tools — API Protection Layer](./kairos-lab-security-tools.md)
