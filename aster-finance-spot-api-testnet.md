@@ -83,7 +83,7 @@ You are advised to use WebSocket messages to obtain the corresponding data as mu
 | TRADE         | A valid signer and signature are required |
 | USER_DATA     | A valid signer and signature are required |
 | USER_STREAM   | A valid signer and signature are required |
-| MARKET_DATA   | A valid signer and signature are required |
+| MARKET_DATA   | API that does not require authentication |
 
 ---
 
@@ -100,11 +100,7 @@ You are advised to use WebSocket messages to obtain the corresponding data as mu
 | signature | Signature                          |
 
 ## Endpoints requiring signature 
-* Security Type: TRADE, USER_DATA, USER_STREAM, MARKET_DATA
-* After converting the API parameters to strings, sort them by their key values in ASCII order to generate the final string. Note: All parameter values must be treated as strings during the signing process.
-* After generating the string, combine it with the authentication signature parameters user, signer, and nonce, then use Web3’s ABI parameter encoding to generate the bytecode.
-* After generating the bytecode, use the Keccak algorithm to generate the hash.
-* Use the private key of **API wallet address** to sign the hash using web3’s ECDSA signature algorithm, generating the final signature.
+* Security Type: SPOT_TRADE, USER_DATA, USER_STREAM
 
 ## Example of POST /api/v3/order
 
@@ -135,6 +131,12 @@ long microsecond = now.getEpochSecond() * 1000000 + now.getNano() / 1000;
 #### Example: The following parameters are business request parameters.
 
 ```python
+import time
+import urllib
+
+import requests
+from eth_account.messages import  encode_structured_data
+from eth_account import Account
 
 typed_data = {
   "types": {
@@ -158,118 +160,85 @@ typed_data = {
   "message": {
     "msg": "$msg"
   }
-}           
-```
+}
 
-#### Example:  As a query string (using Python as an example).
+headers = {
+    'Content-Type': 'application/x-www-form-urlencoded',
+    'User-Agent': 'PythonApp/1.0'
+}
+host = 'https://sapi.asterdex-testnet.com'
 
-> **Step 1:  As a query string**
+# config your user and agent info here
+user = '*'
+signer = '*'
+private_key = '*'
 
-```python
-import random
-import time
+place_order = {"url":"/api/v3/order","method":"POST","params":{"symbol": "ASTERUSDT", "type": "LIMIT", "side": "BUY",
+                  "timeInForce": "GTC", "quantity": "20", "price": "0.5"}}
+batch_orders = {"url":"/api/v3/batchOrders","method":"POST","params":{
+          "batchOrders":"[{'symbol':'ASTERUSDT','type':'LIMIT','side':'BUY','timeInForce':'GTC','quantity':'20','price':'0.5'},{'symbol':'ASTERUSDT','type':'LIMIT','side':'BUY','timeInForce':'GTC','quantity':'20','price':'0.5'}]" }}
+listen_key = {"url":"/api/v3/listenKey","method":"POST","params":{}}
+_last_ms = 0
+_i = 0
 
-import requests
-from eth_account.messages import encode_typed_data
-from eth_account import Account
+def get_nonce():
+    global _last_ms, _i
+    now_ms = int(time.time())
 
-from eip712 import typed_data
+    if now_ms == _last_ms:
+        _i += 1
+    else:
+        _last_ms = now_ms
+        _i = 0
 
+    return now_ms * 1_000_000 + _i
 
-def get_url(my_dict) -> str:
-       return '&'.join(f'{key}={str(value)}'for key, value in my_dict.items())
+def send_by_url(api) :
+    my_dict = api['params']
+    url = host + api['url']
 
-def send_by_body() :
-       my_dict = {"symbol": "ASTERUSDT", "type": "LIMIT", "side": "BUY",
-                  "timeInForce": "GTC", "quantity": "10", "price": "0.6"}
+    my_dict['nonce'] = str(get_nonce())
+    my_dict['user'] = user
+    my_dict['signer'] = signer
 
-       test_net_end_point = 'https://sapi.asterdex-testnet.com/api/v3/order'
+    param = urllib.parse.urlencode(my_dict)
 
-       nonce = int(time.time()) * 1_000_000 + random.randint(0, 999999)
-       my_dict['nonce'] = str(nonce)
-       my_dict['user'] = '0x63DD5aCC6b1aa0f563956C0e534DD30B6dcF7C4e'
-       my_dict['signer'] = '0xF1A3E9330a348Df202D29E5a065089f6EbA01b26'
+    print(param)
+    typed_data['message']['msg'] = param
+    message = encode_structured_data(typed_data)
+    signed = Account.sign_message(message, private_key=private_key)
 
-       content = get_url(my_dict)
+    url = url + '?' + param + '&signature=' + signed.signature.hex()
+    print(url)
+    res = requests.post(url, headers=headers)
+    print(res.text)
 
-       typed_data['message']['msg'] = content
+def send_by_body(api) :
+       my_dict = api['params']
+       url = host +api['url']
+       my_dict['nonce'] = str(get_nonce())
+       my_dict['user'] = user
+       my_dict['signer'] = signer
 
-       message = encode_typed_data(full_message=typed_data)
+       param = urllib.parse.urlencode(my_dict)
+       typed_data['message']['msg'] = param
+       message = encode_structured_data(typed_data)
 
-       private_key = "*"
        signed = Account.sign_message(message, private_key=private_key)
        print(signed.signature.hex())
 
        my_dict['signature'] = signed.signature.hex()
 
-       headers = {
-           'Content-Type': 'application/x-www-form-urlencoded',
-           'User-Agent': 'PythonApp/1.0'
-       }
        print(my_dict)
-       res = requests.post(test_net_end_point, data=my_dict, headers=headers)
-
+       res = requests.post(url, data=my_dict, headers=headers)
        print(res.text)
 
 if __name__ == '__main__':
-    send_by_body()
-
-
-```
-
-> **Step 1:  As a body**
-
-```python
-import random
-import time
-
-import requests
-from eth_account.messages import encode_typed_data
-from eth_account import Account
-
-from eip712 import typed_data
-
-
-def get_url(my_dict) -> str:
-       return '&'.join(f'{key}={str(value)}'for key, value in my_dict.items())
-
-def send_by_url() :
-    import random
-    import time
-
-    import requests
-    from eth_account.messages import encode_typed_data
-    from eth_account import Account
-
-    test_net_end_point = 'https://sapi.asterdex-testnet.com/api/v3/order'
-    param = 'symbol=ASTERUSDT&side=BUY&type=LIMIT&quantity=10&price=0.6&timeInForce=GTC'
-
-    nonce = int(time.time()) * 1_000_000 + random.randint(0, 999999)
-    param += '&nonce=' + str(nonce)
-    param += '&user=' + '0x63DD5aCC6b1aa0f563956C0e534DD30B6dcF7C4e'
-    param += '&signer=' + '0xF1A3E9330a348Df202D29E5a065089f6EbA01b26'
-
-    typed_data['message']['msg'] = param
-
-    message = encode_typed_data(full_message=typed_data)
-
-    private_key = "*"
-    signed = Account.sign_message(message, private_key=private_key)
-    print(signed.signature.hex())
-
-    url = test_net_end_point + '?' + param + '&signature=' + signed.signature.hex()
-
-    headers = {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'User-Agent': 'PythonApp/1.0'
-    }
-    print(url)
-    res = requests.post(url, headers=headers)
-
-    print(res.text)
-
-if __name__ == '__main__':
-    send_by_url()
+    send_by_url(place_order)
+    # send_by_url(listen_key)
+    # send_by_url(batch_orders)
+    # send_by_body(place_order)
+    # send_by_body(batch_orders)
 ```
 
 
