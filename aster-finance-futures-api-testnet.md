@@ -205,7 +205,7 @@ It is recommended to use a small recvWindow of 5000 or less!
 | TRADE         | A valid signer and signature are required |
 | USER_DATA     | A valid signer and signature are required |
 | USER_STREAM   | A valid signer and signature are required |
-| MARKET_DATA   | A valid signer and signature are required |
+| MARKET_DATA   | API that does not require authentication |
 
 ## Authentication signature payload
 
@@ -217,7 +217,7 @@ It is recommended to use a small recvWindow of 5000 or less!
 | signature | Signature                          |
 
 ## Endpoints requiring signature 
-* Security Type: TRADE, USER_DATA, USER_STREAM, MARKET_DATA
+* Security Type: TRADE, USER_DATA, USER_STREAM
 
 ## Example of POST /fapi/v3/order
 
@@ -248,37 +248,7 @@ long microsecond = now.getEpochSecond() * 1000000 + now.getNano() / 1000;
 #### Example: The following parameters are business request parameters.
 
 ```python
-
-typed_data = {
-  "types": {
-    "EIP712Domain": [
-      {"name": "name", "type": "string"},
-      {"name": "version", "type": "string"},
-      {"name": "chainId", "type": "uint256"},
-      {"name": "verifyingContract", "type": "address"}
-    ],
-    "Message": [
-      { "name": "msg", "type": "string" }
-    ]
-  },
-  "primaryType": "Message",
-  "domain": {
-    "name": "AsterSignTransaction",
-    "version": "1",
-    "chainId": 714,
-    "verifyingContract": "0x0000000000000000000000000000000000000000"
-  },
-  "message": {
-    "msg": "$msg"
-  }
-}           
-```
-
-#### Example:  As a query string (using Python as an example).
-
-> **Step 1:  As a query string**
-
-```python
+import json
 import time
 import urllib
 
@@ -314,20 +284,18 @@ headers = {
     'Content-Type': 'application/x-www-form-urlencoded',
     'User-Agent': 'PythonApp/1.0'
 }
+host = 'https://fapi.asterdex-testnet.com'
 
 # config your user and agent info here
 user = '*'
 signer = '*'
-private_key = "*"
-
-host = 'https://fapi.asterdex-testnet.com'
+private_key = '*'
 
 place_order = {"url":"/fapi/v3/order","method":"POST","params":{"symbol": "ASTERUSDT", "type": "LIMIT", "side": "BUY",
                   "timeInForce": "GTC", "quantity": "20", "price": "0.5"}}
 batch_orders = {"url":"/fapi/v3/batchOrders","method":"POST","params":{
           "batchOrders":"[{'symbol':'ASTERUSDT','type':'LIMIT','side':'BUY','timeInForce':'GTC','quantity':'20','price':'0.5'},{'symbol':'ASTERUSDT','type':'LIMIT','side':'BUY','timeInForce':'GTC','quantity':'20','price':'0.5'}]" }}
-listenKey = {"url":"/fapi/v3/listenKey","method":"POST","params":{}}
-
+listen_key = {"url":"/fapi/v3/listenKey","method":"POST","params":{}}
 _last_ms = 0
 _i = 0
 
@@ -361,7 +329,6 @@ def send_by_url(api) :
     url = url + '?' + param + '&signature=' + signed.signature.hex()
     print(url)
     res = requests.post(url, headers=headers)
-
     print(res.text)
 
 def send_by_body(api) :
@@ -382,15 +349,15 @@ def send_by_body(api) :
 
        print(my_dict)
        res = requests.post(url, data=my_dict, headers=headers)
-
+       # print(res.headers)
        print(res.text)
 
 if __name__ == '__main__':
     send_by_url(place_order)
+    # send_by_url(listen_key)
     # send_by_url(batch_orders)
     # send_by_body(place_order)
     # send_by_body(batch_orders)
-    # send_by_body(listenKey)
 
 ```
 
