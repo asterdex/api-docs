@@ -288,12 +288,13 @@ host = 'https://fapi3.asterdex.com'
 # config your user and agent info here
 user = '*'
 signer = '*'
-private_key = "*"
+private_key = '*'
 
 place_order = {"url":"/fapi/v3/order","method":"POST","params":{"symbol": "ASTERUSDT", "type": "LIMIT", "side": "BUY",
                   "timeInForce": "GTC", "quantity": "20", "price": "0.5"}}
 batch_orders = {"url":"/fapi/v3/batchOrders","method":"POST","params":{
           "batchOrders":"[{'symbol':'ASTERUSDT','type':'LIMIT','side':'BUY','timeInForce':'GTC','quantity':'20','price':'0.5'},{'symbol':'ASTERUSDT','type':'LIMIT','side':'BUY','timeInForce':'GTC','quantity':'20','price':'0.5'}]" }}
+
 batch_orders_delete = {"url": "/fapi/v3/batchOrders", "method": "DELETE",
                        "params": {"symbol": "BTCUSDT", "origClientOrderIdList": "[123,111,123]"}}
 
@@ -315,6 +316,7 @@ def get_nonce():
 def send_by_url(api) :
     my_dict = api['params']
     url = host + api['url']
+    method = api['method']
 
     my_dict['nonce'] = str(get_nonce())
     my_dict['user'] = user
@@ -329,13 +331,19 @@ def send_by_url(api) :
 
     url = url + '?' + param + '&signature=' + signed.signature.hex()
     print(url)
-    res = requests.post(url, headers=headers)
 
-    print(res.text)
+    if method == 'DELETE':
+        res = requests.delete(url, headers=headers)
+        print(res.text)
+    if method == 'POST':
+        res = requests.post(url, headers=headers)
+        print(res.text)
 
 def send_by_body(api) :
        my_dict = api['params']
        url = host +api['url']
+       method = api['method']
+
        my_dict['nonce'] = str(get_nonce())
        my_dict['user'] = user
        my_dict['signer'] = signer
@@ -350,16 +358,20 @@ def send_by_body(api) :
        my_dict['signature'] = signed.signature.hex()
 
        print(my_dict)
-       res = requests.post(url, data=my_dict, headers=headers)
-
-       print(res.text)
+       if method == 'DELETE':
+           res = requests.delete(url, data=my_dict, headers=headers)
+           print(res.text)
+       if method == 'POST':
+           res = requests.post(url, data=my_dict, headers=headers)
+           print(res.text)
 
 if __name__ == '__main__':
     send_by_url(place_order)
-    # send_by_url(batch_orders)
     # send_by_body(place_order)
     # send_by_body(batch_orders)
-    #send_by_url(batch_orders_delete)
+    # send_by_url(batch_orders_delete)
+    # send_by_body(batch_orders_delete)
+
 ```
 
 ## Public Endpoints Info
