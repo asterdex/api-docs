@@ -294,6 +294,8 @@ place_order = {"url":"/fapi/v3/order","method":"POST","params":{"symbol": "ASTER
                   "timeInForce": "GTC", "quantity": "20", "price": "0.5"}}
 batch_orders = {"url":"/fapi/v3/batchOrders","method":"POST","params":{
           "batchOrders":"[{'symbol':'ASTERUSDT','type':'LIMIT','side':'BUY','timeInForce':'GTC','quantity':'20','price':'0.5'},{'symbol':'ASTERUSDT','type':'LIMIT','side':'BUY','timeInForce':'GTC','quantity':'20','price':'0.5'}]" }}
+batch_orders_delete = {"url": "/fapi/v3/batchOrders", "method": "DELETE",
+                       "params": {"symbol": "BTCUSDT", "origClientOrderIdList": "[123,111,123]"}}
 
 _last_ms = 0
 _i = 0
@@ -357,6 +359,7 @@ if __name__ == '__main__':
     # send_by_url(batch_orders)
     # send_by_body(place_order)
     # send_by_body(batch_orders)
+    #send_by_url(batch_orders_delete)
 ```
 
 ## Public Endpoints Info
