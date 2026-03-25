@@ -282,7 +282,7 @@ batch_orders = {"url":"/fapi/v3/batchOrders","method":"POST","params":{
           "batchOrders":"[{'symbol':'ASTERUSDT','type':'LIMIT','side':'BUY','timeInForce':'GTC','quantity':'20','price':'0.5'},{'symbol':'ASTERUSDT','type':'LIMIT','side':'BUY','timeInForce':'GTC','quantity':'20','price':'0.5'}]" }}
 
 batch_orders_delete = {"url": "/fapi/v3/batchOrders", "method": "DELETE",
-                       "params": {"symbol": "BTCUSDT", "origClientOrderIdList": "[123,111,123]"}}
+                       "params": {"symbol": "BTCUSDT", "origClientOrderIdList": '["123aaaa","111ccc","321313"]'}}
 
 _last_ms = 0
 _i = 0
