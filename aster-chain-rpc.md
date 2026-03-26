@@ -15,7 +15,7 @@
 * The `blockTag` parameter accepts `"latest"` to query the most recent state.
 * All time-related fields are in milliseconds.
 
-> **Note:** The following endpoints only return data when the user has **privacy mode disabled**. If privacy mode is enabled, no data will be returned.
+> **Note:** In the Open Orders and Fills endpoints, account privacy enabled only applies to new orders placed after it is enabled; orders completed when account privacy is disabled remain visible as usual.
 
 ---
 
@@ -236,12 +236,10 @@ Query the trade fill history for a given address within a specified time range.
 Index | Name | Type | Mandatory | Description
 ----- | ---- | ---- | --------- | -----------
 0 | address | STRING | YES | The wallet address to query
-1 | symbol | STRING | YES | Trading pair symbol (e.g. `"BTCUSDT"`)
-2 | from | LONG | YES | Start time in milliseconds
-3 | to | LONG | YES | End time in milliseconds
-4 | limit | INT | YES | Number of records per page; max `1000` per request
-5 | page | INT | YES | Page number, starting from `1`
-6 | blockTag | STRING | YES | Block tag, use `"latest"` for the most recent state
+1 | symbol | STRING | NO | Trading pair symbol (e.g. `"BTCUSDT"`); pass `null` to query all symbols
+2 | from | LONG | NO | Start time in milliseconds. If omitted and `to` is provided, defaults to `to - 7 days`. If both are omitted, defaults to 7 days before current time. Must be ≥ `1772678119418` (block 1 genesis); queries before this timestamp return empty results.
+3 | to | LONG | NO | End time in milliseconds. If omitted and `from` is provided, defaults to `from + 7 days`. If both are omitted, defaults to current time. The time range between `from` and `to` must not exceed 7 days.
+4 | blockTag | STRING | YES | Block tag, use `"latest"` for the most recent state
 
 > **Request Example:**
 
@@ -254,12 +252,10 @@ curl -X POST "https://tapi.asterdex.com/info" \
     "jsonrpc": "2.0",
     "method": "aster_userFills",
     "params": [
-      "0x690931c*********",
-      "BTCUSDT",
-      1772887745000,
-      1773146945000,
-      2,
-      1,
+      "0x87EC27*********************",
+      null,
+      null,
+      null,
       "latest"
     ]
   }'
@@ -270,24 +266,38 @@ curl -X POST "https://tapi.asterdex.com/info" \
 ```javascript
 {
   "result": {
-    "address": "0x690931c*********",
+    "address": "0x87EC27*********************",
     "accountPrivy": "disabled",
-    "startTime": 1772887745000,
-    "endTime": 1783146945000,
+    "startTime": 1773916057398,
+    "endTime": 1774520857398,
     "fills": [
       {
         "symbol": "BTCUSDT",
         "side": "BUY",
-        "price": "71087.9",
-        "qty": "0.00100000",
-        "time": 1773405618000
+        "price": "69999",
+        "qty": "0.001",
+        "time": 1774233564000
+      },
+      {
+        "symbol": "BTCUSDT",
+        "side": "SELL",
+        "price": "70658.6",
+        "qty": "0.001",
+        "time": 1774084612000
+      },
+      {
+        "symbol": "ETHUSDT",
+        "side": "BUY",
+        "price": "1971",
+        "qty": "0.013",
+        "time": 1774084518000
       },
       {
         "symbol": "BTCUSDT",
         "side": "BUY",
-        "price": "71088.1",
-        "qty": "0.00100000",
-        "time": 1773401493000
+        "price": "70676.7",
+        "qty": "0.001",
+        "time": 1774084489000
       }
     ]
   },
@@ -302,9 +312,9 @@ Name | Type | Description
 ---- | ---- | -----------
 address | STRING | Wallet address
 accountPrivy | STRING | Privacy mode status: `"disabled"` or `"enabled"`
-startTime | LONG | Query start time in milliseconds
-endTime | LONG | Query end time in milliseconds
-fills | ARRAY | List of trade fills
+startTime | LONG | Actual query start time in milliseconds
+endTime | LONG | Actual query end time in milliseconds
+fills | ARRAY | List of trade fills; returns at most `1000` records
 fills[].symbol | STRING | Trading pair symbol
 fills[].side | STRING | Trade side: `BUY` or `SELL`
 fills[].price | STRING | Fill price
