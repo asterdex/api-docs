@@ -251,6 +251,7 @@ long microsecond = now.getEpochSecond() * 1000000 + now.getNano() / 1000;
 import json
 import time
 import urllib
+import threading
 
 import requests
 from eth_account.messages import  encode_structured_data
@@ -296,20 +297,23 @@ place_order = {"url":"/fapi/v3/order","method":"POST","params":{"symbol": "ASTER
 batch_orders = {"url":"/fapi/v3/batchOrders","method":"POST","params":{
           "batchOrders":"[{'symbol':'ASTERUSDT','type':'LIMIT','side':'BUY','timeInForce':'GTC','quantity':'20','price':'0.5'},{'symbol':'ASTERUSDT','type':'LIMIT','side':'BUY','timeInForce':'GTC','quantity':'20','price':'0.5'}]" }}
 listen_key = {"url":"/fapi/v3/listenKey","method":"POST","params":{}}
+
 _last_ms = 0
 _i = 0
+_nonce_lock = threading.Lock()
 
 def get_nonce():
     global _last_ms, _i
-    now_ms = int(time.time())
+    with _nonce_lock:
+        now_ms = int(time.time())
 
-    if now_ms == _last_ms:
-        _i += 1
-    else:
-        _last_ms = now_ms
-        _i = 0
+        if now_ms == _last_ms:
+            _i += 1
+        else:
+            _last_ms = now_ms
+            _i = 0
 
-    return now_ms * 1_000_000 + _i
+        return now_ms * 1_000_000 + _i
 
 def send_by_url(api) :
     my_dict = api['params']
