@@ -141,6 +141,8 @@ POST /info
 
 Query all open orders for a given address.
 
+> **Note:** Only orders created at or after block 1 genesis time (`1772678119418`) are returned. Maximum **1000** records returned.
+
 **Method:** `aster_openOrders`
 
 **Weight:**
