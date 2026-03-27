@@ -236,6 +236,7 @@ long microsecond = now.getEpochSecond() * 1000000 + now.getNano() / 1000;
 ```python
 import time
 import urllib
+import threading
 
 import requests
 from eth_account.messages import  encode_structured_data
@@ -286,18 +287,20 @@ batch_orders_delete = {"url": "/fapi/v3/batchOrders", "method": "DELETE",
 
 _last_ms = 0
 _i = 0
+_nonce_lock = threading.Lock()
 
 def get_nonce():
     global _last_ms, _i
-    now_ms = int(time.time())
+    with _nonce_lock:
+        now_ms = int(time.time())
 
-    if now_ms == _last_ms:
-        _i += 1
-    else:
-        _last_ms = now_ms
-        _i = 0
+        if now_ms == _last_ms:
+            _i += 1
+        else:
+            _last_ms = now_ms
+            _i = 0
 
-    return now_ms * 1_000_000 + _i
+        return now_ms * 1_000_000 + _i
 
 def send_by_url(api) :
     my_dict = api['params']
