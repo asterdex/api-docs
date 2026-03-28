@@ -153,7 +153,7 @@ Query all open orders for a given address.
 Index | Name | Type | Mandatory | Description
 ----- | ---- | ---- | --------- | -----------
 0 | address | STRING | YES | The wallet address to query
-1 | symbol | STRING | NO | Trading pair symbol (e.g. `"BTCUSDT"`); pass `""` to query all symbols
+1 | symbol | STRING | NO | Trading pair symbol (e.g. `"BTCUSDT"`); pass `null` or `""` to query all symbols
 2 | blockTag | STRING | YES | Block tag, use `"latest"` for the most recent state
 
 > **Request Example:**
@@ -238,7 +238,7 @@ Query the trade fill history for a given address within a specified time range.
 Index | Name | Type | Mandatory | Description
 ----- | ---- | ---- | --------- | -----------
 0 | address | STRING | YES | The wallet address to query
-1 | symbol | STRING | NO | Trading pair symbol (e.g. `"BTCUSDT"`); pass `null` to query all symbols
+1 | symbol | STRING | NO | Trading pair symbol (e.g. `"BTCUSDT"`); pass `null` or `""` to query all symbols
 2 | from | LONG | NO | Start time in milliseconds. If omitted and `to` is provided, defaults to `to - 7 days`. If both are omitted, defaults to 7 days before current time. Must be ≥ `1772678119418` (block 1 genesis); queries before this timestamp return empty results.
 3 | to | LONG | NO | End time in milliseconds. If omitted and `from` is provided, defaults to `from + 7 days`. If both are omitted, defaults to current time. The time range between `from` and `to` must not exceed 7 days.
 4 | blockTag | STRING | YES | Block tag, use `"latest"` for the most recent state
