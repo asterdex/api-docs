@@ -3016,7 +3016,7 @@ Get all account orders; active, canceled, or filled.
 }
 ```
 
-``GET /fapi/v3/account``
+``GET /fapi/v3/accountWithJoinMargin``
 
 Get current account information.
 
