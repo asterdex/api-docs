@@ -64,7 +64,7 @@ curl -X POST "https://tapi.asterdex.com/info" \
 {
   "result": {
     "address": "0x690931c*********",
-    "accountPrivy": "disabled",
+    "accountPrivacy": "disabled",
     "perpAssets": [
       {
         "asset": "USD1",
@@ -111,7 +111,7 @@ curl -X POST "https://tapi.asterdex.com/info" \
 字段名 | 类型 | 说明
 ------ | ---- | ----
 address | STRING | 钱包地址
-accountPrivy | STRING | 隐私模式状态：`"disabled"` 已关闭 / `"enabled"` 已开启
+accountPrivacy | STRING | 隐私模式状态：`"disabled"` 已关闭 / `"enabled"` 已开启
 perpAssets | ARRAY | 永续合约资产列表
 perpAssets[].asset | STRING | 资产名称
 perpAssets[].walletBalance | DECIMAL | 钱包余额
@@ -153,7 +153,7 @@ POST /info
 下标 | 参数名 | 类型 | 是否必填 | 说明
 ---- | ------ | ---- | -------- | ----
 0 | address | STRING | 是 | 要查询的钱包地址
-1 | symbol | STRING | 否 | 交易对名称（如 `"BTCUSDT"`）；传入 `""` 查询所有交易对
+1 | symbol | STRING | 否 | 交易对名称（如 `"BTCUSDT"`）；传 `null` 或 `""` 查询所有交易对
 2 | blockTag | STRING | 是 | 区块标签，传入 `"latest"` 表示查询最新状态
 
 > **请求示例：**
@@ -180,7 +180,7 @@ curl -X POST "https://tapi.asterdex.com/info" \
 {
   "result": {
     "address": "0x690931c*********",
-    "accountPrivy": "disabled",
+    "accountPrivacy": "disabled",
     "openOrders": [
       {
         "orderId": "web_AD_7jz2xjo0ma4nblniq_98",
@@ -210,7 +210,7 @@ curl -X POST "https://tapi.asterdex.com/info" \
 字段名 | 类型 | 说明
 ------ | ---- | ----
 address | STRING | 钱包地址
-accountPrivy | STRING | 隐私模式状态：`"disabled"` 已关闭 / `"enabled"` 已开启
+accountPrivacy | STRING | 隐私模式状态：`"disabled"` 已关闭 / `"enabled"` 已开启
 openOrders | ARRAY | 当前挂单列表
 openOrders[].orderId | STRING | 订单 ID
 openOrders[].symbol | STRING | 交易对名称
@@ -238,7 +238,7 @@ POST /info
 下标 | 参数名 | 类型 | 是否必填 | 说明
 ---- | ------ | ---- | -------- | ----
 0 | address | STRING | 是 | 要查询的钱包地址
-1 | symbol | STRING | 否 | 交易对名称（如 `"BTCUSDT"`），传 `null` 则查询所有交易对
+1 | symbol | STRING | 否 | 交易对名称（如 `"BTCUSDT"`）；传 `null` 或 `""` 查询所有交易对
 2 | from | LONG | 否 | 查询起始时间（毫秒时间戳）。若不填且填了 `to`，则默认为 `to - 7天`；若两者均不填，则默认为当前时间往前 7 天。最小值为 `1772678119418`（block 1 创世时间），早于此时间的查询默认返回空。
 3 | to | LONG | 否 | 查询结束时间（毫秒时间戳）。若不填且填了 `from`，则默认为 `from + 7天`；若两者均不填，则默认为当前时间。`from` 与 `to` 时间间隔不得超过 7 天。
 4 | blockTag | STRING | 是 | 区块标签，传入 `"latest"` 表示查询最新状态
@@ -269,7 +269,7 @@ curl -X POST "https://tapi.asterdex.com/info" \
 {
   "result": {
     "address": "0x1c3C4*************",
-    "accountPrivy": "disabled",
+    "accountPrivacy": "disabled",
     "startTime": 1773916057398,
     "endTime": 1774520857398,
     "fills": [
@@ -313,7 +313,7 @@ curl -X POST "https://tapi.asterdex.com/info" \
 字段名 | 类型 | 说明
 ------ | ---- | ----
 address | STRING | 钱包地址
-accountPrivy | STRING | 隐私模式状态：`"disabled"` 已关闭 / `"enabled"` 已开启
+accountPrivacy | STRING | 隐私模式状态：`"disabled"` 已关闭 / `"enabled"` 已开启
 startTime | LONG | 实际查询起始时间（毫秒时间戳）
 endTime | LONG | 实际查询结束时间（毫秒时间戳）
 fills | ARRAY | 成交记录列表，最多返回 `1000` 条

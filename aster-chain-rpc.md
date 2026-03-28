@@ -64,7 +64,7 @@ curl -X POST "https://tapi.asterdex.com/info" \
 {
   "result": {
     "address": "0x690931c*********",
-    "accountPrivy": "disabled",
+    "accountPrivacy": "disabled",
     "perpAssets": [
       {
         "asset": "USD1",
@@ -111,7 +111,7 @@ curl -X POST "https://tapi.asterdex.com/info" \
 Name | Type | Description
 ---- | ---- | -----------
 address | STRING | Wallet address
-accountPrivy | STRING | Privacy mode status: `"disabled"` or `"enabled"`
+accountPrivacy | STRING | Privacy mode status: `"disabled"` or `"enabled"`
 perpAssets | ARRAY | List of perpetual assets and balances
 perpAssets[].asset | STRING | Asset name
 perpAssets[].walletBalance | DECIMAL | Wallet balance
@@ -153,7 +153,7 @@ Query all open orders for a given address.
 Index | Name | Type | Mandatory | Description
 ----- | ---- | ---- | --------- | -----------
 0 | address | STRING | YES | The wallet address to query
-1 | symbol | STRING | NO | Trading pair symbol (e.g. `"BTCUSDT"`); pass `""` to query all symbols
+1 | symbol | STRING | NO | Trading pair symbol (e.g. `"BTCUSDT"`); pass `null` or `""` to query all symbols
 2 | blockTag | STRING | YES | Block tag, use `"latest"` for the most recent state
 
 > **Request Example:**
@@ -180,7 +180,7 @@ curl -X POST "https://tapi.asterdex.com/info" \
 {
   "result": {
     "address": "0x690931c*********",
-    "accountPrivy": "disabled",
+    "accountPrivacy": "disabled",
     "openOrders": [
       {
         "orderId": "web_AD_7jz2xjo0ma4nblniq_98",
@@ -210,7 +210,7 @@ curl -X POST "https://tapi.asterdex.com/info" \
 Name | Type | Description
 ---- | ---- | -----------
 address | STRING | Wallet address
-accountPrivy | STRING | Privacy mode status: `"disabled"` or `"enabled"`
+accountPrivacy | STRING | Privacy mode status: `"disabled"` or `"enabled"`
 openOrders | ARRAY | List of open orders
 openOrders[].orderId | STRING | Order ID
 openOrders[].symbol | STRING | Trading pair symbol
@@ -238,7 +238,7 @@ Query the trade fill history for a given address within a specified time range.
 Index | Name | Type | Mandatory | Description
 ----- | ---- | ---- | --------- | -----------
 0 | address | STRING | YES | The wallet address to query
-1 | symbol | STRING | NO | Trading pair symbol (e.g. `"BTCUSDT"`); pass `null` to query all symbols
+1 | symbol | STRING | NO | Trading pair symbol (e.g. `"BTCUSDT"`); pass `null` or `""` to query all symbols
 2 | from | LONG | NO | Start time in milliseconds. If omitted and `to` is provided, defaults to `to - 7 days`. If both are omitted, defaults to 7 days before current time. Must be ≥ `1772678119418` (block 1 genesis); queries before this timestamp return empty results.
 3 | to | LONG | NO | End time in milliseconds. If omitted and `from` is provided, defaults to `from + 7 days`. If both are omitted, defaults to current time. The time range between `from` and `to` must not exceed 7 days.
 4 | blockTag | STRING | YES | Block tag, use `"latest"` for the most recent state
@@ -269,7 +269,7 @@ curl -X POST "https://tapi.asterdex.com/info" \
 {
   "result": {
     "address": "0x87EC27*********************",
-    "accountPrivy": "disabled",
+    "accountPrivacy": "disabled",
     "startTime": 1773916057398,
     "endTime": 1774520857398,
     "fills": [
@@ -313,7 +313,7 @@ curl -X POST "https://tapi.asterdex.com/info" \
 Name | Type | Description
 ---- | ---- | -----------
 address | STRING | Wallet address
-accountPrivy | STRING | Privacy mode status: `"disabled"` or `"enabled"`
+accountPrivacy | STRING | Privacy mode status: `"disabled"` or `"enabled"`
 startTime | LONG | Actual query start time in milliseconds
 endTime | LONG | Actual query end time in milliseconds
 fills | ARRAY | List of trade fills; returns at most `1000` records
