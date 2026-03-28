@@ -64,7 +64,7 @@ curl -X POST "https://tapi.asterdex.com/info" \
 {
   "result": {
     "address": "0x690931c*********",
-    "accountPrivy": "disabled",
+    "accountPrivacy": "disabled",
     "perpAssets": [
       {
         "asset": "USD1",
@@ -111,7 +111,7 @@ curl -X POST "https://tapi.asterdex.com/info" \
 Name | Type | Description
 ---- | ---- | -----------
 address | STRING | Wallet address
-accountPrivy | STRING | Privacy mode status: `"disabled"` or `"enabled"`
+accountPrivacy | STRING | Privacy mode status: `"disabled"` or `"enabled"`
 perpAssets | ARRAY | List of perpetual assets and balances
 perpAssets[].asset | STRING | Asset name
 perpAssets[].walletBalance | DECIMAL | Wallet balance
@@ -180,7 +180,7 @@ curl -X POST "https://tapi.asterdex.com/info" \
 {
   "result": {
     "address": "0x690931c*********",
-    "accountPrivy": "disabled",
+    "accountPrivacy": "disabled",
     "openOrders": [
       {
         "orderId": "web_AD_7jz2xjo0ma4nblniq_98",
@@ -210,7 +210,7 @@ curl -X POST "https://tapi.asterdex.com/info" \
 Name | Type | Description
 ---- | ---- | -----------
 address | STRING | Wallet address
-accountPrivy | STRING | Privacy mode status: `"disabled"` or `"enabled"`
+accountPrivacy | STRING | Privacy mode status: `"disabled"` or `"enabled"`
 openOrders | ARRAY | List of open orders
 openOrders[].orderId | STRING | Order ID
 openOrders[].symbol | STRING | Trading pair symbol
@@ -269,7 +269,7 @@ curl -X POST "https://tapi.asterdex.com/info" \
 {
   "result": {
     "address": "0x87EC27*********************",
-    "accountPrivy": "disabled",
+    "accountPrivacy": "disabled",
     "startTime": 1773916057398,
     "endTime": 1774520857398,
     "fills": [
@@ -313,7 +313,7 @@ curl -X POST "https://tapi.asterdex.com/info" \
 Name | Type | Description
 ---- | ---- | -----------
 address | STRING | Wallet address
-accountPrivy | STRING | Privacy mode status: `"disabled"` or `"enabled"`
+accountPrivacy | STRING | Privacy mode status: `"disabled"` or `"enabled"`
 startTime | LONG | Actual query start time in milliseconds
 endTime | LONG | Actual query end time in milliseconds
 fills | ARRAY | List of trade fills; returns at most `1000` records

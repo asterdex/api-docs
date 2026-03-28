@@ -64,7 +64,7 @@ curl -X POST "https://tapi.asterdex.com/info" \
 {
   "result": {
     "address": "0x690931c*********",
-    "accountPrivy": "disabled",
+    "accountPrivacy": "disabled",
     "perpAssets": [
       {
         "asset": "USD1",
@@ -111,7 +111,7 @@ curl -X POST "https://tapi.asterdex.com/info" \
 字段名 | 类型 | 说明
 ------ | ---- | ----
 address | STRING | 钱包地址
-accountPrivy | STRING | 隐私模式状态：`"disabled"` 已关闭 / `"enabled"` 已开启
+accountPrivacy | STRING | 隐私模式状态：`"disabled"` 已关闭 / `"enabled"` 已开启
 perpAssets | ARRAY | 永续合约资产列表
 perpAssets[].asset | STRING | 资产名称
 perpAssets[].walletBalance | DECIMAL | 钱包余额
@@ -180,7 +180,7 @@ curl -X POST "https://tapi.asterdex.com/info" \
 {
   "result": {
     "address": "0x690931c*********",
-    "accountPrivy": "disabled",
+    "accountPrivacy": "disabled",
     "openOrders": [
       {
         "orderId": "web_AD_7jz2xjo0ma4nblniq_98",
@@ -210,7 +210,7 @@ curl -X POST "https://tapi.asterdex.com/info" \
 字段名 | 类型 | 说明
 ------ | ---- | ----
 address | STRING | 钱包地址
-accountPrivy | STRING | 隐私模式状态：`"disabled"` 已关闭 / `"enabled"` 已开启
+accountPrivacy | STRING | 隐私模式状态：`"disabled"` 已关闭 / `"enabled"` 已开启
 openOrders | ARRAY | 当前挂单列表
 openOrders[].orderId | STRING | 订单 ID
 openOrders[].symbol | STRING | 交易对名称
@@ -269,7 +269,7 @@ curl -X POST "https://tapi.asterdex.com/info" \
 {
   "result": {
     "address": "0x1c3C4*************",
-    "accountPrivy": "disabled",
+    "accountPrivacy": "disabled",
     "startTime": 1773916057398,
     "endTime": 1774520857398,
     "fills": [
@@ -313,7 +313,7 @@ curl -X POST "https://tapi.asterdex.com/info" \
 字段名 | 类型 | 说明
 ------ | ---- | ----
 address | STRING | 钱包地址
-accountPrivy | STRING | 隐私模式状态：`"disabled"` 已关闭 / `"enabled"` 已开启
+accountPrivacy | STRING | 隐私模式状态：`"disabled"` 已关闭 / `"enabled"` 已开启
 startTime | LONG | 实际查询起始时间（毫秒时间戳）
 endTime | LONG | 实际查询结束时间（毫秒时间戳）
 fills | ARRAY | 成交记录列表，最多返回 `1000` 条
