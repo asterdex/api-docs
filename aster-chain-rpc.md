@@ -322,3 +322,5 @@ fills[].side | STRING | Trade side: `BUY` or `SELL`
 fills[].price | STRING | Fill price
 fills[].qty | STRING | Fill quantity
 fills[].time | LONG | Fill time in milliseconds
+
+> **Note:** This endpoint only returns futures trade fill data.
