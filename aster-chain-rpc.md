@@ -3,7 +3,7 @@
 - [Chain RPC Endpoints](#chain-rpc-endpoints)
   - [Get Balance](#get-balance)
   - [Get Open Orders](#get-open-orders)
-  - [Get User Fills](#get-user-fills)
+  - [Get User Futures Fills](#get-user-futures-fills)
 
 # General Info
 
@@ -139,7 +139,7 @@ positions[].positions[].marginValue | STRING | Margin value
 POST /info
 ``
 
-Query all open orders for a given address.
+Query futures open orders for a given address.
 
 > **Note:** Only open orders created at or after block 1 genesis time (`1772678119418`) are returned. Maximum **1000** records returned.
 
@@ -220,7 +220,7 @@ openOrders[].origQty | STRING | Original order quantity
 openOrders[].status | STRING | Order status: e.g. `NEW`
 
 
-## Get User Fills
+## Get User Futures Fills
 
 ``
 POST /info
@@ -322,3 +322,5 @@ fills[].side | STRING | Trade side: `BUY` or `SELL`
 fills[].price | STRING | Fill price
 fills[].qty | STRING | Fill quantity
 fills[].time | LONG | Fill time in milliseconds
+
+> **Note:** This endpoint only returns futures trade fill data.
