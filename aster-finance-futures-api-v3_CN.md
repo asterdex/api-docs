@@ -3726,7 +3726,7 @@ true
 ```
 
 ``
-DELETE /fapi/v3//mmp``
+DELETE /fapi/v3/mmp``
 
 **权重:**
 1
