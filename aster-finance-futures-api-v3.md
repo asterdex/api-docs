@@ -94,6 +94,10 @@
   - [Position ADL Quantile Estimation (USER_DATA)](#position-adl-quantile-estimation-user_data)
   - [User's Force Orders (USER_DATA)](#users-force-orders-user_data)
   - [User Commission Rate (USER_DATA)](#user-commission-rate-user_data)
+  - [Update User MMP (USER_DATA)](#update-user-mmp-user_data)
+  - [Get User MMP (USER_DATA)](#get-user-mmp-user_data)
+  - [Delete User MMP (USER_DATA)](#delete-user-mmp-user_data)
+  - [Reset User MMP (USER_DATA)](#reset-user-mmp-user_data)
 - [User Data Streams](#user-data-streams)
   - [Start User Data Stream (USER_STREAM)](#start-user-data-stream-user_stream)
   - [Keepalive User Data Stream (USER_STREAM)](#keepalive-user-data-stream-user_stream)
@@ -3509,6 +3513,101 @@ Get trades for a specific account and symbol.
 | Name       | Type   | Mandatory | Description |
 | ---------- | ------ | --------- | ----------- |
 | symbol     | STRING | YES       |             |
+
+
+## Update User MMP (USER_DATA)
+
+> **Response:**
+
+```javascript
+true
+```
+
+``POST /fapi/v3/mmp``
+
+**Weight:**
+1
+
+**Parameters:**
+
+| Name                       | Type   | Mandatory | Description |
+| -------------------------- | ------ | --------- | ----------- |
+| symbol                     | STRING | YES       |             |
+| windowTimeInMilliseconds   | LONG   | YES       | Time window (in ms) for calculating qtyLimit, valueLimit, and deltaLimit |
+| frozenTimeInMilliseconds   | LONG   | YES       | Duration (in ms) during which MMP orders are prohibited after a limit is triggered |
+| qtyLimit                   | LONG   | FALSE     | Maximum cumulative filled quantity (both buy and sell) within the window. If reached, triggers the frozen period |
+| valueLimit                 | LONG   | FALSE     | Maximum cumulative notional value within the window. If reached, triggers the frozen period |
+| deltaLimit                 | LONG   | FALSE     | Maximum cumulative net position change (buys minus sells) within the window. If reached, triggers the frozen period |
+
+
+## Get User MMP (USER_DATA)
+
+> **Response:**
+
+```javascript
+[
+	{
+		"symbol":"BTCUSDT",
+		"windowTimeInMilliseconds":5000,
+		"frozenTimeInMilliseconds":10000,
+		"qtyLimit":10,
+		"valueLimit":200000000,
+		"deltaLimit":100000000
+	}
+]
+```
+
+``GET /fapi/v3/mmp``
+
+**Weight:**
+1
+
+**Parameters:**
+
+| Name   | Type   | Mandatory | Description |
+| ------ | ------ | --------- | ----------- |
+| symbol | STRING | FALSE     |             |
+
+
+## Delete User MMP (USER_DATA)
+
+> **Response:**
+
+```javascript
+true
+```
+
+``DELETE /fapi/v3/mmp``
+
+**Weight:**
+1
+
+**Parameters:**
+
+| Name   | Type   | Mandatory | Description |
+| ------ | ------ | --------- | ----------- |
+| symbol | STRING | YES       |             |
+
+
+## Reset User MMP (USER_DATA)
+
+> **Response:**
+
+```javascript
+true
+```
+
+``POST /fapi/v3/mmpReset``
+
+**Weight:**
+1
+
+**Parameters:**
+
+| Name   | Type   | Mandatory | Description |
+| ------ | ------ | --------- | ----------- |
+| symbol | STRING | YES       |             |
+
 
 # User Data Streams
 
