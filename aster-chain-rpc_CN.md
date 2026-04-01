@@ -322,3 +322,5 @@ fills[].side | STRING | 成交方向：`BUY` 买入 / `SELL` 卖出
 fills[].price | STRING | 成交价格
 fills[].qty | STRING | 成交数量
 fills[].time | LONG | 成交时间（毫秒时间戳）
+
+> **注意：** 该接口仅返回期货成交数据。
