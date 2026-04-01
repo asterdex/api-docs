@@ -2,10 +2,11 @@
 
 This page provides a quick comparison between Aster `V1` and `V3`, focusing on authentication, endpoint structure, capability coverage, and the most important architectural value behind V3.
 
-> **Key takeaways**
+> **In short**
+> - **API Key** = V1: standard API Key + HMAC authentication
+> - **API Wallet** = V3 (Pro API): Web3-native signing on Aster L1, with faster execution, on-chain traceability, and replay protection
 >
-> 1. Authentication moves from `API Key + HMAC` to `API Wallet / Agent + Web3-style signing`
-> 2. The futures structure is upgraded on top of `Aster L1`, giving `V3` stronger `Take Order` performance while consolidating the main paths into `/fapi/v3/*`
+> This page covers the differences between the two.
 
 ---
 
