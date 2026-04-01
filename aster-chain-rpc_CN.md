@@ -3,7 +3,7 @@
 - [链上 RPC 接口](#链上-rpc-接口)
   - [查询账户余额](#查询账户余额)
   - [查询当前挂单](#查询当前挂单)
-  - [查询用户成交记录](#查询用户成交记录)
+  - [查询用户期货成交记录](#查询用户期货成交记录)
 
 # 基本信息
 
@@ -139,7 +139,7 @@ positions[].positions[].marginValue | STRING | 保证金价值
 POST /info
 ``
 
-查询指定地址的所有当前挂单。
+查询指定地址的期货当前挂单。
 
 > **说明：** 仅返回创建时间不早于 block 1 创世时间（`1772678119418`）的挂单，最多返回 **1000** 条。
 
@@ -220,7 +220,7 @@ openOrders[].origQty | STRING | 原始委托数量
 openOrders[].status | STRING | 订单状态：如 `NEW` 待成交
 
 
-## 查询用户成交记录
+## 查询用户期货成交记录
 
 ``
 POST /info
@@ -322,3 +322,5 @@ fills[].side | STRING | 成交方向：`BUY` 买入 / `SELL` 卖出
 fills[].price | STRING | 成交价格
 fills[].qty | STRING | 成交数量
 fills[].time | LONG | 成交时间（毫秒时间戳）
+
+> **注意：** 该接口仅返回期货成交数据。
