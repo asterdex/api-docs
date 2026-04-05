@@ -1,1 +1,36 @@
-.idea
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build
+dist/
+build/
+*.egg-info/
+
+# Secrets — NEVER commit these
+.env
+.env.local
+*.pem
+*.key
+private_key*
+secret*
+
+# Test artifacts
+.pytest_cache/
+.coverage
+htmlcov/
