@@ -8,12 +8,13 @@ from nacl.signing import SigningKey
 import time
 import requests
 
-user = '6mSp4BuWCNgRSwv8JopQwCma26hmBT8jrcgJNadq23Gt'
-base58_private_key = '*'
-signer = '0x71949710270163F096A8Bd342b266183Ae742e5E'
-signer_pri_key =  '*'
+# ⚠️  WARNING: Replace these with your own addresses and keys before use.
+user = 'YOUR_SOLANA_PUBLIC_KEY'
+base58_private_key = 'YOUR_SOLANA_PRIVATE_KEY'
+signer = '0xYOUR_AGENT_WALLET_ADDRESS'
+signer_pri_key =  '0xYOUR_AGENT_PRIVATE_KEY'
 
-builder = '0x014c85ffb0fF2F2972237AA950B452f92C69Ae1D'
+builder = '0xYOUR_BUILDER_ADDRESS'
 host = 'https://fapi3.asterdex.com'
 
 headers = {

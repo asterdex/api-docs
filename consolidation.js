@@ -87,7 +87,7 @@ var value = {
 }
 
 async function getUrl(my_dict) {
-    content = ''
+    let content = ''
     for (let key in my_dict) {
         content = content + key + '=' + my_dict[key] + '&'
     }
@@ -105,12 +105,12 @@ async function sign_v1(secretKey, message) {
 }
 
 async function sendRequest(url, method) {
-    headers = {}
-    key = api_key
-    if (use_new_apikey == true) {
+    let headers = {}
+    let key = api_key
+    if (use_new_apikey === true) {
         key = new_address_apikey
     }
-    if (method == 'POST') {
+    if (method === 'POST') {
         headers = {
             'Content-Type': 'application/x-www-form-urlencoded',
             'X-MBX-APIKEY': key,
@@ -134,12 +134,12 @@ async function sendRequest(url, method) {
 }
 
 async function send_v1(path, method, my_dict) {
-    content = await getUrl(my_dict)
-    secret = api_secret
-    if (use_new_apikey == true) {
+    const content = await getUrl(my_dict)
+    let secret = api_secret
+    if (use_new_apikey === true) {
         secret = new_address_apiSecret
     }
-    signature = await sign_v1(secret, content)
+    const signature = await sign_v1(secret, content)
     path = path + '?' + content + '&signature=' + signature
     return await sendRequest(host + path, method)
 }
@@ -156,32 +156,32 @@ async function generateSignature() {
 }
 
 async function send(config, addParams) {
-    path = config['url']
-    method = config['method']
-    my_dict = { ...config['params'], ...addParams }
+    const path = config['url']
+    const method = config['method']
+    const my_dict = { ...config['params'], ...addParams }
     return await send_v1(path, method, my_dict)
 }
 
 async function sign(private_key, message) {
-    wallet = new ethers.Wallet(private_key);
+    const wallet = new ethers.Wallet(private_key);
     const signature = await wallet.signMessage(message);
     return signature
 }
 
 async function main() {
     //循环归集
-    i = 0
+    let i = 0
     for (const config of new_address_config) {
         console.log('开始归集账户:', config.address);
         //获取创建apikey的nonce
         let nonce = await send(spot_get_nonce, {'address': config.address})
 
         //给新地址创建api_key api_secret
-        message = 'You are signing into Astherus ${nonce}'.replace('${nonce}', nonce)
-        userSignature = await sign(config.private_key,message)
+        const message = 'You are signing into Astherus ${nonce}'.replace('${nonce}', nonce)
+        const userSignature = await sign(config.private_key,message)
         
         //创建apikey时的描述信息 注意同一账户的desc不能重复
-        var key_desc = Date.now() +'_' + i
+        const key_desc = Date.now() +'_' + i
         i = i + 1
         let new_api = await send(spot_create_apikey, { 'userSignature': userSignature,'address': config.address,'desc': key_desc })
         new_address_apikey = new_api['apiKey']
@@ -192,10 +192,10 @@ async function main() {
 
         use_new_apikey = true
         //归集 使用新生成的apikey api_secret 将新地址的CDL转账到老地址账户
-        sendToMainAddressRes = await send(spot_send_toAddress, { 'asset': config.asset, "amount": config.amount, "toAddress": main_address })
+        const sendToMainAddressRes = await send(spot_send_toAddress, { 'asset': config.asset, "amount": config.amount, "toAddress": main_address })
         console.log('sendToMainAddressRes:', sendToMainAddressRes)
         use_new_apikey = false
-        if(sendToMainAddressRes['status'] = 'SUCCESS'){
+        if(sendToMainAddressRes && sendToMainAddressRes['status'] === 'SUCCESS'){
             console.log('归集成功:', config.address);
         }else{
             console.log('归集失败:', config.address);
@@ -203,25 +203,25 @@ async function main() {
     }
 
 
-    estimateFee = await send(spot_withdraw_estimateFee, {})
+    const estimateFee = await send(spot_withdraw_estimateFee, {})
     console.log('estimateFee:', estimateFee)
 
 
     //归集和提现的手续费 代币 数量配置
-    fee = estimateFee['gasCost']
+    const fee = estimateFee['gasCost']
     value.fee = fee*1.5+''
     console.log('提现手续费:', value.fee)
 
 
-    withdraw_ignature = await generateSignature()
+    const withdraw_signature = await generateSignature()
 
     //使用老账户进行提现操作
-    spotWithdraw = await send(spot_withdraw, {
+    const spotWithdraw = await send(spot_withdraw, {
         'fee':  value.fee, 'nonce': withdraw_nonce,
-        'userSignature': withdraw_ignature, 'receiver': main_address, 'asset': withdraw_asset, 'amount': withdraw_amount
+        'userSignature': withdraw_signature, 'receiver': main_address, 'asset': withdraw_asset, 'amount': withdraw_amount
     })
 
-    if(spotWithdraw['hash'] != ''){
+    if(spotWithdraw && spotWithdraw['hash'] !== ''){
         console.log('提现成功:', spotWithdraw['hash']);
     }else{
         console.log('提现失败:', spotWithdraw);

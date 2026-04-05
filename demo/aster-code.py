@@ -13,14 +13,16 @@ chain_id = 1666
 # aster_chain = 'Testnet'
 # chain_id = 714
 
-user = '0x014c85ffb0fF2F2972237AA950B452f92C69Ae1D'
-main_private_key = '*'
+# ⚠️  WARNING: Replace these with your own addresses and keys before use.
+# These are PLACEHOLDER values — do NOT use on mainnet.
+user = '0xYOUR_MAIN_WALLET_ADDRESS'
+main_private_key = '0xYOUR_MAIN_PRIVATE_KEY'
 
 
-signer = '0xC98Fd64eBc39E28b92849d9cCef9495663439014'
-priKey =  '*'
+signer = '0xYOUR_AGENT_WALLET_ADDRESS'
+priKey =  '0xYOUR_AGENT_PRIVATE_KEY'
 
-builder = '0x014c85ffb0fF2F2972237AA950B452f92C69Ae1D'
+builder = '0xYOUR_BUILDER_ADDRESS'
 approveAgent = {'url': '/fapi/v3/approveAgent', 'method': 'POST',
               'params':{'agentName': 'ivanbuilder','agentAddress':signer,
                       'ipWhitelist':'', 'expired':1967945395040,'canSpotTrade':True,
