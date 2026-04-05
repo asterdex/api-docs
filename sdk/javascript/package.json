@@ -1,0 +1,31 @@
+{
+  "name": "@kairoslab/asterdex-sdk",
+  "version": "0.1.0",
+  "description": "Community JavaScript SDK for AsterDex V3 API — by Kairos Lab",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "lint": "eslint src/ tests/",
+    "test": "node --experimental-vm-modules node_modules/.bin/jest",
+    "format": "prettier --check 'src/**/*.js' 'tests/**/*.js'"
+  },
+  "keywords": ["asterdex", "dex", "crypto", "trading", "web3", "api", "eip712"],
+  "author": "Kairos Lab <dev@kairoslab.xyz>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Valisthea/aster-api-docs"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "ethers": "^6.13.0"
+  },
+  "devDependencies": {
+    "eslint": "^9.0.0",
+    "jest": "^29.7.0",
+    "@jest/globals": "^29.7.0",
+    "prettier": "^3.2.0"
+  }
+}
