@@ -1133,6 +1133,49 @@ Note:
 
 * You must send at least one of `orderId` or `origClientOrderId`.
 
+## Query Current Open Order (USER\_DATA)
+
+**Response**
+
+```javascript
+{
+    "orderId": 38,
+    "symbol": "ADA25SLP25",
+    "status": "NEW",
+    "clientOrderId": "afMd4GBQyHkHpGWdiy34Li",
+    "price": "20",
+    "avgPrice": "12.0000000000000000",
+    "origQty": "10",
+    "executedQty": "10",
+    "cumQuote": "120",
+    "timeInForce": "GTC",
+    "type": "LIMIT",
+    "side": "BUY",
+    "stopPrice": "0",
+    "origType": "LIMIT",
+    "time": 1649913186270,
+    "updateTime": 1649913186297
+}
+```
+
+`GET /api/v3/openOrder (HMAC SHA256)`
+
+Query current open order status.
+
+**Weight:** 1
+
+**Parameters:**
+
+| Name | Type | Is it required? | Description |
+| :---- | :---- | :---- | :---- |
+| symbol | STRING | YES |  |
+| orderId | LONG | NO |  |
+| origClientOrderId | STRING | NO |  |
+
+Note:
+
+* You must send at least one of `orderId` or `origClientOrderId`.
+
 ## Current open orders (USER\_DATA)
 
 **Response**

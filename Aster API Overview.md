@@ -1,6 +1,9 @@
 # Aster API V1 vs V3
 
-This page provides a quick comparison between Aster `V1` and `V3`, focusing on authentication, endpoint structure, capability coverage, and the most important architectural value behind V3.
+This page provides a quick comparison between Aster `V1` and `V3`, focusing on authentication, endpoint structure, capability coverage, and the most important architectural value behind V3.  
+
+**`Starting from March 25, 2026, V1 new API Key creation is no longer supported. Existing API Keys will continue to work.`**
+
 
 > **Key takeaways**
 >
