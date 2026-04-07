@@ -1275,6 +1275,46 @@ Retrieve all account orders; active, canceled, or completed.
 * By default, query data is from the last 7 days.
 
 
+``
+GET /api/v3/transactionHistory``
+> **Response**
+
+```javascript
+[
+   {
+    "tranId": 1759115482304540227, 
+    "tradeId": null,              
+    "asset": "ASTER",             
+    "symbol": "",                 
+    "balanceDelta": "-500.00000000", 
+    "balanceInfo": "TRADE_SOURCE",    
+    "time": 1759115482000,       
+    "type": "TRADE_SOURCE"      
+   }
+]
+```
+
+Query transaction records
+
+**Weight:**
+30
+
+**Parameters:**
+
+| Name | Type | Is it required? | Description |
+------------ | ------------ | ------------ | ------------
+asset | STRING | NO | asset
+type | STRING | NO |  type
+startTime | LONG | NO | startTime
+endTime | LONG | NO |  endTime
+limit | LONG | NO | default:100 max:1000
+
+**Note:** 
+
+*  `type`: `TRADE_TARGET`,`TRADE_SOURCE`,`TRANSFER_SPOT_TO_FUTURE`,`TRANSFER_FUTURE_TO_SPOT`,`TRANSFER_SPOT_TO_SPOT`,`AIRDROP`,`DIVIDEND`,`TRANSFER_REFUND`,`INTERNAL_TRANSFER`,`TRANSFER`,`SWAP`,`COMMISSION_REBATE`,`CASH_BACK` 
+*  If startTime and endTime are not provided, only data from the most recent 7 days will be returned.
+
+
 ## Perp-spot transfer (TRADE)
 
 **Response:**
