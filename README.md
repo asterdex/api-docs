@@ -1,51 +1,50 @@
-# API Documentation for Aster Finance Futures
+# Aster API Docs
 
-[Aster Finance Futures API Document](./V1(Legacy)/EN/aster-finance-futures-api.md)
+Official API documentation for Aster.
 
-# Aster Finance Futures API 文档
+## 🚀 Quick Start
 
-[Aster Finance Futures API 文档](./V1(Legacy)/中文/aster-finance-futures-api_CN.md)
+- Use **V3 (Recommended)** for all new integrations
+- Starting from **March 25, 2026**, V1 new API Key creation is no longer supported. Existing API Keys will continue to work.
+- Choose **EN** / **中文** based on your preference
 
-# API V3 Documentation for Aster Finance Futures
+## 📖 Docs
 
-[Aster Finance Futures API V3 Document](./V3(Recommended)/EN/aster-finance-futures-api-v3.md)
+### API Overview
 
-# Aster Finance Futures API V3 文档
+- [Aster API Overview](./Aster%20API%20Overview.md)
 
-[Aster Finance Futures API V3 文档](./V3(Recommended)/中文/aster-finance-futures-api-v3_CN.md)
+### V3 Futures API (Recommended)
 
-# Aster Finance Futures Testnet API V3 文档
+- [Futures API V3 (EN)](./V3(Recommended)/EN/aster-finance-futures-api-v3.md)
+- [Futures API V3 (中文)](./V3(Recommended)/中文/aster-finance-futures-api-v3_CN.md)
+- [Futures Testnet API V3 (EN)](./V3(Recommended)/EN/aster-finance-futures-api-testnet.md)
+- [Futures Testnet API V3 (中文)](./V3(Recommended)/中文/aster-finance-futures-api-testnet_CN.md)
 
-[Aster Finance Futures Testnet API V3 文档](./V3(Recommended)/EN/aster-finance-futures-api-testnet.md)
+### V3 Spot API (Recommended)
 
-# API Documentation for Aster Finance Spot
+- [Spot API V3 (EN)](./V3(Recommended)/EN/aster-finance-spot-api-v3.md)
+- [Spot API V3 (中文)](./V3(Recommended)/中文/aster-finance-spot-api_CN-v3.md)
+- [Spot Testnet API V3 (EN)](./V3(Recommended)/EN/aster-finance-spot-api-testnet.md)
+- [Spot Testnet API V3 (中文)](./V3(Recommended)/中文/aster-finance-spot-api-testnet_CN.md)
 
-[Aster Finance Spot API Document](./V1(Legacy)/EN/aster-finance-spot-api.md)
+### V1 Futures API (Legacy)
 
-# Aster Finance Spot API 文档
+- [Futures API V1 (EN)](./V1(Legacy)/EN/aster-finance-futures-api.md)
+- [Futures API V1 (中文)](./V1(Legacy)/中文/aster-finance-futures-api_CN.md)
 
-[Aster Finance Spot API 文档](./V1(Legacy)/中文/aster-finance-spot-api_CN.md)
+### V1 Spot API (Legacy)
 
-# Aster Finance Spot Testnet API V3 文档
+- [Spot API V1 (EN)](./V1(Legacy)/EN/aster-finance-spot-api.md)
+- [Spot API V1 (中文)](./V1(Legacy)/中文/aster-finance-spot-api_CN.md)
 
-[Aster Finance Spot Testnet API V3 文档](./V3(Recommended)/EN/aster-finance-spot-api-testnet.md)
+### RPC
 
-# Aster Finance Spot Asset Consolidation
+- [Aster Chain RPC](./RPC/aster-chain-rpc.md)
+- [Aster Chain RPC 文档](./RPC/aster-chain-rpc_CN.md)
 
-[Aster Finance Spot Asset Consolidation](./demo/consolidation.js)
+### Demo
 
-# Aster Api Key
-
-[Aster Api Key](./demo/aster-api-key-registration.md)
-
-# Aster 现货资产归集脚本示例
-
-[Aster 现货资产归集脚本示例](./demo/consolidation.js)
-
-# Aster 充值提现
-
-[Aster Deposit and Withdrawal](./demo/aster-deposit-withdrawal.md)
-
-# Aster Chain RPC
-
-[Aster Chain RPC](./RPC/aster-chain-rpc.md)
+- [API Key Registration](./demo/aster-api-key-registration.md)
+- [Spot Asset Consolidation](./demo/consolidation.js)
+- [Deposit & Withdrawal](./demo/aster-deposit-withdrawal.md)
