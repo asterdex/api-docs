@@ -32,19 +32,19 @@
 
 # Aster Finance Spot Asset Consolidation
 
-[Aster Finance Spot Asset Consolidation](./Demo/consolidation.js)
+[Aster Finance Spot Asset Consolidation](./demo/consolidation.js)
 
 # Aster Api Key
 
-[Aster Api Key](./Demo/aster-api-key-registration.md)
+[Aster Api Key](./demo/aster-api-key-registration.md)
 
 # Aster 现货资产归集脚本示例
 
-[Aster 现货资产归集脚本示例](./Demo/consolidation.js)
+[Aster 现货资产归集脚本示例](./demo/consolidation.js)
 
 # Aster 充值提现
 
-[Aster Deposit and Withdrawal](./Demo/aster-deposit-withdrawal.md)
+[Aster Deposit and Withdrawal](./demo/aster-deposit-withdrawal.md)
 
 # Aster Chain RPC
 
