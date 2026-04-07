@@ -2,36 +2,6 @@
 
 Official API documentation for Aster.
 
-## 📂 Structure
-
-```
-RPC/
-├── aster-chain-rpc.md
-└── aster-chain-rpc_CN.md
-
-V1(Legacy)/
-├── EN/
-│   ├── aster-finance-futures-api.md
-│   └── aster-finance-spot-api.md
-└── 中文/
-    ├── aster-finance-futures-api_CN.md
-    └── aster-finance-spot-api_CN.md
-
-V3(Recommended)/
-├── EN/
-│   ├── aster-finance-futures-api-testnet.md
-│   ├── aster-finance-futures-api-v3.md
-│   ├── aster-finance-spot-api-testnet.md
-│   └── aster-finance-spot-api-v3.md
-└── 中文/
-    ├── aster-finance-futures-api-testnet_CN.md
-    ├── aster-finance-futures-api-v3_CN.md
-    ├── aster-finance-spot-api-testnet_CN.md
-    └── aster-finance-spot-api_CN-v3.md
-
-demo/
-```
-
 ## 🚀 Quick Start
 
 - Use **V3 (Recommended)** for all new integrations
@@ -43,11 +13,6 @@ demo/
 ### API Overview
 
 - [Aster API Overview](./Aster%20API%20Overview.md)
-
-### RPC
-
-- [Aster Chain RPC](./RPC/aster-chain-rpc.md)
-- [Aster Chain RPC 文档](./RPC/aster-chain-rpc_CN.md)
 
 ### V3 Futures API (Recommended)
 
@@ -72,6 +37,11 @@ demo/
 
 - [Spot API V1 (EN)](./V1(Legacy)/EN/aster-finance-spot-api.md)
 - [Spot API V1 (中文)](./V1(Legacy)/中文/aster-finance-spot-api_CN.md)
+
+### RPC
+
+- [Aster Chain RPC](./RPC/aster-chain-rpc.md)
+- [Aster Chain RPC 文档](./RPC/aster-chain-rpc_CN.md)
 
 ### Demo
 
