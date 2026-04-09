@@ -161,13 +161,19 @@
 
 ### V3 Nonce Mechanism
 
-*  A nonce is essentially a number used to validate that a user request is valid, not duplicated, and not outdated. It is generally recommended to use the current timestamp as the nonce, preferably with microsecond precision, to ensure uniqueness and monotonicity.
+* **Nonce** is used to validate the **validity, uniqueness, and replay-protection** of requests. Clients should use the **current timestamp (microsecond precision)** as the nonce, and the difference from server time must not exceed **10 seconds**.
 
-* When a new action comes in, the system first checks if that number has already been used—if it has, the action is rejected as a duplicate. If it’s new, the system then checks whether it’s too old compared to the recent ones it has already seen.
+* Request processing flow:
 
-* To do this efficiently, it only keeps a limited number of the most recent nonces for each user. If the list is already full and the new number is smaller than the oldest one in the list, it gets rejected because it’s considered outdated. Otherwise, the system removes the oldest number and adds the new one.
+  1. If the nonce **has already been used** → rejected as a **duplicate request**
+  2. Otherwise, the system checks whether it is **too old**
 
-* In simple terms, this mechanism ensures that user actions are processed in a clean and reliable way—preventing repeated requests, ignoring stale ones, and only keeping track of the most relevant recent activity.
+* To improve performance, each user maintains only the **most recent 100 nonces**:
+
+  * If the list is full and the new nonce is **smaller than the current minimum** → rejected as **expired**
+  * Otherwise, the **oldest nonce is removed** and the new one is added
+
+* Overall effect: **prevents duplicates and stale requests, retaining only recent valid requests**
 
 ## LIMITS
 
@@ -234,7 +240,7 @@ It is strongly recommended to use websocket stream for getting data as much as p
 | signer     | 0x21cF8Ae13Bb72632562c6Fff438652Ba1a151bb0                         |[Click Here](https://www.asterdex.com/en/api-wallet)         | 
 | privateKey | 0x4fd0a42218f3eae43a6ce26d22544e986139a01e5b34a62db53757ffca81bae1 |[Click Here](https://www.asterdex.com/en/api-wallet)        | 
 
-#### The nonce parameter is the current system time in microseconds. If it exceeds the system time or lags behind it by more than 5 seconds, the request is considered invalid.
+#### The nonce parameter is the current system time in microseconds. If it exceeds the system time or lags behind it by more than 10 seconds, the request is considered invalid.
 ```python
 #python
 nonce = math.trunc(time.time()*1000000)
