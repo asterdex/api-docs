@@ -156,6 +156,22 @@
 * For POST, PUT, and DELETE method APIs, send data in the request body (content type application/x-www-form-urlencoded)
 * Parameters may be sent in any order.
 
+### V3 Nonce Mechanism
+
+* **Nonce** is used to validate the **validity, uniqueness, and replay-protection** of requests. Clients should use the **current timestamp (microsecond precision)** as the nonce, and the difference from server time must not exceed **10 seconds**.
+
+* Request processing flow:
+
+  1. If the nonce **has already been used** → rejected as a **duplicate request**
+  2. Otherwise, the system checks whether it is **too old**
+
+* To improve performance, each user maintains only the **most recent 100 nonces**:
+
+  * If the list is full and the new nonce is **smaller than the current minimum** → rejected as **expired**
+  * Otherwise, the **oldest nonce is removed** and the new one is added
+
+* Overall effect: **prevents duplicates and stale requests, retaining only recent valid requests**
+
 ## LIMITS
 
 * The `/fapi/v3/exchangeInfo` `rateLimits` array contains objects related to the exchange's `RAW_REQUEST`, `REQUEST_WEIGHT`, and `ORDER` rate limits. These are further defined in the `ENUM definitions` section under `Rate limiters (rateLimitType)`.
@@ -231,7 +247,7 @@ It is recommended to use a small recvWindow of 5000 or less!
 | signer     | 0x21cF8Ae13Bb72632562c6Fff438652Ba1a151bb0                         |[Click Here](https://www.asterdex-testnet.com/en/api-wallet)         | 
 | privateKey | 0x4fd0a42218f3eae43a6ce26d22544e986139a01e5b34a62db53757ffca81bae1 |[Click Here](https://www.asterdex-testnet.com/en/api-wallet)        | 
 
-#### The nonce parameter is the current system time in microseconds. If it exceeds the system time or lags behind it by more than 5 seconds, the request is considered invalid.
+#### The nonce parameter is the current system time in microseconds. If it exceeds the system time or lags behind it by more than 10 seconds, the request is considered invalid.
 
 ```python
 #python
