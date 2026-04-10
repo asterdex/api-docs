@@ -88,7 +88,9 @@
 	- [杠杆分层标准 (USER_DATA)](#杠杆分层标准-user_data)
 	- [持仓ADL队列估算 (USER_DATA)](#持仓adl队列估算-user_data)
 	- [用户强平单历史 (USER_DATA)](#用户强平单历史-user_data)
-	- [用户手续费率 (USER_DATA)](#用户手续费率-user_data)- [Websocket 账户信息推送](#websocket-账户信息推送)
+	- [用户手续费率 (USER_DATA)](#用户手续费率-user_data)
+	- [绑定子账户 (USER_DATA)](#绑定子账户-user_data)		
+- [Websocket 账户信息推送](#websocket-账户信息推送)
 	- [生成listenKey (USER_STREAM)](#生成listenkey-user_stream)
 	- [延长listenKey有效期 (USER_STREAM)](#延长listenkey有效期-user_stream)
 	- [关闭listenKey (USER_STREAM)](#关闭listenkey-user_stream)
@@ -3575,6 +3577,75 @@ GET /fapi/v3/commissionRate``
 名称  |  类型  | 是否必需 |  描述
 ------------ | ------------ | ------------ | ------------
 symbol | STRING | YES	
+
+
+# 绑定子账户 (USER_DATA)
+
+> **响应:**
+
+```javascript
+{
+    "code": 200,
+    "msg": "success"
+}
+```
+
+`POST /fapi/v3/sub-accounts/bind`
+
+**权重:** 5
+
+**参数:**
+
+名称               | 类型    | 是否必需 | 描述
+------------------ | ------- | -------- | ---
+childAddress       | STRING  | YES      | 子账户钱包地址
+name               | STRING  | YES      | 子账户名称
+nonce              | LONG    | YES      | 微秒级时间戳，用于防重放
+user               | STRING  | YES      | 母账户钱包地址
+childSignature     | STRING  | YES      | 子账户对消息体的签名（见下方签名说明）
+signature          | STRING  | YES      | 母账户对消息体的签名，**必须使用母账户钱包私钥签名**（见下方签名说明）
+
+---
+
+### 签名说明
+
+本接口需要**两次独立签名**，两次签名的消息体不同：
+
+#### 第一步：子账户签名（childSignature）
+
+子账户使用**自己的钱包私钥**对以下消息体签名：
+
+```
+childAddress={childAddress}&name={name}&nonce={nonce}&user={user}
+```
+
+#### 第二步：母账户签名（signature）
+
+母账户使用**自己的钱包私钥**（非 API Key）对以下消息体签名，消息体在第一步基础上**追加了 `childSignature`**：
+
+```
+childAddress={childAddress}&name={name}&nonce={nonce}&user={user}&childSignature={childSignature}
+```
+
+> 两次签名消息体的关键区别：母账户的签名消息体**包含** `childSignature`，子账户的不包含。
+
+#### 支持的签名算法
+
+| 账户类型 | 签名算法 | 编码格式 |
+|---------|---------|---------|
+| EVM 地址 | EIP-712 Typed Data（chainId=1666，message.msg=消息体） | Hex |
+| Solana 地址 | Ed25519 | Base58 |
+
+> 母账户与子账户的地址类型必须一致（EVM 对 EVM，Solana 对 Solana）。
+
+---
+
+### 注意事项
+
+* `signature` 必须使用**母账户钱包私钥**签名，不可使用signer私钥替代
+* `childSignature` 与 `signature` 不可互换
+* `user` 字段必须与已认证的母账户地址一致，不可伪造
+* 只支持**白名单地址**创建，需要联系**项目方**配置
 
 
 
