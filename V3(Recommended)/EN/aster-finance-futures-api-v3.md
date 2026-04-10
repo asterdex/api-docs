@@ -98,6 +98,7 @@
   - [Get User MMP (USER_DATA)](#get-user-mmp-user_data)
   - [Delete User MMP (USER_DATA)](#delete-user-mmp-user_data)
   - [Reset User MMP (USER_DATA)](#reset-user-mmp-user_data)
+  - [Bind Sub-Account (USER_DATA)](#bind-sub-account-user_data)
 - [User Data Streams](#user-data-streams)
   - [Start User Data Stream (USER_STREAM)](#start-user-data-stream-user_stream)
   - [Keepalive User Data Stream (USER_STREAM)](#keepalive-user-data-stream-user_stream)
@@ -3613,6 +3614,76 @@ true
 | Name   | Type   | Mandatory | Description |
 | ------ | ------ | --------- | ----------- |
 | symbol | STRING | YES       |             |
+
+
+# Bind Sub-Account (USER_DATA)
+
+> **Response:**
+
+```javascript
+{
+    "code": 200,
+    "msg": "success"
+}
+```
+
+`POST /fapi/v3/sub-accounts/bind`
+
+**Weight:** 5
+
+**Parameters:**
+
+Name               | Type    | Required | Description
+------------------ | ------- | -------- | ---
+childAddress       | STRING  | YES      | Sub-account wallet address
+name               | STRING  | YES      | Sub-account name
+nonce              | LONG    | YES      | Microsecond-level timestamp, used for replay attack prevention
+user               | STRING  | YES      | Master account wallet address
+childSignature     | STRING  | YES      | Sub-account's signature over the message body (see Signature Instructions below)
+signature          | STRING  | YES      | Master account's signature over the message body,**must be signed using the master account's wallet private key**(see Signature Instructions below)
+
+---
+
+### Signature Instructions
+
+This endpoint requires**two independent signatures**，The message body differs between the two：
+
+#### Step 1：Sub-Account Signature（childSignature）
+
+The sub-account signs the following message body using**its own wallet private key:**：
+
+```
+childAddress={childAddress}&name={name}&nonce={nonce}&user={user}
+```
+
+#### Step 2：Master Account Signature（signature）
+
+The master account signs the following message body using**its own wallet private key**(not the API Key)，The message body**appends `childSignature`** to the one used in Step 1：
+
+```
+childAddress={childAddress}&name={name}&nonce={nonce}&user={user}&childSignature={childSignature}
+```
+
+> The key difference between the two message bodies: the master account's message body**includes** `childSignature`， while the sub-account's does not.
+
+#### Supported Signing Algorithms
+
+| Account Type | Signing Algorithm | Encoding Format |
+|---------|---------|---------|
+| EVM Address | EIP-712 Typed Data（chainId=1666，message.msg=message body） | Hex |
+| Solana Address | Ed25519 | Base58 |
+
+> The address types of the master account and sub-account must match (EVM with EVM, Solana with Solana).
+
+---
+
+### Important Notes
+
+* `signature` must be signed using the**master account's wallet private key**— the signer private key must not be used as a substitute
+* `childSignature` and `signature` are not interchangeable
+* The `user` field must match the authenticated master account address and cannot be forged
+* Only **whitelisted addresses** are supported for creation. Please contact the **project team** for configuration.
+
 
 
 # User Data Streams
