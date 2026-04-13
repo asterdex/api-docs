@@ -219,7 +219,7 @@ MARKET_DATA | 需要有效的API-KEY
 这是我们设置`recvWindow`的目的所在，如果你从事高频交易，对交易时效性有较高的要求，可以灵活设置recvWindow以达到你的要求。
 
 <aside class="notice">
-不推荐使用5秒以上的recvWindow
+不推荐使用5秒以上的recvWindow! 最多不能超过 60秒!
 </aside>
 
 ### POST /fapi/v1/order 的示例
