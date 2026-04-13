@@ -243,7 +243,7 @@ processed within a certain number of milliseconds or be rejected by the
 server.
 
 <aside class="notice">
-It is recommended to use a small recvWindow of 5000 or less!
+It is recommended to use a small recvWindow of 5000 or less! It must not exceed 60 seconds!
 </aside>
 
 ### SIGNED Endpoint Examples for POST /fapi/v1/order
