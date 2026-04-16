@@ -2275,8 +2275,8 @@ Name              |  Type   | Mandatory   | Description
 orderId | LONG  |  NO  | Order ID
 origClientOrderId  |  STRING |  NO |  User-defined order ID
 symbol |  STRING |  YES|  Trading pair
-quantity  |   DECIMAL|  YES | Order quantity
-price  |  DECIMAL | YES | Order price
+quantity  |   DECIMAL|  NO | Order quantity
+price  |  DECIMAL | NO | Order price
 
 
 * Either `orderId` or `origClientOrderId` must be sent. If both are sent, `orderId` takes precedence.

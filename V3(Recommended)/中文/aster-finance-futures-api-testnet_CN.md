@@ -2465,8 +2465,8 @@ PUT /fapi/v3/order  ``
 orderId | LONG  |  NO  |系统订单号
 origClientOrderId  |  STRING |  NO |  用户自定义的订单号
 symbol |  STRING |  YES|  交易对
-quantity  |   DECIMAL|  YES | 下单数量
-price  |  DECIMAL | YES | 委托价格
+quantity  |   DECIMAL|  NO | 下单数量
+price  |  DECIMAL | NO | 委托价格
 
 
 * orderId 与 origClientOrderId 必须至少发送一个，同时发送则以 order id为准
