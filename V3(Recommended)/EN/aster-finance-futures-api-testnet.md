@@ -2233,6 +2233,58 @@ Additional mandatory parameters based on `type`:
   * Cannot be used with `reduceOnly` parameter
   * In Hedge Mode,cannot be used with `BUY` orders in `LONG` position side. and cannot be used with `SELL` orders in `SHORT` position side
 
+## Modify Order (TRADE)
+
+> **Response:**
+
+```javascript
+{ 
+	'orderId': 405,  // Order ID
+	'symbol': 'GOOGLUSDT', // Trading pair
+	'status': 'NEW', // Order status
+	'clientOrderId': 'uOLCC3aiCou3z2YL0sxWIX',  // User-defined order ID
+	'price': '295.50',  // Order price
+	'avgPrice': '0.00000', // Average fill price
+	'origQty': '0.150',  // Original order quantity
+	'executedQty': '0', // Filled quantity
+	'cumQty': '0', 
+	'cumQuote': '0',  // Filled amount
+	'timeInForce': 'GTC',  // Time in force
+	'type': 'LIMIT',  // Order type
+	'reduceOnly': False,  // Reduce only
+	'closePosition': False,  // Close all positions on trigger
+	'side': 'BUY',   // Order side
+	'positionSide': 'BOTH',   // Position side
+	'stopPrice': '0',  // Trigger price, invalid for `TRAILING_STOP_MARKET`
+	'workingType': 'CONTRACT_PRICE',  // Condition price trigger type
+	'priceProtect': False,  // Conditional order trigger protection enabled
+	'origType': 'LIMIT',  // Original order type before trigger
+	'updateTime': 1776311274450 // Update time
+}
+```
+
+``
+PUT /fapi/v3/order  ``
+
+**Weight:**
+1
+
+**Parameters:**
+Name              |  Type   | Mandatory   | Description
+---------------- | ------- | -------- | ----
+orderId | LONG  |  NO  | Order ID
+origClientOrderId  |  STRING |  NO |  User-defined order ID
+symbol |  STRING |  YES|  Trading pair
+quantity  |   DECIMAL|  YES | Order quantity
+price  |  DECIMAL | YES | Order price
+
+
+* Either `orderId` or `origClientOrderId` must be sent. If both are sent, `orderId` takes precedence.
+* At least one of `quantity` or `price` must be sent.
+* If the new `quantity` or `price` does not meet `PRICE_FILTER` / `PERCENT_FILTER` / `LOT_SIZE` restrictions, the modification will be rejected and the original order will remain.
+* Only `LIMIT` order type is supported.
+* Maximum 10000 modifications per order.
+
 ## Place Multiple Orders  (TRADE)
 
 > **Response:**

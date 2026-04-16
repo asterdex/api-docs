@@ -70,6 +70,7 @@
 	- [查询联合保证金模式(USER_DATA)](#查询联合保证金模式user_data)
 	- [下单 (TRADE)](#下单-trade)
 	- [测试下单接口 (TRADE)](#测试下单接口-trade)
+	- [修改订单 (TRADE)](#修改订单-trade)
 	- [批量下单 (TRADE)](#批量下单-trade)
 	- [查询订单 (USER_DATA)](#查询订单-user_data)
 	- [撤销订单 (TRADE)](#撤销订单-trade)
@@ -2506,7 +2507,58 @@ POST /fapi/v3/order/test``
 
 参考 `POST /fapi/v3/order`
 
+## 修改订单 (TRADE)
 
+> **响应:**
+
+```javascript
+{ 
+	'orderId': 405,  //订单号
+	'symbol': 'GOOGLUSDT', //交易对
+	'status': 'NEW', //订单状态
+	'clientOrderId': 'uOLCC3aiCou3z2YL0sxWIX',  //用户自定义的订单号
+	'price': '295.50',  //委托价格
+	'avgPrice': '0.00000', // 平均成交价
+	'origQty': '0.150',  // 原始委托数量
+	'executedQty': '0', // 成交量
+	'cumQty': '0', 
+	'cumQuote': '0',  // 成交金额
+	'timeInForce': 'GTC',  // 有效方法
+	'type': 'LIMIT',  // 订单类型
+	'reduceOnly': False,  // 仅减仓
+	'closePosition': False,  // 是否条件全平仓
+	'side': 'BUY',   //买卖方向
+	'positionSide': 'BOTH',   // 持仓方向
+	'stopPrice': '0',  // 触发价，对`TRAILING_STOP_MARKET`无效
+	'workingType': 'CONTRACT_PRICE',  // 条件价格触发类型
+	'priceProtect': False,  // 是否开启条件单触发保护
+	'origType': 'LIMIT',  // 触发前订单类型
+	'updateTime': 1776311274450 //更新时间
+}
+```
+
+``
+PUT /fapi/v3/order  ``
+
+**权重:**
+1
+
+**参数:**
+
+名称              |  类型   | 是否必需   | 描述
+---------------- | ------- | -------- | ----
+orderId | LONG  |  NO  |系统订单号
+origClientOrderId  |  STRING |  NO |  用户自定义的订单号
+symbol |  STRING |  YES|  交易对
+quantity  |   DECIMAL|  YES | 下单数量
+price  |  DECIMAL | YES | 委托价格
+
+
+* orderId 与 origClientOrderId 必须至少发送一个，同时发送则以 order id为准
+* quantity 与 price 必须至少发送一个
+* 当新订单的quantity 或 price不满足PRICE_FILTER / PERCENT_FILTER / LOT_SIZE限制，修改会被拒绝，原订单依旧被保留
+订单只支持limit类型
+* 同一订单修改次数最多10000次
 
 ## 批量下单 (TRADE)
 
