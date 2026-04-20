@@ -1013,7 +1013,7 @@ Get symbol fees
 }
 ```
 
-`POST /api/v3/order (HMAC SHA256)`
+`POST /api/v3/order`
 
 Send order
 
@@ -1075,7 +1075,7 @@ Other information:
 }
 ```
 
-`DELETE /api/v3/order (HMAC SHA256)`
+`DELETE /api/v3/order`
 
 Cancel active orders
 
@@ -1116,7 +1116,7 @@ At least one of `orderId` or `origClientOrderId` must be sent.
 } 
 ```
 
-`GET /api/v3/order (HMAC SHA256)`
+`GET /api/v3/order`
 
 Query order status
 
@@ -1164,7 +1164,7 @@ Note:
 }
 ```
 
-`GET /api/v3/openOrder (HMAC SHA256)`
+`GET /api/v3/openOrder`
 
 Query current open order status.
 
@@ -1209,7 +1209,7 @@ Note:
 ]
 ```
 
-`GET /api/v3/openOrders (HMAC SHA256)`
+`GET /api/v3/openOrders`
 
 Retrieve all current open orders for trading pairs. Use calls without a trading pair parameter with caution.
 
@@ -1279,7 +1279,7 @@ origClientOrderIdList | STRING | NO | clientOrderId array string
 ]
 ```
 
-`GET /api/v3/allOrders (HMAC SHA256)`
+`GET /api/v3/allOrders`
 
 Retrieve all account orders; active, canceled, or completed.
 
@@ -1352,7 +1352,7 @@ limit | LONG | NO | default:100 max:1000
 }
 ```
 
-`POST /api/v3/asset/wallet/transfer  (HMAC SHA256)`
+`POST /api/v3/asset/wallet/transfer `
 
 **Weight:** 5
 
@@ -1493,7 +1493,7 @@ const signature = await signer.signTypedData(domain, types, value)
 }
 ```
 
-`GET /api/v3/account (HMAC SHA256)`
+`GET /api/v3/account`
 
 Retrieve current account information
 
@@ -1529,7 +1529,7 @@ Retrieve current account information
 ] 
 ```
 
-`GET /api/v3/userTrades (HMAC SHA256)`
+`GET /api/v3/userTrades`
 
 Retrieve the trade history for a specified trading pair of an account
 
