@@ -35,7 +35,7 @@ In `V1`, authentication follows the typical `API Key + Secret` model:
 
 - Send `X-MBX-APIKEY` in the request header
 - Include `timestamp` in request parameters
-- Optionally include `recvWindow`
+- Optionally include `openzWindow`
 - Generate `signature` using `HMAC SHA256`
 
 The signing payload is usually based on request parameters, which means `query string + request body`.
