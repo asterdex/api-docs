@@ -91,7 +91,8 @@ You are advised to use WebSocket messages to obtain the corresponding data as mu
 ## API authentication types
 
 * Each API has its own authentication type, which determines what kind of authentication is required when accessing it.
-* If authentication is required, a signer should be included in the request body.
+* If API_WALLET authentication is required, a signer should be included in the request body.
+* If master account authentication is required, a user should be included in the request body.
 
 | Security Type | Description                               |
 | ------------- | ----------------------------------------- |
@@ -217,7 +218,6 @@ def send_by_url(api) :
     url = host + api['url']
 
     my_dict['nonce'] = str(get_nonce())
-    my_dict['user'] = user
     my_dict['signer'] = signer
 
     param = urllib.parse.urlencode(my_dict)
@@ -236,7 +236,6 @@ def send_by_body(api) :
        my_dict = api['params']
        url = host +api['url']
        my_dict['nonce'] = str(get_nonce())
-       my_dict['user'] = user
        my_dict['signer'] = signer
 
        param = urllib.parse.urlencode(my_dict)
