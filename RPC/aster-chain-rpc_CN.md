@@ -324,3 +324,183 @@ fills[].qty | STRING | 成交数量
 fills[].time | LONG | 成交时间（毫秒时间戳）
 
 > **注意：** 该接口仅返回期货成交数据。
+
+
+## 查询用户现货当前挂单
+
+``
+POST /info
+``
+
+查询指定地址的现货当前挂单。
+
+> **说明：** 仅返回创建时间不早于 block 1 创世时间（`1772678119418`）的挂单，最多返回 **1000** 条。
+
+**方法名：** `aster_spotOpenOrders`
+
+**权重：**
+1
+
+**请求参数（params 数组）：**
+
+下标 | 参数名 | 类型 | 是否必填 | 说明
+---- | ------ | ---- | -------- | ----
+0 | address | STRING | 是 | 要查询的钱包地址
+1 | symbol | STRING | 否 | 交易对名称（如 `"ASTCUSDT"`）；传 `null` 或 `""` 查询所有交易对
+2 | blockTag | STRING | 是 | 区块标签，传入 `"latest"` 表示查询最新状态
+
+> **请求示例：**
+
+```shell
+curl -X POST "https://tapi.asterdex.com/info" \
+  -H "accept: */*" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "id": {},
+    "jsonrpc": "2.0",
+    "method": "aster_spotOpenOrders",
+    "params": [
+      "0x90B8DE626a8*****************",
+      null,
+      "latest"
+    ]
+  }'
+```
+
+> **返回结果：**
+
+```javascript
+{
+  "result": {
+    "address": "0x90B8DE626a8***************",
+    "accountPrivacy": "enabled",
+    "openOrders": [
+      {
+        "orderId": "web_rgXtfO0hXb3EbaagJYLe",
+        "symbol": "ASTCUSDT",
+        "side": "BUY",
+        "type": "LIMIT",
+        "origQty": "0.00600000",
+        "price": "19000.00000000"
+      },
+      {
+        "orderId": "web_iXqhwgrotPEFZ7hpw1vq",
+        "symbol": "ASTCUSDC",
+        "side": "SELL",
+        "type": "LIMIT",
+        "origQty": "0.00420000",
+        "price": "49000.00000000"
+      },
+      {
+        "orderId": "web_dUdf2dUyFfvp4mqauXKg",
+        "symbol": "ADOGUSDT",
+        "side": "BUY",
+        "type": "LIMIT",
+        "origQty": "1000.00000000",
+        "price": "4.20000000"
+      }
+    ]
+  },
+  "id": {},
+  "jsonrpc": "2.0"
+}
+```
+
+**返回字段说明：**
+
+字段名 | 类型 | 说明
+------ | ---- | ----
+address | STRING | 钱包地址
+accountPrivacy | STRING | 隐私模式状态：`"disabled"` 已关闭 / `"enabled"` 已开启
+openOrders | ARRAY | 当前挂单列表
+openOrders[].orderId | STRING | 订单 ID
+openOrders[].symbol | STRING | 交易对名称
+openOrders[].side | STRING | 买卖方向：`BUY` 买入 / `SELL` 卖出
+openOrders[].type | STRING | 订单类型：如 `LIMIT` 限价单、`MARKET` 市价单
+openOrders[].origQty | STRING | 原始委托数量
+openOrders[].price | STRING | 委托价格
+
+
+## 查询用户现货成交记录
+
+``
+POST /info
+``
+
+查询指定地址在指定时间范围内的现货历史成交记录。
+
+**方法名：** `aster_spotUserFills`
+
+**权重：**
+1
+
+**请求参数（params 数组）：**
+
+下标 | 参数名 | 类型 | 是否必填 | 说明
+---- | ------ | ---- | -------- | ----
+0 | address | STRING | 是 | 要查询的钱包地址
+1 | symbol | STRING | 否 | 交易对名称（如 `"ASTCUSDT"`）；传 `null` 或 `""` 查询所有交易对
+2 | from | LONG | 否 | 查询起始时间（毫秒时间戳）。若不填且填了 `to`，则默认为 `to - 7天`；若两者均不填，则默认为当前时间往前 7 天。最小值为 `1772678119418`（block 1 创世时间），早于此时间的查询默认返回空。
+3 | to | LONG | 否 | 查询结束时间（毫秒时间戳）。若不填且填了 `from`，则默认为 `from + 7天`；若两者均不填，则默认为当前时间。`from` 与 `to` 时间间隔不得超过 7 天。
+4 | blockTag | STRING | 是 | 区块标签，传入 `"latest"` 表示查询最新状态
+
+> **请求示例：**
+
+```shell
+curl -X POST "https://tapi.asterdex.com/info" \
+  -H "accept: */*" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "id": {},
+    "jsonrpc": "2.0",
+    "method": "aster_spotUserFills",
+    "params": [
+      "0x90B8DE626a8*****************",
+      null,
+      null,
+      null,
+      "latest"
+    ]
+  }'
+```
+
+> **返回结果：**
+
+```javascript
+{
+  "result": {
+    "address": "0x90B8DE626a8***************",
+    "accountPrivacy": "enabled",
+    "startTime": 1776410901599,
+    "endTime": 1777015701599,
+    "fills": [
+      {
+        "symbol": "ASTCUSDT",
+        "side": "BUY",
+        "price": "21000",
+        "qty": "0.00170000",
+        "time": 1777000095000
+      }
+    ]
+  },
+  "id": {},
+  "jsonrpc": "2.0"
+}
+```
+
+**返回字段说明：**
+
+字段名 | 类型 | 说明
+------ | ---- | ----
+address | STRING | 钱包地址
+accountPrivacy | STRING | 隐私模式状态：`"disabled"` 已关闭 / `"enabled"` 已开启
+startTime | LONG | 实际查询起始时间（毫秒时间戳）
+endTime | LONG | 实际查询结束时间（毫秒时间戳）
+fills | ARRAY | 成交记录列表，最多返回 `1000` 条
+fills[].symbol | STRING | 交易对名称
+fills[].side | STRING | 成交方向：`BUY` 买入 / `SELL` 卖出
+fills[].price | STRING | 成交价格
+fills[].qty | STRING | 成交数量
+fills[].time | LONG | 成交时间（毫秒时间戳）
+
+> **注意：** 该接口仅返回现货成交数据。
