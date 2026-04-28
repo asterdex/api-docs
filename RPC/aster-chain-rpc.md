@@ -190,7 +190,7 @@ curl -X POST "https://tapi.asterdex.com/info" \
         "side": "SELL",
         "type": "LIMIT",
         "origQty": "4.44000000",
-        "status": "NEW"
+        "price": "10.00000000"
       },
       {
         "orderId": "web_AD_4u1emfjslzt4hqnc5_98",
@@ -198,7 +198,7 @@ curl -X POST "https://tapi.asterdex.com/info" \
         "side": "BUY",
         "type": "LIMIT",
         "origQty": "0.00100000",
-        "status": "NEW"
+        "price": "95000.00000000"
       }
     ]
   },
@@ -219,7 +219,7 @@ openOrders[].symbol | STRING | Trading pair symbol
 openOrders[].side | STRING | Order side: `BUY` or `SELL`
 openOrders[].type | STRING | Order type: e.g. `LIMIT`, `MARKET`
 openOrders[].origQty | STRING | Original order quantity
-openOrders[].status | STRING | Order status: e.g. `NEW`
+openOrders[].price | STRING | Order price
 
 
 ## Get User Futures Fills
