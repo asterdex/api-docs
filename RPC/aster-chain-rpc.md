@@ -4,6 +4,8 @@
   - [Get Balance](#get-balance)
   - [Get Open Orders](#get-open-orders)
   - [Get User Futures Fills](#get-user-futures-fills)
+  - [Get Spot Open Orders](#get-spot-open-orders)
+  - [Get User Spot Fills](#get-user-spot-fills)
 
 # General Info
 
@@ -324,3 +326,183 @@ fills[].qty | STRING | Fill quantity
 fills[].time | LONG | Fill time in milliseconds
 
 > **Note:** This endpoint only returns futures trade fill data.
+
+
+## Get Spot Open Orders
+
+``
+POST /info
+``
+
+Query spot open orders for a given address.
+
+> **Note:** Only open orders created at or after block 1 genesis time (`1772678119418`) are returned. Maximum **1000** records returned.
+
+**Method:** `aster_spotOpenOrders`
+
+**Weight:**
+1
+
+**Parameters (params array):**
+
+Index | Name | Type | Mandatory | Description
+----- | ---- | ---- | --------- | -----------
+0 | address | STRING | YES | The wallet address to query
+1 | symbol | STRING | NO | Trading pair symbol (e.g. `"ASTCUSDT"`); pass `null` or `""` to query all symbols
+2 | blockTag | STRING | YES | Block tag, use `"latest"` for the most recent state
+
+> **Request Example:**
+
+```shell
+curl -X POST "https://tapi.asterdex.com/info" \
+  -H "accept: */*" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "id": {},
+    "jsonrpc": "2.0",
+    "method": "aster_spotOpenOrders",
+    "params": [
+      "0x90B8DE626a8*****************",
+      null,
+      "latest"
+    ]
+  }'
+```
+
+> **Response:**
+
+```javascript
+{
+  "result": {
+    "address": "0x90B8DE626a8***************",
+    "accountPrivacy": "enabled",
+    "openOrders": [
+      {
+        "orderId": "web_rgXtfO0hXb3EbaagJYLe",
+        "symbol": "ASTCUSDT",
+        "side": "BUY",
+        "type": "LIMIT",
+        "origQty": "0.00600000",
+        "price": "19000.00000000"
+      },
+      {
+        "orderId": "web_iXqhwgrotPEFZ7hpw1vq",
+        "symbol": "ASTCUSDC",
+        "side": "SELL",
+        "type": "LIMIT",
+        "origQty": "0.00420000",
+        "price": "49000.00000000"
+      },
+      {
+        "orderId": "web_dUdf2dUyFfvp4mqauXKg",
+        "symbol": "ADOGUSDT",
+        "side": "BUY",
+        "type": "LIMIT",
+        "origQty": "1000.00000000",
+        "price": "4.20000000"
+      }
+    ]
+  },
+  "id": {},
+  "jsonrpc": "2.0"
+}
+```
+
+**Response Fields:**
+
+Name | Type | Description
+---- | ---- | -----------
+address | STRING | Wallet address
+accountPrivacy | STRING | Privacy mode status: `"disabled"` or `"enabled"`
+openOrders | ARRAY | List of open orders
+openOrders[].orderId | STRING | Order ID
+openOrders[].symbol | STRING | Trading pair symbol
+openOrders[].side | STRING | Order side: `BUY` or `SELL`
+openOrders[].type | STRING | Order type: e.g. `LIMIT`, `MARKET`
+openOrders[].origQty | STRING | Original order quantity
+openOrders[].price | STRING | Order price
+
+
+## Get User Spot Fills
+
+``
+POST /info
+``
+
+Query the spot trade fill history for a given address within a specified time range.
+
+**Method:** `aster_spotUserFills`
+
+**Weight:**
+1
+
+**Parameters (params array):**
+
+Index | Name | Type | Mandatory | Description
+----- | ---- | ---- | --------- | -----------
+0 | address | STRING | YES | The wallet address to query
+1 | symbol | STRING | NO | Trading pair symbol (e.g. `"ASTCUSDT"`); pass `null` or `""` to query all symbols
+2 | from | LONG | NO | Start time in milliseconds. If omitted and `to` is provided, defaults to `to - 7 days`. If both are omitted, defaults to 7 days before current time. Must be ≥ `1772678119418` (block 1 genesis); queries before this timestamp return empty results.
+3 | to | LONG | NO | End time in milliseconds. If omitted and `from` is provided, defaults to `from + 7 days`. If both are omitted, defaults to current time. The time range between `from` and `to` must not exceed 7 days.
+4 | blockTag | STRING | YES | Block tag, use `"latest"` for the most recent state
+
+> **Request Example:**
+
+```shell
+curl -X POST "https://tapi.asterdex.com/info" \
+  -H "accept: */*" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "id": {},
+    "jsonrpc": "2.0",
+    "method": "aster_spotUserFills",
+    "params": [
+      "0x90B8DE626a8*****************",
+      null,
+      null,
+      null,
+      "latest"
+    ]
+  }'
+```
+
+> **Response:**
+
+```javascript
+{
+  "result": {
+    "address": "0x90B8DE626a8***************",
+    "accountPrivacy": "enabled",
+    "startTime": 1776410901599,
+    "endTime": 1777015701599,
+    "fills": [
+      {
+        "symbol": "ASTCUSDT",
+        "side": "BUY",
+        "price": "21000",
+        "qty": "0.00170000",
+        "time": 1777000095000
+      }
+    ]
+  },
+  "id": {},
+  "jsonrpc": "2.0"
+}
+```
+
+**Response Fields:**
+
+Name | Type | Description
+---- | ---- | -----------
+address | STRING | Wallet address
+accountPrivacy | STRING | Privacy mode status: `"disabled"` or `"enabled"`
+startTime | LONG | Actual query start time in milliseconds
+endTime | LONG | Actual query end time in milliseconds
+fills | ARRAY | List of trade fills; returns at most `1000` records
+fills[].symbol | STRING | Trading pair symbol
+fills[].side | STRING | Trade side: `BUY` or `SELL`
+fills[].price | STRING | Fill price
+fills[].qty | STRING | Fill quantity
+fills[].time | LONG | Fill time in milliseconds
+
+> **Note:** This endpoint only returns spot trade fill data.
