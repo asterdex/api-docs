@@ -189,14 +189,16 @@ curl -X POST "https://tapi.asterdex.com/info" \
         "symbol": "TRUMPUSDT",
         "side": "SELL",
         "type": "LIMIT",
-        "origQty": "4.44000000"
+        "origQty": "4.44000000",
+        "price": "10.00000000"
       },
       {
         "orderId": "web_AD_4u1emfjslzt4hqnc5_98",
         "symbol": "BTCUSDT",
         "side": "BUY",
         "type": "LIMIT",
-        "origQty": "0.00100000"
+        "origQty": "0.00100000",
+        "price": "95000.00000000"
       }
     ]
   },
@@ -217,6 +219,7 @@ openOrders[].symbol | STRING | Trading pair symbol
 openOrders[].side | STRING | Order side: `BUY` or `SELL`
 openOrders[].type | STRING | Order type: e.g. `LIMIT`, `MARKET`
 openOrders[].origQty | STRING | Original order quantity
+openOrders[].price | STRING | Order price
 
 
 ## Get User Futures Fills
