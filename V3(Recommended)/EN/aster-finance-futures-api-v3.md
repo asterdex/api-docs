@@ -100,6 +100,10 @@
   - [Delete User MMP (USER_DATA)](#delete-user-mmp-user_data)
   - [Reset User MMP (USER_DATA)](#reset-user-mmp-user_data)
   - [Bind Sub-Account (USER_DATA)](#bind-sub-account-user_data)
+  - [Create Sub-Account (TRADE)](#create-sub-account-trade)
+  - [Get Sub-Account List (USER_DATA)](#get-sub-account-list-user_data)
+  - [Update Sub-Account (TRADE)](#update-sub-account-trade)
+  - [Sub-Account Transfer (TRADE)](#sub-account-transfer-trade)
 - [User Data Streams](#user-data-streams)
   - [Start User Data Stream (USER_STREAM)](#start-user-data-stream-user_stream)
   - [Keepalive User Data Stream (USER_STREAM)](#keepalive-user-data-stream-user_stream)
@@ -3737,6 +3741,276 @@ childAddress={childAddress}&name={name}&nonce={nonce}&user={user}&childSignature
 * `childSignature` and `signature` are not interchangeable
 * The `user` field must match the authenticated master account address and cannot be forged
 * Only **whitelisted addresses** are supported for creation. Please contact the **project team** for configuration.
+
+
+
+# Create Sub-Account (TRADE)
+
+> **Response:**
+
+```javascript
+{
+    "code": 200,
+    "msg": "success"
+}
+```
+
+`POST /fapi/v3/createSubAccount`
+
+**Weight:** 5
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| subSourceAddr | STRING | YES | Sub-account wallet address |
+| subAccountName | STRING | YES | Sub-account name |
+| nonce | LONG | YES | Microsecond-level timestamp, used for replay attack prevention |
+| user | STRING | YES | Master account wallet address |
+| signer | STRING | YES | Signer address associated with the master account |
+| childSignature | STRING | YES | Sub-account's signature over the message body (see Signature Instructions below) |
+| signature | STRING | YES | Master account's signature over the message body, **must be signed using the master account's wallet private key** (see Signature Instructions below) |
+
+---
+
+### Signature Instructions
+
+This endpoint requires **two independent signatures**. The message body differs between the two:
+
+#### Step 1: Sub-Account Signature (childSignature)
+
+The sub-account signs the following message body using **its own wallet private key:**
+
+```
+subAccountName={subAccountName}&subSourceAddr={subSourceAddr}&nonce={nonce}&user={user}&signer={signer}
+```
+
+#### Step 2: Master Account Signature (signature)
+
+The master account signs the following message body using **its own wallet private key** (not the signer private key). The message body **appends `childSignature`** to the one used in Step 1:
+
+```
+subAccountName={subAccountName}&subSourceAddr={subSourceAddr}&nonce={nonce}&user={user}&signer={signer}&childSignature={childSignature}
+```
+
+> The key difference between the two message bodies: the master account's message body **includes** `childSignature`, while the sub-account's does not.
+
+#### Supported Signing Algorithms
+
+| Account Type | Signing Algorithm | Encoding Format |
+|---|---|---|
+| EVM Address | EIP-712 Typed Data (chainId=1666, message.msg=message body) | Hex |
+| Solana Address | Ed25519 | Base58 |
+
+> The address types of the master account and sub-account must match (EVM with EVM, Solana with Solana).
+
+---
+
+### Important Notes
+
+* `signature` **must be signed using the master account's wallet private key** — the signer private key must not be used as a substitute.
+* `childSignature` and `signature` are not interchangeable.
+* The `user` field must match the authenticated master account address and cannot be forged.
+
+
+
+# Get Sub-Account List (USER_DATA)
+
+> **Response:**
+
+```javascript
+[
+    {
+        "accountId": 123456,
+        "subAccountName": "trading-desk-1",
+        "parentAccount": false
+    },
+    {
+        "accountId": 100000,
+        "subAccountName": "",
+        "parentAccount": true
+    }
+]
+```
+
+`GET /fapi/v3/getSubAccountList`
+
+**Weight:** 5
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| nonce | LONG | YES | Microsecond-level timestamp, used for replay attack prevention |
+| user | STRING | YES | Master account wallet address |
+| signer | STRING | YES | Signer address associated with the master account |
+| signature | STRING | YES | Signature over the message body (see Signature Instructions below) |
+
+**Response fields:**
+
+| Name | Type | Description |
+|------|------|-------------|
+| accountId | LONG | Account ID |
+| subAccountName | STRING | Sub-account name |
+| parentAccount | BOOLEAN | Whether this entry is the master account (`true`) or a sub-account (`false`) |
+
+---
+
+### Signature Instructions
+
+Sign the following message body using the **signer's private key** (EIP-712, always used regardless of whether the parent account is EVM or Solana):
+
+```
+nonce={nonce}&user={user}&signer={signer}
+```
+
+#### Signing Algorithm
+
+| Algorithm | Encoding Format |
+|---|---|
+| EIP-712 Typed Data (chainId=1666, message.msg=message body) | Hex |
+
+> Unlike other sub-account endpoints, `getSubAccountList` always uses the **signer private key** (EIP-712) for signing, even when the master account is a Solana address.
+
+
+
+# Update Sub-Account (TRADE)
+
+> **Response:**
+
+```javascript
+{
+    "code": 200,
+    "msg": "success"
+}
+```
+
+`POST /fapi/v3/updateSubAccount`
+
+**Weight:** 5
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| subSourceAddr | STRING | YES | Sub-account wallet address to update |
+| nonce | LONG | YES | Microsecond-level timestamp, used for replay attack prevention |
+| user | STRING | YES | Master account wallet address |
+| signer | STRING | YES | Signer address associated with the master account |
+| subAccountName | STRING | NO | New sub-account name (at least one of `subAccountName` or `status` must be provided) |
+| status | STRING | NO | Sub-account status: `NORMAL` (active) or `FROZEN` (frozen) |
+| signature | STRING | YES | Master account's signature over the message body, **must be signed using the master account's wallet private key** (see Signature Instructions below) |
+
+---
+
+### Signature Instructions
+
+The master account signs the following message body using **its own wallet private key** (not the signer private key):
+
+```
+subSourceAddr={subSourceAddr}&nonce={nonce}&user={user}&signer={signer}[&subAccountName={subAccountName}][&status={status}]
+```
+
+> Only include optional fields (`subAccountName`, `status`) in the message body if they are included in the request.
+
+#### Supported Signing Algorithms
+
+| Account Type | Signing Algorithm | Encoding Format |
+|---|---|---|
+| EVM Address | EIP-712 Typed Data (chainId=1666, message.msg=message body) | Hex |
+| Solana Address | Ed25519 | Base58 |
+
+---
+
+### Important Notes
+
+* `signature` **must be signed using the master account's wallet private key** — the signer private key must not be used as a substitute.
+* At least one of `subAccountName` or `status` must be provided.
+* `status` accepted values: `NORMAL` (unfreeze / active), `FROZEN` (freeze).
+* A frozen sub-account cannot initiate transfers.
+
+
+
+# Sub-Account Transfer (TRADE)
+
+> **Response:**
+
+```javascript
+{
+    "code": 200,
+    "msg": "success"
+}
+```
+
+`POST /fapi/v3/subAccountTransfer`
+
+**Weight:** 5
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| toAccountAddress | STRING | YES | Destination wallet address |
+| asset | STRING | YES | Asset name (e.g., `USDT`) |
+| amount | STRING | YES | Transfer amount |
+| kindType | ENUM | YES | Transfer direction (see table below) |
+| nonce | LONG | YES | Microsecond-level timestamp, used for replay attack prevention |
+| user | STRING | YES | Signing account wallet address (master account address in most cases; sub-account address when the sub-account initiates a transfer to the master account) |
+| signer | STRING | YES | Signer address associated with `user` |
+| fromAccountAddress | STRING | NO | Source wallet address. Required when the source account differs from `user` (e.g., sub→sub transfers or master→sub transfers initiated by a third party) |
+| signature | STRING | YES | Signature over the message body, **must be signed using the `user` account's wallet private key** (see Signature Instructions below) |
+
+**`kindType` values:**
+
+| Value | Description |
+|-------|-------------|
+| `FUTURE_FUTURE` | Perpetual account → Perpetual account |
+| `FUTURE_SPOT` | Perpetual account → Spot account |
+| `SPOT_FUTURE` | Spot account → Perpetual account |
+| `SPOT_SPOT` | Spot account → Spot account |
+
+---
+
+### Signature Instructions
+
+Sign the following message body using the **`user` account's wallet private key** (not the signer private key):
+
+**Without `fromAccountAddress`:**
+```
+toAccountAddress={toAccountAddress}&asset={asset}&amount={amount}&kindType={kindType}&nonce={nonce}&user={user}&signer={signer}
+```
+
+**With `fromAccountAddress`:**
+```
+toAccountAddress={toAccountAddress}&asset={asset}&amount={amount}&kindType={kindType}&nonce={nonce}&user={user}&signer={signer}&fromAccountAddress={fromAccountAddress}
+```
+
+#### Supported Signing Algorithms
+
+| Account Type | Signing Algorithm | Encoding Format |
+|---|---|---|
+| EVM Address | EIP-712 Typed Data (chainId=1666, message.msg=message body) | Hex |
+| Solana Address | Ed25519 | Base58 |
+
+---
+
+### Transfer Scenarios
+
+| Scenario | `user` | `fromAccountAddress` | Signing Key |
+|----------|--------|----------------------|-------------|
+| Master → Sub | Master account address | *(not required)* | Master account wallet private key |
+| Sub → Master | Sub-account address | *(not required)* | Sub-account wallet private key |
+| Sub A → Sub B | Master account address | Sub A address | Master account wallet private key |
+
+---
+
+### Important Notes
+
+* `signature` **must be signed using the `user` account's wallet private key** — the signer private key must not be used as a substitute.
+* The `user` field must match the address corresponding to the private key used for signing.
+* When signing with a **sub-account's private key**, only transfers **to the master account** are supported. Sub→Sub transfers must be signed by the master account.
+* Transfers to or from a **frozen sub-account** will fail.
+* Transfers to **external addresses** (addresses not within the sub-account relationship) are not supported.
 
 
 
