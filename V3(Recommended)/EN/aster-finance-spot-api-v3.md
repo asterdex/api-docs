@@ -211,7 +211,6 @@ def send_by_url(api) :
     url = host + api['url']
 
     my_dict['nonce'] = str(get_nonce())
-    my_dict['user'] = user
     my_dict['signer'] = signer
 
     param = urllib.parse.urlencode(my_dict)
@@ -230,7 +229,6 @@ def send_by_body(api) :
        my_dict = api['params']
        url = host +api['url']
        my_dict['nonce'] = str(get_nonce())
-       my_dict['user'] = user
        my_dict['signer'] = signer
 
        param = urllib.parse.urlencode(my_dict)
