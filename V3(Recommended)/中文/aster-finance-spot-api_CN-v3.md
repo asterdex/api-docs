@@ -95,7 +95,8 @@
 
 ## 接口鉴权类型
 * 每个接口都有自己的鉴权类型，鉴权类型决定了访问时应当进行何种鉴权
-* 如果需要鉴权，应当在请求体中添加signer
+* 如果需要使用API_WALLET鉴权，应当在请求体中添加signer
+* 如果需要使用主地址鉴权，应当在请求体中添加user
 
 鉴权类型 | 描述
 ------------ | ------------
@@ -200,7 +201,6 @@ def send_by_url(api) :
     url = host + api['url']
 
     my_dict['nonce'] = str(get_nonce())
-    my_dict['user'] = user
     my_dict['signer'] = signer
 
     param = urllib.parse.urlencode(my_dict)
@@ -219,7 +219,6 @@ def send_by_body(api) :
        my_dict = api['params']
        url = host +api['url']
        my_dict['nonce'] = str(get_nonce())
-       my_dict['user'] = user
        my_dict['signer'] = signer
 
        param = urllib.parse.urlencode(my_dict)
