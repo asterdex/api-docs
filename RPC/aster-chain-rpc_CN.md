@@ -189,16 +189,14 @@ curl -X POST "https://tapi.asterdex.com/info" \
         "symbol": "TRUMPUSDT",
         "side": "SELL",
         "type": "LIMIT",
-        "origQty": "4.44000000",
-        "status": "NEW"
+        "origQty": "4.44000000"
       },
       {
         "orderId": "web_AD_4u1emfjslzt4hqnc5_98",
         "symbol": "BTCUSDT",
         "side": "BUY",
         "type": "LIMIT",
-        "origQty": "0.00100000",
-        "status": "NEW"
+        "origQty": "0.00100000"
       }
     ]
   },
@@ -219,7 +217,6 @@ openOrders[].symbol | STRING | 交易对名称
 openOrders[].side | STRING | 买卖方向：`BUY` 买入 / `SELL` 卖出
 openOrders[].type | STRING | 订单类型：如 `LIMIT` 限价单、`MARKET` 市价单
 openOrders[].origQty | STRING | 原始委托数量
-openOrders[].status | STRING | 订单状态：如 `NEW` 待成交
 
 
 ## 查询用户期货成交记录
