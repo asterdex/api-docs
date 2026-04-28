@@ -98,6 +98,10 @@
 	- [删除用户MMP (USER_DATA)](#删除用户mmp-user_data)
 	- [重置用户MMP (USER_DATA)](#重置用户mmp-user_data)		
 	- [绑定子账户 (USER_DATA)](#绑定子账户-user_data)		
+	- [创建子账户 (TRADE)](#创建子账户-trade)		
+	- [查询子账户列表 (USER_DATA)](#查询子账户列表-user_data)		
+	- [更新子账户 (TRADE)](#更新子账户-trade)		
+	- [子账户划转 (TRADE)](#子账户划转-trade)		
 - [Websocket 账户信息推送](#websocket-账户信息推送)
 	- [生成listenKey (USER_STREAM)](#生成listenkey-user_stream)
 	- [延长listenKey有效期 (USER_STREAM)](#延长listenkey有效期-user_stream)
@@ -3887,6 +3891,280 @@ childAddress={childAddress}&name={name}&nonce={nonce}&user={user}&childSignature
 * `childSignature` 与 `signature` 不可互换
 * `user` 字段必须与已认证的母账户地址一致，不可伪造
 * 只支持**白名单地址**创建，需要联系**项目方**配置
+
+
+# 创建子账户 (TRADE)
+
+> **响应:**
+
+```javascript
+{
+    "code": 200,
+    "msg": "success"
+}
+```
+
+`POST /fapi/v3/createSubAccount`
+
+**权重:** 5
+
+**所需权限:** TRADE
+
+**参数:**
+
+| 名称 | 类型 | 是否必需 | 描述 |
+|------|------|---------|------|
+| subSourceAddr | STRING | YES | 子账户钱包地址 |
+| subAccountName | STRING | YES | 子账户名称 |
+| nonce | LONG | YES | 微秒级时间戳，用于防重放攻击 |
+| user | STRING | YES | 母账户钱包地址 |
+| signer | STRING | YES | 与母账户关联的 signer 地址 |
+| childSignature | STRING | YES | 子账户对消息体的签名（见下方签名说明） |
+| signature | STRING | YES | 母账户对消息体的签名，**必须使用母账户钱包私钥签名**（见下方签名说明） |
+
+---
+
+### 签名说明
+
+本接口需要**两次独立签名**，两次签名的消息体不同：
+
+#### 第一步：子账户签名（childSignature）
+
+子账户使用**自己的钱包私钥**对以下消息体签名：
+
+```
+subAccountName={subAccountName}&subSourceAddr={subSourceAddr}&nonce={nonce}&user={user}&signer={signer}
+```
+
+#### 第二步：母账户签名（signature）
+
+母账户使用**自己的钱包私钥**（非 signer 私钥）对以下消息体签名，消息体在第一步基础上**追加了 `childSignature`**：
+
+```
+subAccountName={subAccountName}&subSourceAddr={subSourceAddr}&nonce={nonce}&user={user}&signer={signer}&childSignature={childSignature}
+```
+
+> 两次签名消息体的关键区别：母账户的签名消息体**包含** `childSignature`，子账户的不包含。
+
+#### 支持的签名算法
+
+| 账户类型 | 签名算法 | 编码格式 |
+|---|---|---|
+| EVM 地址 | EIP-712 Typed Data（chainId=1666，message.msg=消息体） | Hex |
+| Solana 地址 | Ed25519 | Base58 |
+
+> 母账户与子账户的地址类型必须一致（EVM 对 EVM，Solana 对 Solana）。
+
+---
+
+### 注意事项
+
+* `signature` **必须使用母账户钱包私钥签名**，不可使用 signer 私钥替代。
+* `childSignature` 与 `signature` 不可互换。
+* `user` 字段必须与已认证的母账户地址一致，不可伪造。
+
+
+# 查询子账户列表 (USER_DATA)
+
+> **响应:**
+
+```javascript
+[
+    {
+        "accountId": 123456,
+        "subAccountName": "trading-desk-1",
+        "parentAccount": false
+    },
+    {
+        "accountId": 100000,
+        "subAccountName": "",
+        "parentAccount": true
+    }
+]
+```
+
+`GET /fapi/v3/getSubAccountList`
+
+**权重:** 5
+
+**参数:**
+
+| 名称 | 类型 | 是否必需 | 描述 |
+|------|------|---------|------|
+| nonce | LONG | YES | 微秒级时间戳，用于防重放攻击 |
+| user | STRING | YES | 母账户钱包地址 |
+| signer | STRING | YES | 与母账户关联的 signer 地址 |
+| signature | STRING | YES | 对消息体的签名（见下方签名说明） |
+
+**响应字段:**
+
+| 名称 | 类型 | 描述 |
+|------|------|------|
+| accountId | LONG | 账户 ID |
+| subAccountName | STRING | 子账户名称 |
+| parentAccount | BOOLEAN | 是否为母账户（`true` 表示母账户，`false` 表示子账户） |
+
+---
+
+### 签名说明
+
+使用 **signer 私钥**（EIP-712）对以下消息体签名（无论母账户是 EVM 还是 Solana 地址，均使用 EIP-712）：
+
+```
+nonce={nonce}&user={user}&signer={signer}
+```
+
+#### 签名算法
+
+| 算法 | 编码格式 |
+|---|---|
+| EIP-712 Typed Data（chainId=1666，message.msg=消息体） | Hex |
+
+> 与其他子账户接口不同，`getSubAccountList` 始终使用 **signer 私钥**（EIP-712）签名，即使母账户为 Solana 地址也不例外。
+
+
+
+# 更新子账户 (TRADE)
+
+> **响应:**
+
+```javascript
+{
+    "code": 200,
+    "msg": "success"
+}
+```
+
+`POST /fapi/v3/updateSubAccount`
+
+**权重:** 5
+
+**所需权限:** TRADE
+
+**参数:**
+
+| 名称 | 类型 | 是否必需 | 描述 |
+|------|------|---------|------|
+| subSourceAddr | STRING | YES | 待更新的子账户钱包地址 |
+| nonce | LONG | YES | 微秒级时间戳，用于防重放攻击 |
+| user | STRING | YES | 母账户钱包地址 |
+| signer | STRING | YES | 与母账户关联的 signer 地址 |
+| subAccountName | STRING | NO | 新的子账户名称（`subAccountName` 与 `status` 至少需传其一） |
+| status | STRING | NO | 子账户状态：`NORMAL`（正常）或 `FROZEN`（冻结） |
+| signature | STRING | YES | 母账户对消息体的签名，**必须使用母账户钱包私钥签名**（见下方签名说明） |
+
+---
+
+### 签名说明
+
+母账户使用**自己的钱包私钥**（非 signer 私钥）对以下消息体签名：
+
+```
+subSourceAddr={subSourceAddr}&nonce={nonce}&user={user}&signer={signer}[&subAccountName={subAccountName}][&status={status}]
+```
+
+> 可选字段（`subAccountName`、`status`）仅在请求中包含时才加入消息体。
+
+#### 支持的签名算法
+
+| 账户类型 | 签名算法 | 编码格式 |
+|---|---|---|
+| EVM 地址 | EIP-712 Typed Data（chainId=1666，message.msg=消息体） | Hex |
+| Solana 地址 | Ed25519 | Base58 |
+
+---
+
+### 注意事项
+
+* `signature` **必须使用母账户钱包私钥签名**，不可使用 signer 私钥替代。
+* `subAccountName` 与 `status` 至少需传其一。
+* `status` 取值：`NORMAL`（解冻 / 正常），`FROZEN`（冻结）。
+* 已冻结的子账户无法发起划转。
+
+
+
+# 子账户划转 (TRADE)
+
+> **响应:**
+
+```javascript
+{
+    "code": 200,
+    "msg": "success"
+}
+```
+
+`POST /fapi/v3/subAccountTransfer`
+
+**权重:** 5
+
+**所需权限:** TRADE
+
+**参数:**
+
+| 名称 | 类型 | 是否必需 | 描述 |
+|------|------|---------|------|
+| toAccountAddress | STRING | YES | 目标钱包地址 |
+| asset | STRING | YES | 资产名称（如 `USDT`） |
+| amount | STRING | YES | 划转金额 |
+| kindType | ENUM | YES | 划转方向（见下表） |
+| nonce | LONG | YES | 微秒级时间戳，用于防重放攻击 |
+| user | STRING | YES | 签名账户的钱包地址（通常为母账户地址；子账户向母账户划转时为子账户地址） |
+| signer | STRING | YES | 与 `user` 关联的 signer 地址 |
+| fromAccountAddress | STRING | NO | 转出钱包地址。当转出账户与 `user` 不一致时必传（如子→子划转，或以第三方身份发起的母→子划转） |
+| signature | STRING | YES | 对消息体的签名，**必须使用 `user` 账户的钱包私钥签名**（见下方签名说明） |
+
+**`kindType` 取值:**
+
+| 取值 | 说明 |
+|------|------|
+| `FUTURE_FUTURE` | 合约账户 → 合约账户 |
+| `FUTURE_SPOT` | 合约账户 → 现货账户 |
+| `SPOT_FUTURE` | 现货账户 → 合约账户 |
+| `SPOT_SPOT` | 现货账户 → 现货账户 |
+
+---
+
+### 签名说明
+
+使用 **`user` 账户的钱包私钥**（非 signer 私钥）对以下消息体签名：
+
+**不含 `fromAccountAddress`：**
+```
+toAccountAddress={toAccountAddress}&asset={asset}&amount={amount}&kindType={kindType}&nonce={nonce}&user={user}&signer={signer}
+```
+
+**含 `fromAccountAddress`：**
+```
+toAccountAddress={toAccountAddress}&asset={asset}&amount={amount}&kindType={kindType}&nonce={nonce}&user={user}&signer={signer}&fromAccountAddress={fromAccountAddress}
+```
+
+#### 支持的签名算法
+
+| 账户类型 | 签名算法 | 编码格式 |
+|---|---|---|
+| EVM 地址 | EIP-712 Typed Data（chainId=1666，message.msg=消息体） | Hex |
+| Solana 地址 | Ed25519 | Base58 |
+
+---
+
+### 划转场景说明
+
+| 场景 | `user` | `fromAccountAddress` | 签名私钥 |
+|------|--------|----------------------|---------|
+| 母账户 → 子账户 | 母账户地址 | *(无需传入)* | 母账户钱包私钥 |
+| 子账户 → 母账户 | 子账户地址 | *(无需传入)* | 子账户钱包私钥 |
+| 子账户 A → 子账户 B | 母账户地址 | 子账户 A 地址 | 母账户钱包私钥 |
+
+---
+
+### 注意事项
+
+* `signature` **必须使用 `user` 账户的钱包私钥签名**，不可使用 signer 私钥替代。
+* `user` 字段必须与签名所用私钥对应的地址一致。
+* 使用**子账户私钥**签名时，仅支持向**母账户**划转；子→子划转必须由母账户签名。
+* 向**已冻结的子账户**划转或从**已冻结的子账户**划出均会失败。
+* 不支持向**非子账户关系内的外部地址**划转。
 
 
 # Websocket 账户信息推送
