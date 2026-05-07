@@ -4000,14 +4000,14 @@ toAccountAddress={toAccountAddress}&asset={asset}&amount={amount}&kindType={kind
 | Master → Sub | Master account address | *(not required)* | Master account wallet private key |
 | Sub → Master | Sub-account address | *(not required)* | Sub-account wallet private key |
 | Sub A → Sub B | Master account address | Sub A address | Master account wallet private key |
-
+| Sub A → Sub B | Sub-account address | *(not required)* | Sub-account wallet private key |
 ---
 
 ### Important Notes
 
 * `signature` **must be signed using the `user` account's wallet private key** — the signer private key must not be used as a substitute.
 * The `user` field must match the address corresponding to the private key used for signing.
-* When signing with a **sub-account's private key**, only transfers **to the master account** are supported. Sub→Sub transfers must be signed by the master account.
+* When signing with a **sub-account's private key**, transfers **to the master account** are supported. Sub→Sub transfers are also supported, with the source address being the signing **sub-account**.
 * Transfers to or from a **frozen sub-account** will fail.
 * Transfers to **external addresses** (addresses not within the sub-account relationship) are not supported.
 
