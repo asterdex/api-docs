@@ -2473,7 +2473,7 @@ price  |  DECIMAL | NO | 委托价格
 
 
 * orderId 与 origClientOrderId 必须至少发送一个，同时发送则以 order id为准
-* quantity 与 price 必须至少发送一个
+* quantity 与 price 均必须发送
 * 当新订单的quantity 或 price不满足PRICE_FILTER / PERCENT_FILTER / LOT_SIZE限制，修改会被拒绝，原订单依旧被保留
 订单只支持limit类型
 * 同一订单修改次数最多10000次
