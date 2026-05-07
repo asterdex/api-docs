@@ -2283,7 +2283,7 @@ price  |  DECIMAL | NO | Order price
 
 
 * Either `orderId` or `origClientOrderId` must be sent. If both are sent, `orderId` takes precedence.
-* At least one of `quantity` or `price` must be sent.
+* Both `quantity` and `price` must be sent.
 * If the new `quantity` or `price` does not meet `PRICE_FILTER` / `PERCENT_FILTER` / `LOT_SIZE` restrictions, the modification will be rejected and the original order will remain.
 * Only `LIMIT` order type is supported.
 * Maximum 10000 modifications per order.
