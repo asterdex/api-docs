@@ -100,6 +100,8 @@
   - [Get Sub-Account List (USER_DATA)](#get-sub-account-list-user_data)
   - [Update Sub-Account (TRADE)](#update-sub-account-trade)
   - [Sub-Account Transfer (TRADE)](#sub-account-transfer-trade)
+  - [Migrate User Assets (WITHDRAW)](#migrate-user-assets-withdraw)
+  - [Migrate User Assets History (USER_DATA)](#migrate-user-assets-history-user_data)
 - [User Data Streams](#user-data-streams)
   - [Start User Data Stream (USER_STREAM)](#start-user-data-stream-user_stream)
   - [Keepalive User Data Stream (USER_STREAM)](#keepalive-user-data-stream-user_stream)
@@ -3747,6 +3749,84 @@ toAccountAddress={toAccountAddress}&asset={asset}&amount={amount}&kindType={kind
 * When signing with a **sub-account's private key**, transfers **to the master account** are supported. Sub→Sub transfers are also supported, with the source address being the signing **sub-account**.
 * Transfers to or from a **frozen sub-account** will fail.
 * Transfers to **external addresses** (addresses not within the sub-account relationship) are not supported.
+
+
+
+# Migrate User Assets (WITHDRAW)
+
+> **Response:**
+
+```javascript
+{
+    "batchId": "a1B2c3D4e5F6g7H8i9J0k1"   // batch ID for querying migration history
+}
+```
+
+`POST /fapi/v3/asset/migrateUser`
+
+**Weight:** 50
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| user | STRING | YES | Source account wallet address — the account from which assets will be migrated |
+| nonce | LONG | YES | Microsecond-level timestamp, used for replay attack prevention |
+| signature | STRING | YES | Signature over the request body, signed using the `user` account's wallet private key (EIP-712 for EVM addresses, Ed25519 for Solana addresses) |
+
+**Notes:**
+
+* The source account must have **no open positions** before migration can proceed; the request will be rejected otherwise.
+* The source account must have **no open orders** before migration can proceed; the request will be rejected otherwise.
+* All assets with a positive available balance are automatically included. Assets with zero balance are skipped.
+* Up to **300 assets** are processed per migration batch.
+* Assets are transferred to the **authenticated user's account** (the destination).
+* If the source account has no assets with a positive balance, an empty response is returned and no transfer is initiated.
+* Record the returned `batchId` to query migration status via [Migrate User Assets History](#migrate-user-assets-history-user_data).
+
+---
+
+# Migrate User Assets History (USER_DATA)
+
+> **Response:**
+
+```javascript
+{
+    "batchId": "a1B2c3D4e5F6g7H8i9J0k1",
+    "fromUserId": 12345678,
+    "toUserId": 87654321,
+    "status": "SUCCESS",            // migration status
+    "items": [
+        {
+            "asset": "USDT",
+            "amount": "500.00000000"
+        },
+        {
+            "asset": "BTC",
+            "amount": "0.05000000"
+        }
+    ]
+}
+```
+
+`GET /fapi/v3/asset/migrateUser/history`
+
+**Weight:** 50
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| batchId | STRING | YES | Batch ID returned from the [Migrate User Assets](#migrate-user-assets-withdraw) endpoint |
+| nonce | LONG | YES | Microsecond-level timestamp, used for replay attack prevention |
+| user | STRING | YES | Authenticated user's wallet address |
+| signer | STRING | YES | Signer address associated with the `user` account |
+| signature | STRING | YES | Signature over the request body |
+
+**Notes:**
+
+* `batchId` is mandatory. Each `batchId` corresponds to a single migration batch.
+* The query is scoped to the authenticated user — only migrations initiated by or associated with the authenticated account are returned.
 
 
 

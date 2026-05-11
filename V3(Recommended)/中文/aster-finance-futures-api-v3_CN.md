@@ -102,6 +102,8 @@
 	- [查询子账户列表 (USER_DATA)](#查询子账户列表-user_data)		
 	- [更新子账户 (TRADE)](#更新子账户-trade)		
 	- [子账户划转 (TRADE)](#子账户划转-trade)		
+	- [用户资产迁移 (WITHDRAW)](#用户资产迁移-withdraw)		
+	- [用户资产迁移历史 (USER_DATA)](#用户资产迁移历史-user_data)		
 - [Websocket 账户信息推送](#websocket-账户信息推送)
 	- [生成listenKey (USER_STREAM)](#生成listenkey-user_stream)
 	- [延长listenKey有效期 (USER_STREAM)](#延长listenkey有效期-user_stream)
@@ -4165,6 +4167,89 @@ toAccountAddress={toAccountAddress}&asset={asset}&amount={amount}&kindType={kind
 * 使用**子账户私钥**签名时，支持向**母账户**划转；也支持子→子划转,此时转账的来源地址为签名的**子账户**
 * 向**已冻结的子账户**划转或从**已冻结的子账户**划出均会失败。
 * 不支持向**非子账户关系内的外部地址**划转。
+
+
+
+# 用户资产迁移 (WITHDRAW)
+
+> **响应:**
+
+```javascript
+{
+    "batchId": "a1B2c3D4e5F6g7H8i9J0k1"   // 批次 ID，用于查询迁移历史
+}
+```
+
+`POST /fapi/v3/asset/migrateUser`
+
+**权重:** 50
+
+**所需权限:** WITHDRAW
+
+**参数:**
+
+| 名称 | 类型 | 是否必需 | 描述 |
+|------|------|---------|------|
+| user | STRING | YES | 来源账户钱包地址，即待迁移资产所在的账户 |
+| nonce | LONG | YES | 微秒级时间戳，用于防重放攻击 |
+| signature | STRING | YES | 对请求体的签名，**必须使用 `user` 账户的钱包私钥签名**（EVM 地址使用 EIP-712，Solana 地址使用 Ed25519） |
+
+**注意事项:**
+
+* 来源账户必须**无持仓**，否则请求将被拒绝。
+* 来源账户必须**无挂单**，否则请求将被拒绝。
+* 所有可用余额大于 0 的资产将自动包含在迁移批次中；余额为 0 的资产将被跳过。
+* 单次迁移批次最多处理 **300 种资产**。
+* 资产将转移至**当前已认证用户的账户**（目标账户）。
+* 若来源账户无可用资产，接口将返回空响应，不发起实际转账。
+* 请记录返回的 `batchId`，以便通过 [用户资产迁移历史](#用户资产迁移历史-user_data) 接口查询迁移状态。
+
+---
+
+# 用户资产迁移历史 (USER_DATA)
+
+> **响应:**
+
+```javascript
+{
+    "batchId": "a1B2c3D4e5F6g7H8i9J0k1",
+    "fromUserId": 12345678,
+    "toUserId": 87654321,
+    "status": "SUCCESS",            // 迁移状态
+    "items": [
+        {
+            "asset": "USDT",
+            "amount": "500.00000000"
+        },
+        {
+            "asset": "BTC",
+            "amount": "0.05000000"
+        }
+    ]
+}
+```
+
+`GET /fapi/v3/asset/migrateUser/history`
+
+**权重:** 50
+
+**所需权限:** USER_DATA
+
+**参数:**
+
+| 名称 | 类型 | 是否必需 | 描述 |
+|------|------|---------|------|
+| batchId | STRING | YES | 调用 [用户资产迁移](#用户资产迁移-withdraw) 接口时返回的批次 ID |
+| nonce | LONG | YES | 微秒级时间戳，用于防重放攻击 |
+| user | STRING | YES | 当前认证用户的钱包地址 |
+| signer | STRING | YES | 与 `user` 关联的 signer 地址 |
+| signature | STRING | YES | 对请求体的签名 |
+
+**注意事项:**
+
+* `batchId` 为必传参数，每个 `batchId` 对应一次迁移批次。
+* 查询结果仅限当前认证用户——只返回与该账户相关的迁移记录。
+
 
 
 # Websocket 账户信息推送
