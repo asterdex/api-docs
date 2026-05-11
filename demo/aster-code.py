@@ -51,7 +51,8 @@ getBuilders = {'url': '/fapi/v3/builder', 'method': 'GET', 'params':{}}
 placeOrder = {'url': '/fapi/v3/order', 'method': 'POST',
               'params':{'symbol': 'BTCUSDT', 'type': 'MARKET','builder':builder,'feeRate':0.00001, 'side': 'BUY','quantity': "0.03"}}
 
-
+migrateUser = {'url': '/fapi/v3/asset/migrateUser', 'method': 'POST',
+              'params':{},'main':True,"primary_type":"UserAssetMigrate" }
 
 # 模板只包含 EIP712Domain
 eip712_template = {
@@ -237,6 +238,7 @@ if __name__ == '__main__':
     # send_by_url(updateBuilder)
     # send_by_url(delBuilder)
     # send_by_url(placeOrder)
+    #send_by_url(migrateUser)
 
 
 
