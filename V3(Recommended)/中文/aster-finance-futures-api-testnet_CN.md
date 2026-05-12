@@ -4105,13 +4105,31 @@ toAccountAddress={toAccountAddress}&asset={asset}&amount={amount}&kindType={kind
 使用**用户钱包私钥**对以下消息体签名：
 
 ```
-user={user}&nonce={nonce}&agentName={agentName}&agentAddress={agentAddress}&expired={expired}&signatureChainId={signatureChainId}&canSpotTrade={canSpotTrade}&canPerpTrade={canPerpTrade}&canWithdraw={canWithdraw}
-```
+msg: user={user}&nonce={nonce}&agentName={agentName}&agentAddress={agentAddress}&expired={expired}&signatureChainId={signatureChainId}&canSpotTrade={canSpotTrade}&canPerpTrade={canPerpTrade}&canWithdraw={canWithdraw}&ipWhitelist={ipWhitelist}
 
-若传入 `ipWhitelist`，则在消息体末尾追加：
-
-```
-user={user}&nonce={nonce}&agentName={agentName}&agentAddress={agentAddress}&expired={expired}&signatureChainId={signatureChainId}&canSpotTrade={canSpotTrade}&canPerpTrade={canPerpTrade}&canWithdraw={canWithdraw}&ipWhitelist={ipWhitelist}
+typed_data = {
+  "types": {
+    "EIP712Domain": [
+      {"name": "name", "type": "string"},
+      {"name": "version", "type": "string"},
+      {"name": "chainId", "type": "uint256"},
+      {"name": "verifyingContract", "type": "address"}
+    ],
+    "Message": [
+      { "name": "msg", "type": "string" }
+    ]
+  },
+  "primaryType": "Message",
+  "domain": {
+    "name": "AsterSignTransaction",
+    "version": "1",
+    "chainId": 1666,
+    "verifyingContract": "0x0000000000000000000000000000000000000000"
+  },
+  "message": {
+    "msg": "$msg"
+  }
+}
 ```
 
 #### 支持的签名算法

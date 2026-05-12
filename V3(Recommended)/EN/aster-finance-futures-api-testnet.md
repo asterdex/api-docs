@@ -3873,13 +3873,31 @@ Registers a new API agent account and grants it trading/withdrawal permissions i
 Sign the following message body using the **user's wallet private key**:
 
 ```
-user={user}&nonce={nonce}&agentName={agentName}&agentAddress={agentAddress}&expired={expired}&signatureChainId={signatureChainId}&canSpotTrade={canSpotTrade}&canPerpTrade={canPerpTrade}&canWithdraw={canWithdraw}
-```
+msg: user={user}&nonce={nonce}&agentName={agentName}&agentAddress={agentAddress}&expired={expired}&signatureChainId={signatureChainId}&canSpotTrade={canSpotTrade}&canPerpTrade={canPerpTrade}&canWithdraw={canWithdraw}&ipWhitelist={ipWhitelist}
 
-If `ipWhitelist` is provided, append it to the message body:
-
-```
-user={user}&nonce={nonce}&agentName={agentName}&agentAddress={agentAddress}&expired={expired}&signatureChainId={signatureChainId}&canSpotTrade={canSpotTrade}&canPerpTrade={canPerpTrade}&canWithdraw={canWithdraw}&ipWhitelist={ipWhitelist}
+typed_data = {
+  "types": {
+    "EIP712Domain": [
+      {"name": "name", "type": "string"},
+      {"name": "version", "type": "string"},
+      {"name": "chainId", "type": "uint256"},
+      {"name": "verifyingContract", "type": "address"}
+    ],
+    "Message": [
+      { "name": "msg", "type": "string" }
+    ]
+  },
+  "primaryType": "Message",
+  "domain": {
+    "name": "AsterSignTransaction",
+    "version": "1",
+    "chainId": 1666,
+    "verifyingContract": "0x0000000000000000000000000000000000000000"
+  },
+  "message": {
+    "msg": "$msg"
+  }
+}
 ```
 
 #### Supported Signing Algorithms

@@ -4295,7 +4295,7 @@ toAccountAddress={toAccountAddress}&asset={asset}&amount={amount}&kindType={kind
 使用**用户钱包私钥**对以下消息体签名：
 
 ```
-msg: user={user}&nonce={nonce}&agentName={agentName}&agentAddress={agentAddress}&expired={expired}&signatureChainId={signatureChainId}&canSpotTrade={canSpotTrade}&canPerpTrade={canPerpTrade}&canWithdraw={canWithdraw}
+msg: user={user}&nonce={nonce}&agentName={agentName}&agentAddress={agentAddress}&expired={expired}&signatureChainId={signatureChainId}&canSpotTrade={canSpotTrade}&canPerpTrade={canPerpTrade}&canWithdraw={canWithdraw}&ipWhitelist={ipWhitelist}
 
 typed_data = {
   "types": {
