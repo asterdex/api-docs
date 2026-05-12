@@ -4127,7 +4127,7 @@ typed_data = {
   "domain": {
     "name": "AsterSignTransaction",
     "version": "1",
-    "chainId": 1666,
+    "chainId": 714,
     "verifyingContract": "0x0000000000000000000000000000000000000000"
   },
   "message": {
