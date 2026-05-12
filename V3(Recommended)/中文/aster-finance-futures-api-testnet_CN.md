@@ -4106,7 +4106,11 @@ toAccountAddress={toAccountAddress}&asset={asset}&amount={amount}&kindType={kind
 
 ```
 msg: user={user}&nonce={nonce}&agentName={agentName}&agentAddress={agentAddress}&expired={expired}&signatureChainId={signatureChainId}&canSpotTrade={canSpotTrade}&canPerpTrade={canPerpTrade}&canWithdraw={canWithdraw}&ipWhitelist={ipWhitelist}
+```
 
+> **EVM 地址专用：** 将上述 `msg` 字符串作为 EIP-712 结构化数据中 `message.msg` 的值进行签名，结构如下：
+
+```
 typed_data = {
   "types": {
     "EIP712Domain": [

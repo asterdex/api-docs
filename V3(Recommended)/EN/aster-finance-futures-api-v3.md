@@ -4137,7 +4137,11 @@ Sign the following message body using the **user's wallet private key**:
 
 ```
 msg: user={user}&nonce={nonce}&agentName={agentName}&agentAddress={agentAddress}&expired={expired}&signatureChainId={signatureChainId}&canSpotTrade={canSpotTrade}&canPerpTrade={canPerpTrade}&canWithdraw={canWithdraw}&ipWhitelist={ipWhitelist}
+```
 
+> **EVM addresses only:** wrap the `msg` string above as `message.msg` in the following EIP-712 typed data structure before signing:
+
+```
 typed_data = {
   "types": {
     "EIP712Domain": [
