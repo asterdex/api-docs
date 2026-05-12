@@ -96,6 +96,7 @@
 	- [子账户划转 (TRADE)](#子账户划转-trade)		
 	- [用户资产迁移 (WITHDRAW)](#用户资产迁移-withdraw)		
 	- [用户资产迁移历史 (USER_DATA)](#用户资产迁移历史-user_data)		
+	- [注册并授权 Agent (PUBLIC)](#注册并授权-agent-public)		
 - [Websocket 账户信息推送](#websocket-账户信息推送)
 	- [生成listenKey (USER_STREAM)](#生成listenkey-user_stream)
 	- [延长listenKey有效期 (USER_STREAM)](#延长listenkey有效期-user_stream)
@@ -4059,6 +4060,76 @@ toAccountAddress={toAccountAddress}&asset={asset}&amount={amount}&kindType={kind
 
 * `batchId` 为必传参数，每个 `batchId` 对应一次迁移批次。
 * 查询结果仅限当前认证用户——只返回与该账户相关的迁移记录。
+
+
+
+
+# 注册并授权 Agent (PUBLIC)
+
+> **响应:**
+
+```javascript
+{
+    "code": 200,
+    "msg": "success"
+}
+```
+
+`POST /fapi/v3/registerAndApproveAgent`
+
+注册新的 API Agent 账户并一次性授予其交易/提现权限。Agent 授权后，可使用 API Key 在指定权限范围内代表用户进行操作。
+
+**权重:** 50
+
+**参数:**
+
+| 名称 | 类型 | 是否必需 | 描述 |
+|------|------|---------|------|
+| user | STRING | YES | 用户钱包地址 |
+| nonce | LONG | YES | 微秒级时间戳，用于防重放攻击 |
+| agentName | STRING | YES | Agent 的显示名称 |
+| agentAddress | STRING | YES | Agent 的钱包地址 |
+| expired | LONG | YES | Agent 到期时间戳（毫秒） |
+| signatureChainId | LONG | YES | 生成签名时所使用的链 ID（EVM 地址填 `56`，Solana 地址填 `101`） |
+| signature | STRING | YES | 对消息体的签名，必须使用用户钱包私钥签名（见下方签名说明） |
+| canSpotTrade | BOOLEAN | YES | 是否允许 Agent 下现货订单 |
+| canPerpTrade | BOOLEAN | YES | 是否允许 Agent 下永续合约订单 |
+| canWithdraw | BOOLEAN | YES | 是否允许 Agent 发起提现 |
+| ipWhitelist | STRING | NO | 允许访问的 IP 地址或 CIDR 段列表，以**空格**分隔（如 `192.168.1.1 10.0.0.0/24`）。**当 `canWithdraw` 为 `true` 时必填，不可为空。** |
+| agentCode | STRING | NO | Agent 注册邀请码 |
+
+---
+
+### 签名说明
+
+使用**用户钱包私钥**对以下消息体签名：
+
+```
+user={user}&nonce={nonce}&agentName={agentName}&agentAddress={agentAddress}&expired={expired}&signatureChainId={signatureChainId}&canSpotTrade={canSpotTrade}&canPerpTrade={canPerpTrade}&canWithdraw={canWithdraw}
+```
+
+若传入 `ipWhitelist`，则在消息体末尾追加：
+
+```
+user={user}&nonce={nonce}&agentName={agentName}&agentAddress={agentAddress}&expired={expired}&signatureChainId={signatureChainId}&canSpotTrade={canSpotTrade}&canPerpTrade={canPerpTrade}&canWithdraw={canWithdraw}&ipWhitelist={ipWhitelist}
+```
+
+#### 支持的签名算法
+
+| 账户类型 | 签名算法 | 编码格式 |
+|---|---|---|
+| EVM 地址 | EIP-712 Typed Data（chainId=56，message.msg=消息体） | Hex |
+| Solana 地址 | Ed25519 | Base58 |
+
+---
+
+### 注意事项
+
+* `nonce` 必须为微秒精度时间戳，与服务器时间差不得超过 **10 秒**，且同一 nonce 不可重复使用。
+* `expired` 为 Agent 的有效期截止时间，单位为**毫秒**，超时后 Agent 将自动失效。
+* `ipWhitelist` 以**空格**作为分隔符，支持 CIDR 格式（如 `192.168.1.1 10.0.0.0/24`）。**当 `canWithdraw` 为 `true` 时，`ipWhitelist` 必填且不可为空。**
+* 本接口**无需鉴权**——无需传入 API Key 或 HMAC 请求头，所有授权均通过链上 `signature` 验证。
+* 本接口将 Agent 注册与权限授予合并为单次调用，等同于独立注册接口与 `approveAgent` 接口的组合操作。
 
 
 

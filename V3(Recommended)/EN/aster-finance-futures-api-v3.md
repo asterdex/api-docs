@@ -106,6 +106,7 @@
   - [Sub-Account Transfer (TRADE)](#sub-account-transfer-trade)
   - [Migrate User Assets (WITHDRAW)](#migrate-user-assets-withdraw)
   - [Migrate User Assets History (USER_DATA)](#migrate-user-assets-history-user_data)
+  - [Register and Approve Agent (PUBLIC)](#register-and-approve-agent-public)
 - [User Data Streams](#user-data-streams)
   - [Start User Data Stream (USER_STREAM)](#start-user-data-stream-user_stream)
   - [Keepalive User Data Stream (USER_STREAM)](#keepalive-user-data-stream-user_stream)
@@ -4090,6 +4091,94 @@ toAccountAddress={toAccountAddress}&asset={asset}&amount={amount}&kindType={kind
 
 * `batchId` is mandatory. Each `batchId` corresponds to a single migration batch.
 * The query is scoped to the authenticated user — only migrations initiated by or associated with the authenticated account are returned.
+
+
+
+
+# Register and Approve Agent (PUBLIC)
+
+> **Response:**
+
+```javascript
+{
+    "code": 200,
+    "msg": "success"
+}
+```
+
+`POST /fapi/v3/registerAndApproveAgent`
+
+Registers a new API agent account and grants it trading/withdrawal permissions in a single call. Once approved, the agent can use API Keys to act on behalf of the user within the specified permission scope.
+
+**Weight:** 50
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| user | STRING | YES | User's wallet address |
+| nonce | LONG | YES | Microsecond-level timestamp, used for replay attack prevention |
+| agentName | STRING | YES | Display name for the agent |
+| agentAddress | STRING | YES | Agent's wallet address |
+| expired | LONG | YES | Agent expiration timestamp (milliseconds) |
+| signatureChainId | LONG | YES | Chain ID used when generating the signature (`56` for EVM addresses, `101` for Solana addresses) |
+| signature | STRING | YES | Signature over the message body, signed using the user's wallet private key (see Signature Instructions below) |
+| canSpotTrade | BOOLEAN | YES | Whether the agent is permitted to place spot orders |
+| canPerpTrade | BOOLEAN | YES | Whether the agent is permitted to place perpetual futures orders |
+| canWithdraw | BOOLEAN | YES | Whether the agent is permitted to initiate withdrawals |
+| ipWhitelist | STRING | NO | Space-separated list of permitted IP addresses or CIDR ranges (e.g. `192.168.1.1 10.0.0.0/24`). **Required when `canWithdraw` is `true`.** |
+| agentCode | STRING | NO | Referral/invitation code for agent registration |
+
+---
+
+### Signature Instructions
+
+Sign the following message body using the **user's wallet private key**:
+
+```
+msg: user={user}&nonce={nonce}&agentName={agentName}&agentAddress={agentAddress}&expired={expired}&signatureChainId={signatureChainId}&canSpotTrade={canSpotTrade}&canPerpTrade={canPerpTrade}&canWithdraw={canWithdraw}
+
+typed_data = {
+  "types": {
+    "EIP712Domain": [
+      {"name": "name", "type": "string"},
+      {"name": "version", "type": "string"},
+      {"name": "chainId", "type": "uint256"},
+      {"name": "verifyingContract", "type": "address"}
+    ],
+    "Message": [
+      { "name": "msg", "type": "string" }
+    ]
+  },
+  "primaryType": "Message",
+  "domain": {
+    "name": "AsterSignTransaction",
+    "version": "1",
+    "chainId": 1666,
+    "verifyingContract": "0x0000000000000000000000000000000000000000"
+  },
+  "message": {
+    "msg": "$msg"
+  }
+}
+```
+
+#### Supported Signing Algorithms
+
+| Account Type | Signing Algorithm | Encoding |
+|---|---|---|
+| EVM Address | EIP-712 Typed Data (chainId=56, message.msg=message body) | Hex |
+| Solana Address | Ed25519 | Base58 |
+
+---
+
+### Important Notes
+
+* `nonce` must be a microsecond-precision timestamp. The difference from server time must not exceed **10 seconds**, and the same nonce cannot be reused.
+* `expired` is the agent's validity deadline in **milliseconds**. The agent will automatically expire after this timestamp.
+* `ipWhitelist` uses **spaces** as the delimiter and supports CIDR notation (e.g. `192.168.1.1 10.0.0.0/24`). **`ipWhitelist` is required and must not be empty when `canWithdraw` is `true`.**
+* This endpoint is **unauthenticated** — no API Key or HMAC header is required. All authorization is verified through the on-chain `signature`.
+* This endpoint combines agent registration and permission granting into a single call, equivalent to the standalone registration step followed by `approveAgent`.
 
 
 
