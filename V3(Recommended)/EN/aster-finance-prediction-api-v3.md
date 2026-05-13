@@ -1036,7 +1036,8 @@ Return the current best orders (highest bid, lowest ask)
 {
    "symbol": "APXUSDT",
    "makerCommissionRate": "0.000200",    
-   "takerCommissionRate": "0.000700"
+   "takerCommissionRate": "0.000700",
+    "settlementFeeRate": "0.000700"
 }
 ```
 
@@ -1447,7 +1448,7 @@ limit | LONG | NO | default:100 max:1000
 }
 ```
 
-`POST /api/v3/predictionMint`
+`POST /api/v3/prediction/mint`
 
 Mint YES+NO token pairs for a prediction market. The system deducts an equivalent amount of quote asset at the current market price and credits equal quantities of YES and NO tokens to the account.
 
@@ -1481,7 +1482,7 @@ Notes:
 }
 ```
 
-`POST /api/v3/predictionBurn`
+`POST /api/v3/prediction/burn`
 
 Burn equal quantities of YES+NO token pairs to redeem the corresponding quote asset. The account must hold equal amounts of YES and NO tokens to perform a burn.
 
@@ -1519,6 +1520,8 @@ Notes:
     "realizedPnl": "0.00000000",                // Realized PnL
     "closeQty": "0.00000000",                   // Closed quantity
     "insertTime": 1747000000000,                // Position open time (millisecond timestamp)
+    "commissionFee": "0.10000000",              // Commission fee paid
+    "commissionAsset": "USDT",                  // Commission fee asset
     "balance": "65.00000000",                   // Position value (quantity × average open price)
     "availableBalance": "65.00000000",          // Available balance
   }
@@ -1547,10 +1550,9 @@ Query the current account's prediction market position list.
 ```javascript
 [
   {
-    "userId": 1001234,                          // User ID
     "marketName": "BTC_UP_DOWN_20260501",       // Prediction market name
     "symbol": "BTC_UP_DOWN_20260501YES",        // Trading pair
-    "assetName": "USDT",                        // Settlement asset
+    "asset": "USDT",                            // Settlement asset
     "type": "YES",                              // Position direction: "YES" or "NO"
     "openAvgPrice": "0.72000000",               // Average open price
     "cumQty": "200.00000000",                   // Total position quantity
@@ -1560,6 +1562,10 @@ Query the current account's prediction market position list.
     "insertTime": 1746000000000,                // Position open time (millisecond timestamp)
     "closeTime": 1746086400000,                 // Close/settlement time (millisecond timestamp)
     "status": "settled",                        // Position status: "close" (manually closed) or "settled" (market settled)
+    "commissionFee": "0.10000000",              // Commission fee paid
+    "commissionAsset": "USDT",                  // Commission fee asset
+    "settleFee": "2.00000000",                  // Settlement fee (only present when status is "settled")
+    "settleAsset": "USDT",                      // Settlement fee asset
   }
 ]
 ```
@@ -1586,6 +1592,54 @@ Notes:
 * When both `startTime` and `endTime` are provided, `startTime` must not be greater than `endTime`
 * `limit` range is 1 to 1000, default is 100
 * `status` field: `close` means the user manually closed the position; `settled` means the prediction market expired and settled
+
+## Query prediction market settlement histories (USER\_DATA)
+
+**Response**
+
+```javascript
+[
+  {
+    "marketName": "BTC_UP_DOWN_20260501",       // Prediction market name
+    "asset": "BTC_UP_DOWN_20260501YES",          // Token asset (YES or NO token)
+    "symbol": "BTC_UP_DOWN_20260501YES",         // Trading pair
+    "marketStartTime": 1746000000000,            // Market start time (millisecond timestamp)
+    "marketEndTime": 1746086400000,              // Market end time / settlement time (millisecond timestamp)
+    "shareAmount": "200.00000000",               // Share quantity held at settlement
+    "settleAsset": "USDT",                       // Settlement asset
+    "settleAmount": "200.00000000",              // Settlement amount received
+    "settleFeeAmount": "2.00000000",             // Settlement fee charged
+    "entryPrice": "0.72000000",                  // Average entry price
+    "settlePrice": "1.00000000",                 // Final settlement price
+    "realizedPnl": "56.00000000",                // Realized PnL after settlement
+    "status": "settled"                          // Settlement status
+  }
+]
+```
+
+`GET /api/v3/prediction/settlementHistories`
+
+Query the current account's prediction market settlement history (markets that have expired and settled).
+
+**Weight:** 1
+
+**Parameters:**
+
+| Name | Type | Is it required? | Description |
+| :---- | :---- | :---- | :---- |
+| symbol | STRING | NO | Trading pair; if not provided, returns all settlement records |
+| startTime | LONG | NO | Filter by market start time (millisecond timestamp) |
+| endTime | LONG | NO | Filter by market end time (millisecond timestamp) |
+| limit | INT | NO | Number of results; default 100, maximum 1000 |
+| signer | STRING | YES | API wallet address |
+| nonce | STRING | YES | Current time in microseconds |
+| signature | STRING | YES | Signature |
+
+Notes:
+* When both `startTime` and `endTime` are provided, `startTime` must not be greater than `endTime`
+* `limit` range is 1 to 1000, default is 100
+* `settleAmount` is the gross payout; `realizedPnl` equals `settleAmount` minus the cost basis
+* `settleFeeAmount` is deducted from the settlement payout
 
 ## Get withdraw fee (NONE)
 > **Response:**

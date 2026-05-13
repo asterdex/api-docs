@@ -1061,7 +1061,8 @@ symbol | STRING | NO |
 {
    "symbol": "APXUSDT",
    "makerCommissionRate": "0.000200",    
-   "takerCommissionRate": "0.000700"
+   "takerCommissionRate": "0.000700",
+   "settlementFeeRate": "0.000700"
 }
 ```
 ``
@@ -1498,7 +1499,7 @@ kindType |	STRING | 	YES |	交易类型
 ```
 
 ``
-POST /api/v3/predictionMint``
+POST /api/v3/prediction/mint``
 
 为预测市场铸造 YES+NO 代币对。铸造时系统按当前市场价格扣除等值报价资产，同时向账户发放等量的 YES 和 NO 代币。
 
@@ -1534,7 +1535,7 @@ newClientOrderId | STRING | NO | 客户自定义的唯一订单ID，若不填则
 ```
 
 ``
-POST /api/v3/predictionBurn``
+POST /api/v3/prediction/burn``
 
 销毁等量的 YES+NO 代币对，赎回相应的报价资产。账户需同时持有等量的 YES 代币和 NO 代币才可销毁。
 
@@ -1572,6 +1573,8 @@ newClientOrderId | STRING | NO | 客户自定义的唯一订单ID，若不填则
     "realizedPnl": "0.00000000",                // 已实现盈亏
     "closeQty": "0.00000000",                   // 已平仓数量
     "insertTime": 1747000000000,                // 开仓时间（毫秒时间戳）
+    "commissionFee": "0.10000000",              // 手续费
+    "commissionAsset": "USDT",                  // 手续费资产
     "balance": "65.00000000",                   // 仓位价值（持仓数量 × 开仓均价）
     "availableBalance": "65.00000000",          // 可用余额
   }
@@ -1603,10 +1606,9 @@ signature | STRING | YES | 签名
 ```javascript
 [
   {
-    "userId": 1001234,                          // 用户ID
     "marketName": "BTC_UP_DOWN_20260501",       // 预测市场名称
     "symbol": "BTC_UP_DOWN_20260501YES",        // 交易对
-    "assetName": "USDT",                        // 结算资产
+    "asset": "USDT",                            // 结算资产
     "type": "YES",                              // 持仓方向: "YES" 或 "NO"
     "openAvgPrice": "0.72000000",               // 开仓均价
     "cumQty": "200.00000000",                   // 持仓总数量
@@ -1616,6 +1618,10 @@ signature | STRING | YES | 签名
     "insertTime": 1746000000000,                // 开仓时间（毫秒时间戳）
     "closeTime": 1746086400000,                 // 平仓/结算时间（毫秒时间戳）
     "status": "settled",                        // 仓位状态: "close"（手动平仓）或 "settled"（市场结算）
+    "commissionFee": "0.10000000",              // 手续费
+    "commissionAsset": "USDT",                  // 手续费资产
+    "settleFee": "2.00000000",                  // 结算手续费（仅 status 为 "settled" 时存在）
+    "settleAsset": "USDT",                      // 结算手续费资产
   }
 ]
 ```
@@ -1646,7 +1652,55 @@ signature | STRING | YES | 签名
 * `limit` 取值范围为 1 ~ 1000，默认值为 100
 * `status` 字段说明: `close` 表示用户手动平仓，`settled` 表示预测市场到期结算
 
+## 查询预测市场结算历史 (USER_DATA)
 
+> **响应**
+```javascript
+[
+  {
+    "marketName": "BTC_UP_DOWN_20260501",       // 预测市场名称
+    "asset": "BTC_UP_DOWN_20260501YES",          // 代币资产（YES 或 NO 代币）
+    "symbol": "BTC_UP_DOWN_20260501YES",         // 交易对
+    "marketStartTime": 1746000000000,            // 市场开始时间（毫秒时间戳）
+    "marketEndTime": 1746086400000,              // 市场结束/结算时间（毫秒时间戳）
+    "shareAmount": "200.00000000",               // 结算时持有的份额数量
+    "settleAsset": "USDT",                       // 结算资产
+    "settleAmount": "200.00000000",              // 结算获得金额
+    "settleFeeAmount": "2.00000000",             // 结算手续费
+    "entryPrice": "0.72000000",                  // 平均入场价格
+    "settlePrice": "1.00000000",                 // 最终结算价格
+    "realizedPnl": "56.00000000",                // 结算后已实现盈亏
+    "status": "settled"                          // 结算状态
+  }
+]
+```
+
+``
+GET /api/v3/prediction/settlementHistories
+``
+
+查询当前账户的预测市场结算历史（已到期结算的市场）。
+
+**权重:**
+1
+
+**参数:**
+
+名称 | 类型 | 是否必需 | 描述
+------------ | ------------ | ------------ | ------------
+symbol | STRING | NO | 交易对，不传则返回所有结算记录
+startTime | LONG | NO | 按市场开始时间过滤（毫秒时间戳）
+endTime | LONG | NO | 按市场结束时间过滤（毫秒时间戳）
+limit | INT | NO | 返回数量，默认100，最大1000
+signer | STRING | YES | API钱包地址
+nonce | STRING | YES | 当前时间的微秒值
+signature | STRING | YES | 签名
+
+注意:
+* `startTime` 与 `endTime` 同时传入时，`startTime` 不得大于 `endTime`
+* `limit` 取值范围为 1 ~ 1000，默认值为 100
+* `settleAmount` 为结算总收入，`realizedPnl` = `settleAmount` 减去成本
+* `settleFeeAmount` 从结算收入中扣除
 
 ## 现货提现手续费 (NONe)
 > **响应**
