@@ -1037,11 +1037,7 @@ Return the current best orders (highest bid, lowest ask)
    "symbol": "BTC_UP_DOWM_5M_1778483280_YUSDT",
    "makerCommissionRate": "0.000200",    
    "takerCommissionRate": "0.000700",
-<<<<<<< Updated upstream
-    "settlementFeeRate": "0.000700"
-=======
    "settleCommissionRate": "0.000100"
->>>>>>> Stashed changes
 }
 ```
 
@@ -1555,13 +1551,8 @@ Query the current account's prediction market position list.
 [
   {
     "marketName": "BTC_UP_DOWN_20260501",       // Prediction market name
-<<<<<<< Updated upstream
-    "symbol": "BTC_UP_DOWN_20260501YES",        // Trading pair
-    "asset": "USDT",                            // Settlement asset
-=======
     "symbol": "BTC_UP_DOWM_5M_1778483280_YUSDT",        // Trading pair
     "assetName": "USDT",                        // Settlement asset
->>>>>>> Stashed changes
     "type": "YES",                              // Position direction: "YES" or "NO"
     "openAvgPrice": "0.72000000",               // Average open price
     "cumQty": "200.00000000",                   // Total position quantity
