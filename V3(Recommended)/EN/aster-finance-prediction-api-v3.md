@@ -473,7 +473,7 @@ In order to comply with the `market lot size`, the `quantity` must satisfy the f
 ```javascript
 "predictionEvents": [
         {
-            "eventName": "ETH_UP_DOWM_7D",       // Prediction event name
+            "eventName": "ETH_UP_DOWN_7D",       // Prediction event name
             "oracleSymbol": "ETHUSDT",            // Predicted symbol
             "predictionType": "UP_DOWN",          // Prediction type
             "sides": [ 
@@ -497,14 +497,14 @@ In order to comply with the `market lot size`, the `quantity` must satisfy the f
             ],                                    // Supported TIF values
             "rounds": [
                 {
-                    "marketName": "USD1_UP_DOWM_5M_1778483280",  // Prediction market name
+                    "marketName": "USD1_UP_DOWN_5M_1778483280",  // Prediction market name
                     "symbols": [ 
-                        "USD1_UP_DOWM_5M_1778483280_YUSDT",
-                        "USD1_UP_DOWM_5M_1778483280_NUSDT"
+                        "USD1_UP_DOWN_5M_1778483280_YUSDT",
+                        "USD1_UP_DOWN_5M_1778483280_NUSDT"
                     ],                            // Two symbols for the market; Y = up, N = down
                     "assets": [
-                        "USD1_UP_DOWM_5M_1778483280_Y",
-                        "USD1_UP_DOWM_5M_1778483280_N"
+                        "USD1_UP_DOWN_5M_1778483280_Y",
+                        "USD1_UP_DOWN_5M_1778483280_N"
                     ],                            // Two assets for the market; Y = up, N = down
                     "roundId": 2,                 // Round ID
                     "tradingStartTime": 1778482970000,  // Trading start time
@@ -514,7 +514,7 @@ In order to comply with the `market lot size`, the `quantity` must satisfy the f
                     "roundStatus": "SETTLED",     // Market status
                     "openPrice": "0.99920000",    // Opening price
                     "endPrice": "0.99910000",     // Ending price
-                    "winAsset": "USD1_UP_DOWM_5M_1778483280_N",  // Winning asset: Y if up, N if down
+                    "winAsset": "USD1_UP_DOWN_5M_1778483280_N",  // Winning asset: Y if up, N if down
                     "settleTime": 1778483582057,  // Settlement time
                     "settleHash": "0x3bc0aff52472dafd4b70d3423386a2dabf675fe7cd604e92391e2a4702cf0980"  // On-chain settlement hash
                 }
@@ -706,7 +706,7 @@ Test if the REST API can be reached and retrieve the server time.
 			"FOK",
 			"GTX"
     ],
-		"symbol": "BTC_UP_DOWM_5M_1778483280_YUSDT",
+		"symbol": "BTC_UP_DOWN_5M_1778483280_YUSDT",
 		"ocoAllowed": false
 	}]
 }
@@ -906,7 +906,7 @@ Each K-line represents a trading pair. The open time of each K-line can be regar
 
 ```javascript
 {
-  "symbol": "BTC_UP_DOWM_5M_1778483280_YUSDT",              //symbol
+  "symbol": "BTC_UP_DOWN_5M_1778483280_YUSDT",              //symbol
   "priceChange": "-94.99999800",    //price change
   "priceChangePercent": "-95.960",  //price change percent
   "weightedAvgPrice": "0.29628482", //weighted avgPrice
@@ -952,7 +952,7 @@ Each K-line represents a trading pair. The open time of each K-line can be regar
 
 ```javascript
 {
-   "symbol": "BTC_UP_DOWM_5M_1778483280_YUSDT",
+   "symbol": "BTC_UP_DOWN_5M_1778483280_YUSDT",
    "price": "1.30000000",
    "time": 1649666690902
 }  
@@ -963,7 +963,7 @@ OR
 ```javascript
 [     
   {
-     "symbol": "BTC_UP_DOWM_5M_1778483280_YUSDT",
+     "symbol": "BTC_UP_DOWN_5M_1778483280_YUSDT",
      "price": "1.30000000",
      "time": 1649666690902
   }
@@ -990,7 +990,7 @@ Get the latest price for a trading pair
 
 ```javascript
 {
-  "symbol": "BTC_UP_DOWM_5M_1778483280_YUSDT",
+  "symbol": "BTC_UP_DOWN_5M_1778483280_YUSDT",
   "bidPrice": "0.4999",
   "bidQty": "431.00",
   "askPrice": "0.5001",
@@ -1004,7 +1004,7 @@ OR
 ```javascript
 [
   {
-    "symbol": "BTC_UP_DOWM_5M_1778483280_YUSDT",
+    "symbol": "BTC_UP_DOWN_5M_1778483280_YUSDT",
     "bidPrice": "0.4999",
     "bidQty": "431.00",
     "askPrice": "0.5001",
@@ -1034,7 +1034,7 @@ Return the current best orders (highest bid, lowest ask)
 
 ```javascript
 {
-   "symbol": "BTC_UP_DOWM_5M_1778483280_YUSDT",
+   "symbol": "BTC_UP_DOWN_5M_1778483280_YUSDT",
    "makerCommissionRate": "0.000200",    
    "takerCommissionRate": "0.000700",
    "settleCommissionRate": "0.000100"
@@ -1061,7 +1061,7 @@ Get symbol fees
 
 ```javascript
 {
-  "symbol": "BTC_UP_DOWM_5M_1778483280_YUSDT", 
+  "symbol": "BTC_UP_DOWN_5M_1778483280_YUSDT", 
   "orderId": 28, 
   "clientOrderId": "6gCrw2kRUAF9CvJDGP16IP", 
   "updateTime": 1507725176595, 
@@ -1112,8 +1112,8 @@ Depending on the order `type`, certain parameters are mandatory:
 Other information:
 
 * Place a `MARKET` `SELL` market order; the user controls the amount of base assets to sell with the market order via `QUANTITY`.  
-  * For example, when placing a `MARKET` `SELL` market order on the `BTC_UP_DOWM_5M_1778483280_YUSDT` pair, use `QUANTITY` to let the user specify how much BTC they want to sell.  
-* For a `MARKET` `BUY` market order, the user controls how much of the quote asset they want to spend with `quoteOrderQty`; `QUANTITY` will be calculated by the system based on market liquidity. For example, when placing a `MARKET` `BUY` market order on the `BTC_UP_DOWM_5M_1778483280_YUSDT` pair, use `quoteOrderQty` to let the user choose how much USDT to use to buy BTC.  
+  * For example, when placing a `MARKET` `SELL` market order on the `BTC_UP_DOWN_5M_1778483280_YUSDT` pair, use `QUANTITY` to let the user specify how much BTC they want to sell.  
+* For a `MARKET` `BUY` market order, the user controls how much of the quote asset they want to spend with `quoteOrderQty`; `QUANTITY` will be calculated by the system based on market liquidity. For example, when placing a `MARKET` `BUY` market order on the `BTC_UP_DOWN_5M_1778483280_YUSDT` pair, use `quoteOrderQty` to let the user choose how much USDT to use to buy BTC.  
 * A `MARKET` order using `quoteOrderQty` will not violate the `LOT_SIZE` limit rules; the order will be executed as closely as possible to the given `quoteOrderQty`.  
 * Unless a previous order has already been filled, orders set with the same `newClientOrderId` will be rejected.
 
@@ -1123,7 +1123,7 @@ Other information:
 
 ```javascript
 {
-  "symbol": "BTC_UP_DOWM_5M_1778483280_YUSDT", 
+  "symbol": "BTC_UP_DOWN_5M_1778483280_YUSDT", 
   "orderId": 28, 
   "clientOrderId": "6gCrw2kRUAF9CvJDGP16IP", 
   "updateTime": 1507725176595, 
@@ -1165,7 +1165,7 @@ At least one of `orderId` or `origClientOrderId` must be sent.
 ```javascript
 {
     "orderId": 38,
-    "symbol": "BTC_UP_DOWM_5M_1778483280_YUSDT",
+    "symbol": "BTC_UP_DOWN_5M_1778483280_YUSDT",
     "status": "FILLED",
     "clientOrderId": "afMd4GBQyHkHpGWdiy34Li",
     "price": "20",
@@ -1213,7 +1213,7 @@ Note:
 ```javascript
 {
     "orderId": 38,
-    "symbol": "BTC_UP_DOWM_5M_1778483280_YUSDT",
+    "symbol": "BTC_UP_DOWN_5M_1778483280_YUSDT",
     "status": "NEW",
     "clientOrderId": "afMd4GBQyHkHpGWdiy34Li",
     "price": "20",
@@ -1257,7 +1257,7 @@ Note:
 [
     {
         "orderId": 349661, 
-        "symbol": "BTC_UP_DOWM_5M_1778483280_YUSDT", 
+        "symbol": "BTC_UP_DOWN_5M_1778483280_YUSDT", 
         "status": "NEW", 
         "clientOrderId": "LzypgiMwkf3TQ8wwvLo8RA", 
         "price": "1.10000000", 
@@ -1327,7 +1327,7 @@ origClientOrderIdList | STRING | NO | clientOrderId array string
 [
     {
         "orderId": 349661, 
-        "symbol": "BTC_UP_DOWM_5M_1778483280_YUSDT", 
+        "symbol": "BTC_UP_DOWN_5M_1778483280_YUSDT", 
         "status": "NEW", 
         "clientOrderId": "LzypgiMwkf3TQ8wwvLo8RA", 
         "price": "1.10000000", 
@@ -1379,7 +1379,7 @@ GET /api/v3/transactionHistory``
     "tranId": 1759115482304540227, 
     "tradeId": null,              
     "asset": "ASTER",             
-    "symbol": "BTC_UP_DOWM_5M_1778483280_YUSDT",                 
+    "symbol": "BTC_UP_DOWN_5M_1778483280_YUSDT",                 
     "balanceDelta": "-500.00000000", 
     "balanceInfo": "TRADE_SOURCE",    
     "time": 1759115482000,       
@@ -1511,7 +1511,7 @@ Notes:
 [
   {
     "marketName": "BTC_UP_DOWN_20260512",      // Prediction market name
-    "symbol": "BTC_UP_DOWM_5M_1778483280_YUSDT",        // Trading pair
+    "symbol": "BTC_UP_DOWN_5M_1778483280_YUSDT",        // Trading pair
     "assetName": "USDT",                        // Settlement asset
     "type": "YES",                              // Position direction: "YES" or "NO"
     "openAvgPrice": "0.65000000",               // Average open price
@@ -1551,7 +1551,7 @@ Query the current account's prediction market position list.
 [
   {
     "marketName": "BTC_UP_DOWN_20260501",       // Prediction market name
-    "symbol": "BTC_UP_DOWM_5M_1778483280_YUSDT",        // Trading pair
+    "symbol": "BTC_UP_DOWN_5M_1778483280_YUSDT",        // Trading pair
     "assetName": "USDT",                        // Settlement asset
     "type": "YES",                              // Position direction: "YES" or "NO"
     "openAvgPrice": "0.72000000",               // Average open price
@@ -1785,7 +1785,7 @@ Retrieve current account information
 ```javascript
 [ 
   {
-    "symbol": "BTC_UP_DOWM_5M_1778483280_YUSDT",
+    "symbol": "BTC_UP_DOWN_5M_1778483280_YUSDT",
     "id": 1002,
     "orderId": 266358,
     "side": "BUY",
@@ -1938,7 +1938,7 @@ Currently, the only configurable property is whether to enable the `combined` ("
 {
   "e": "aggTrade",  // Event type
   "E": 123456789,   // Event time
-  "s": "BTC_UP_DOWM_5M_1778483280_YUSDT",    // Symbol
+  "s": "BTC_UP_DOWN_5M_1778483280_YUSDT",    // Symbol
   "a": 12345,       // Aggregate trade ID
   "p": "0.001",     // Price
   "q": "100",       // Quantity
@@ -1964,7 +1964,7 @@ The collection transaction stream pushes transaction information and is an aggre
 {
   "e": "trade",     // Event type
   "E": 123456789,   // Event time
-  "s": "BTC_UP_DOWM_5M_1778483280_YUSDT",    // Symbol
+  "s": "BTC_UP_DOWN_5M_1778483280_YUSDT",    // Symbol
   "t": 12345,       // Trade ID
   "p": "0.001",     // Price
   "q": "100",       // Quantity
@@ -1985,11 +1985,11 @@ Each trade stream pushes the details of every individual trade. A **trade**, als
 {
   "e": "kline",     // Event type
   "E": 123456789,   // Event time
-  "s": "BTC_UP_DOWM_5M_1778483280_YUSDT",    // Symbol
+  "s": "BTC_UP_DOWN_5M_1778483280_YUSDT",    // Symbol
   "k": {
     "t": 123400000, // Kline start time
     "T": 123460000, // Kline close time
-    "s": "BTC_UP_DOWM_5M_1778483280_YUSDT",  // Symbol
+    "s": "BTC_UP_DOWN_5M_1778483280_YUSDT",  // Symbol
     "i": "1m",      // Interval
     "f": 100,       // First trade ID
     "L": 200,       // Last trade ID
@@ -2042,7 +2042,7 @@ m (minutes), h (hours), d (days), w (weeks), M (months)
   {
     "e": "24hrMiniTicker",  // Event type
     "E": 123456789,         // Event time
-    "s": "BTC_UP_DOWM_5M_1778483280_YUSDT",          // Symbol
+    "s": "BTC_UP_DOWN_5M_1778483280_YUSDT",          // Symbol
     "c": "0.0025",          // Close price
     "o": "0.0010",          // Open price
     "h": "0.0025",          // High price
@@ -2084,7 +2084,7 @@ Same as above, but pushes all trading pairs. Note that only updated tickers will
 {
   "e": "24hrTicker",  // Event type
   "E": 123456789,     // Event time
-  "s": "BTC_UP_DOWM_5M_1778483280_YUSDT",      // Symbol
+  "s": "BTC_UP_DOWN_5M_1778483280_YUSDT",      // Symbol
   "p": "0.0015",      // Price change
   "P": "250.00",      // Price change percent
   "w": "0.0018",      // Weighted average price
@@ -2134,7 +2134,7 @@ Pushes the full 24-hour refreshed ticker information for all trading pairs acros
 ```javascript
 {
   "u":400900217,     // order book updateId
-  "s": "BTC_UP_DOWM_5M_1778483280_YUSDT",     // symbol
+  "s": "BTC_UP_DOWN_5M_1778483280_YUSDT",     // symbol
   "b":"25.35190000", // best bid price
   "B":"31.21000000", // best bid qty
   "a":"25.36520000", // best ask price
@@ -2173,7 +2173,7 @@ Real-time push of the best order information for all trading pairs
   "e": "depthUpdate", // Event type
   "E": 123456789,     // Event time
   "T": 123456788,     // Transaction time 
-  "s": "BTC_UP_DOWM_5M_1778483280_YUSDT",     // Symbol
+  "s": "BTC_UP_DOWN_5M_1778483280_YUSDT",     // Symbol
   "U": 100,           // First update ID in event
   "u": 120,           // Final update ID in event
   "pu": 99,          // Final update Id in last stream(ie `u` in last stream) 
@@ -2207,7 +2207,7 @@ Limited depth information pushed every second or every 100 milliseconds. Levels 
   "e": "depthUpdate", // Event type
   "E": 123456789,     // Event time
   "T": 123456788,     // Transaction time 
-  "s": "BTC_UP_DOWM_5M_1778483280_YUSDT",     // Symbol
+  "s": "BTC_UP_DOWN_5M_1778483280_YUSDT",     // Symbol
   "U": 100,           // First update ID in event
   "u": 120,           // Final update ID in event
   "pu": 99,          // Final update Id in last stream(ie `u` in last stream)
@@ -2236,7 +2236,7 @@ Pushes the changed parts of the orderbook (if any) every second or every 100 mil
 
 1. Subscribe to **wss://sstream.asterdex.com/ws/btc_up_dowm_5m_1778483280_yusdt@depth**  
 2. Start caching the received updates. For the same price level, later updates overwrite earlier ones.  
-3. Fetch the REST endpoint [**https://sapi.asterdex.com/api/v3/depth?symbol=BTC_UP_DOWM_5M_1778483280_YUSDT\&limit=1000**](https://sapi.asterdex.com/api/v3/depth?symbol=BTC_UP_DOWM_5M_1778483280_YUSDT&limit=1000) to obtain a 1000-level depth snapshot  
+3. Fetch the REST endpoint [**https://sapi.asterdex.com/api/v3/depth?symbol=BTC_UP_DOWN_5M_1778483280_YUSDT\&limit=1000**](https://sapi.asterdex.com/api/v3/depth?symbol=BTC_UP_DOWN_5M_1778483280_YUSDT&limit=1000) to obtain a 1000-level depth snapshot  
 4. Discard from the currently cached messages those with `u` \<= the `lastUpdateId` obtained in step 3 (drop older, expired information)  
 5. Apply the depth snapshot to your local order book copy, and resume updating the local copy from the first WebSocket event whose `U` \<= `lastUpdateId`\+1 **and** `u` \>= `lastUpdateId`\+1  
 6. Each new event's `U` should equal exactly the previous event's `u`\+1; otherwise packets may have been lost \- restart initialization from step 3  
@@ -2349,7 +2349,7 @@ Orders are updated via the `executionReport` event
 
 ```javascript
 {
- "s": "BTC_UP_DOWM_5M_1778483280_YUSDT",   // symbol
+ "s": "BTC_UP_DOWN_5M_1778483280_YUSDT",   // symbol
   "c":"Xzh0gnxT41PStbwqOtXnjD",  // client order id
   "S":"SELL",   // order direction
   "o":"LIMIT",   // order type
@@ -2410,7 +2410,7 @@ Orders are updated via the `executionReport` event
         "e": "tradepro",
         "E": 1773751963081,
         "T": 1773751963079,
-        "s": "BTC_UP_DOWM_5M_1778483280_YUSDT",
+        "s": "BTC_UP_DOWN_5M_1778483280_YUSDT",
         "t": 128884613,
         "p": "73685.5",
         "q": "0.297",
