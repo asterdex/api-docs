@@ -60,7 +60,7 @@
 ## 访问限制
 ### 访问限制基本信息
 
-* 在 `/api/v3/exchangeInfo` `rateLimits` 数组中包含与交易的有关REQUEST_WEIGHT和ORDERS速率限制相关的对象。这些在 `限制种类 (rateLimitType)` 下的 `枚举定义` 部分中进一步定义。
+* 在 `/api/v3/prediction/exchangeInfo` `rateLimits` 数组中包含与交易的有关REQUEST_WEIGHT和ORDERS速率限制相关的对象。这些在 `限制种类 (rateLimitType)` 下的 `枚举定义` 部分中进一步定义。
 * 违反任何一个速率限制时，将返回429。
 
 ### IP 访问限制
@@ -714,7 +714,7 @@ NONE
 ```
 
 ``
-GET /api/v3/exchangeInfo
+GET /api/v3/prediction/exchangeInfo
 ``
 
 获取交易规则和交易对信息。

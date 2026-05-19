@@ -63,7 +63,7 @@ The API error codes are returned in the following format:
 
 ### Basic information on access restrictions
 
-* The `rateLimits` array in `/api/v3/exchangeInfo` contains objects related to REQUEST\_WEIGHT and ORDERS rate limits for trading. These are further defined in the `enum definitions` section under `rateLimitType`.  
+* The `rateLimits` array in `/api/v3/prediction/exchangeInfo` contains objects related to REQUEST\_WEIGHT and ORDERS rate limits for trading. These are further defined in the `enum definitions` section under `rateLimitType`.  
 * A 429 will be returned when any of the rate limits are violated.
 
 ### IP access limits
@@ -712,7 +712,7 @@ Test if the REST API can be reached and retrieve the server time.
 }
 ```
 
-`GET /api/v3/exchangeInfo`
+`GET /api/v3/prediction/exchangeInfo`
 
 Retrieve trading rules and trading pair information.
 
