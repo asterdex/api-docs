@@ -495,6 +495,28 @@ In order to comply with the `market lot size`, the `quantity` must satisfy the f
                 "FOK",
                 "GTX" 
             ],                                    // Supported TIF values
+            "liveRound":{
+                    "marketName": "USD1_UP_DOWN_5M_1778483280",  // Prediction market name
+                    "symbols": [ 
+                        "USD1_UP_DOWN_5M_1778483280_YUSDT",
+                        "USD1_UP_DOWN_5M_1778483280_NUSDT"
+                    ],                            // Two symbols for the market; Y = up, N = down
+                    "assets": [
+                        "USD1_UP_DOWN_5M_1778483280_Y",
+                        "USD1_UP_DOWN_5M_1778483280_N"
+                    ],                            // Two assets for the market; Y = up, N = down
+                    "roundId": 2,                 // Round ID
+                    "tradingStartTime": 1778482970000,  // Trading start time
+                    "tradingEndTime": 1778483520000,    // Trading end time
+                    "windowStartTime": 1778483280000,   // Window start time
+                    "windowEndTime": 1778483580000,     // Window end time
+                    "roundStatus": "SETTLED",     // Market status
+                    "openPrice": "0.99920000",    // Opening price
+                    "endPrice": "0.99910000",     // Ending price
+                    "winAsset": "USD1_UP_DOWN_5M_1778483280_N",  // Winning asset: Y if up, N if down
+                    "settleTime": 1778483582057,  // Settlement time
+                    "settleHash": "0x3bc0aff52472dafd4b70d3423386a2dabf675fe7cd604e92391e2a4702cf0980"  // On-chain settlement hash
+                },
             "rounds": [
                 {
                     "marketName": "USD1_UP_DOWN_5M_1778483280",  // Prediction market name
