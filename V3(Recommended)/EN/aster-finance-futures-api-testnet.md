@@ -2190,6 +2190,9 @@ Send in a new order.
 | workingType      | ENUM    | NO        | stopPrice triggered by: "MARK_PRICE", "CONTRACT_PRICE". Default "CONTRACT_PRICE"                                                       |
 | priceProtect     | STRING  | NO        | "TRUE" or "FALSE", default "FALSE". Used with`STOP/STOP_MARKET` or `TAKE_PROFIT/TAKE_PROFIT_MARKET` orders.                            |
 | newOrderRespType | ENUM    | NO        | "ACK", "RESULT", default "ACK"                                                                                                         |
+| pegPriceType     | ENUM    | NO        | BBO peg mode: `COUNTERPARTY_1` or `QUEUE_1`. When set on a `LIMIT` order, the engine resolves the actual price from the order book at trigger time using the BBO + `pegOffset`. Defaults to no peg. |
+| pegOffset        | DECIMAL | NO        | Signed offset from BBO when `pegPriceType` is set. BUY orders should use a non-positive value (e.g. `-0.5`); SELL non-negative. Units: same scale as `price` (must be a `tickSize` multiple).        |
+| priceLimit       | DECIMAL | NO        | Absolute price cap for BBO-pegged orders. BUY: ceiling — peg never resolves above this; SELL: floor. Must be > 0 and a multiple of `tickSize`. Defaults to no cap.                                   |
 | recvWindow       | LONG    | NO        |                                                                                                                                        |
 | timestamp        | LONG    | YES       |                                                                                                                                        |
 
@@ -2290,6 +2293,78 @@ price  |  DECIMAL | NO | Order price
 * If the new `quantity` or `price` does not meet `PRICE_FILTER` / `PERCENT_FILTER` / `LOT_SIZE` restrictions, the modification will be rejected and the original order will remain.
 * Only `LIMIT` order type is supported.
 * Maximum 10000 modifications per order.
+* **BBO-pegged orders** (those placed with `pegPriceType` = `COUNTERPARTY_1` / `QUEUE_1`): the engine resolves the actual price from the order book at trigger time. To auto-track the BBO with a continuously re-pegged limit order, use a **Chase order** (see `POST /fapi/v3/chase` below) which the strategy service amends in real time as the BBO moves.
+
+## Place Chase Order (TRADE)
+
+> **Response:**
+
+```javascript
+{
+    "strategyId": 12345,
+    "clientStrategyId": "my_chase_1",
+    "symbol": "BTCUSDT",
+    "side": "BUY",
+    "positionSide": "BOTH",
+    "quantity": "0.1",
+    "quantityUnit": "BASE",
+    "reduceOnly": false,
+    "chaseOffset": "0.5",
+    "chaseOffsetType": "ABSOLUTE",
+    "maxChaseOffset": "10.0",
+    "maxChaseOffsetType": "ABSOLUTE",
+    "priceLimit": "50100.00",
+    "timeInForce": "GTX",
+    "strategyStatus": "NEW",
+    "bookTime": 1747728000000,
+    "updateTime": 1747728000000
+}
+```
+
+``POST /fapi/v3/chase``
+
+Place a **Chase strategy order** — a BBO-pegged GTX limit order that automatically re-pegs to the best bid/ask as the market moves. The strategy service polls the order book each tick and amends the order price in real time to keep the order near the top of the book until it fills or until the market moves beyond `maxChaseOffset` from the original BBO.
+
+**Weight:** 1
+
+**Parameters:**
+
+| Name               | Type    | Mandatory | Description                                                                                                                                                                                |
+| ------------------ | ------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| symbol             | STRING  | YES       | Trading pair.                                                                                                                                                                              |
+| side               | ENUM    | YES       | `BUY` or `SELL`. Missing/blank returns `"Mandatory parameter 'side' was not sent, was empty/null, or malformed."`                                                                          |
+| positionSide       | ENUM    | NO        | Default `BOTH` for One-way Mode; `LONG` or `SHORT` for Hedge Mode.                                                                                                                         |
+| quantityUnit       | STRING  | YES       | `BASE` (qty in base asset, e.g. BTC) or `QUOTE` (qty in quote asset, e.g. USDT). For `QUOTE` orders the system converts to BASE using mark price.                                          |
+| quantity           | DECIMAL | YES       | Order quantity in the unit specified by `quantityUnit`.                                                                                                                                    |
+| reduceOnly         | STRING  | NO        | `"true"` or `"false"` (case-insensitive). Any other value is rejected. Default `"false"`.                                                                                                  |
+| chaseOffset        | DECIMAL | NO        | Distance from BBO to peg the order. Default `"0"` (exact BBO peg). Must be ≥ 0 and a multiple of `tickSize`. BUY price = `bid1 − chaseOffset`; SELL price = `ask1 + chaseOffset`.           |
+| chaseOffsetType    | STRING  | NO        | `ABSOLUTE` (default) . only supports `ABSOLUTE` for now. Will support or `PERCENTAGE` latter                                                                                                                         |
+| maxChaseOffset     | DECIMAL | NO        | Maximum tolerated distance from the original BBO before the chase auto-cancels. Required if `maxChaseOffsetType` is sent. Must be `> 0`.                                                   |
+| maxChaseOffsetType | STRING  | NO        | `ABSOLUTE` or `PERCENTAGE` (default `ABSOLUTE` when `maxChaseOffset` is sent). `ABSOLUTE`: same unit as price, must be a multiple of `tickSize`. `PERCENTAGE`: ≤ 2 decimal places.          |
+| priceLimit         | DECIMAL | NO        | Absolute price cap. BUY: ceiling — chase never crosses above this; SELL: floor. Must be > 0 and a multiple of `tickSize`.                                                                  |
+| timeInForce        | ENUM    | NO        | Default `GTX` (post-only).                                                                                                |
+| clientStrategyId   | STRING  | NO        | User-defined strategy id. Auto-generated if not sent. **Length ≤ 28 characters** (DB column is `varchar(28)`). Must match `^[\.A-Z\:/a-z0-9_-]{1,28}$`.                                    |
+| recvWindow         | LONG    | NO        |                                                                                                                                                                                            |
+| timestamp          | LONG    | YES       |                                                                                                                                                                                            |
+
+**Validation rules:**
+
+* `side` is mandatory.
+* `reduceOnly` accepts only `"true"` / `"false"` (case-insensitive). Any other string returns `INVALID_PARAMETER` with `reduceOnly` as the offending param name.
+* `chaseOffset` must be ≥ 0 and a multiple of `tickSize`.
+* `chaseOffsetType` / `maxChaseOffsetType` must be `ABSOLUTE` or `PERCENTAGE`; an invalid value returns `INVALID_PARAMETER` (not `INVALID_CHASE_OFFSET`).
+* When `maxChaseOffsetType = PERCENTAGE`, the input value must have ≤ 2 decimal places (it is stored at scale 2 on the wire, e.g. `"1"` → 1.00%, `"100"` → 100.00%).
+* When `maxChaseOffsetType = ABSOLUTE`, `maxChaseOffset` must be a multiple of `tickSize`.
+* `clientStrategyId` length must be ≤ 28 characters.
+* OI cap check: for `quantityUnit = QUOTE`, the gateway converts to BASE quantity for the symbol-leverage OI bracket check using `qtyBase = qtyQuote × 10^quantityDecimal / markPrice`.
+
+**Behavior:**
+
+* The initial order is placed as a GTX (post-only) limit with `pegPriceType = QUEUE_1` and signed `pegOffset` (negative for BUY, positive for SELL).
+* The strategy service polls every second and amends the order price as the BBO moves, keeping the order at `bid1 − chaseOffset` (BUY) or `ask1 + chaseOffset` (SELL).
+* If the market moves beyond `maxChaseOffset` from the original BBO, the chase **auto-cancels** with reason `OFFSET_CANCELLED`.
+* If the new peg price would breach `priceLimit`, the chase clamps to `priceLimit` and stops further re-pegs in that direction.
+* The chase terminates on FILL, user cancel (via standard `DELETE /fapi/v3/order`), `maxChaseOffset` breach, or `priceLimit` clamp + no further improvement opportunity.
 
 ## Place Multiple Orders  (TRADE)
 
