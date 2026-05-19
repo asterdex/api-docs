@@ -2562,7 +2562,7 @@ listenKey | STRING | YES
 
 ## 10xx - 常规服务器或网络问题
 ### -1000 UNKNOWN
- * An unknown error occured while processing the request.
+ * An unknown error occurred while processing the request.
  * 处理请求时发生未知错误。
 
 ### -1001 DISCONNECTED

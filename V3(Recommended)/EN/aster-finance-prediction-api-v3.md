@@ -2366,7 +2366,7 @@ Orders are updated via the `executionReport` event
   "L":"19.1000000000",   // Last executed price
   "n":"0.00382000",   // Commission amount
   "N":"SLP25",   // Commission asset
-  "T":1649926447190,   //Trasanction Time
+  "T":1649926447190,   //Transaction Time
   "t":18,   // transaction id
   "m":true,   // is this trade the maker side?
   "ot":"LIMIT", //original order type
