@@ -101,6 +101,10 @@
   - [Get User MMP (USER_DATA)](#get-user-mmp-user_data)
   - [Delete User MMP (USER_DATA)](#delete-user-mmp-user_data)
   - [Reset User MMP (USER_DATA)](#reset-user-mmp-user_data)
+  - [Place Strategy Order (TRADE)](#place-strategy-order-trade)
+  - [Update Strategy Order (TRADE)](#update-strategy-order-trade)
+  - [Query Strategy Open Order (USER_DATA)](#query-strategy-open-order-user_data)
+  - [Query Strategy History Order (USER_DATA)](#query-strategy-history-order-user_data)
   - [Bind Sub-Account (USER_DATA)](#bind-sub-account-user_data)
   - [Create Sub-Account (TRADE)](#create-sub-account-trade)
   - [Get Sub-Account List (USER_DATA)](#get-sub-account-list-user_data)
@@ -3810,6 +3814,256 @@ true
 | ------ | ------ | --------- | ----------- |
 | symbol | STRING | YES       |             |
 
+
+## Place Strategy Order (TRADE)
+
+> **Response:**
+
+```javascript
+{
+    "strategyId": 123456789,
+    "clientStrategyId": "myStrategy1",
+    "strategyType": "OTO",
+    "strategyStatus": "WORKING",
+    "updateTime": 1699900000000,
+    "failureCode": 0,
+    "failureReason": ""
+}
+```
+
+`POST /fapi/v3/placeStrategyOrder`
+
+Place a new strategy order. Supports OTO (One-Triggers-the-Other), OCO (One-Cancels-the-Other), and OTOCO (One-Triggers-One-Cancels-the-Other) strategy types.
+
+**Weight:** 50
+
+**Parameters:**
+
+| Name | Type | Mandatory | Description |
+|------|------|-----------|-------------|
+| clientStrategyId | STRING | NO | Client-assigned unique strategy ID |
+| strategyType | ENUM | YES | Strategy type: `OTO`, `OCO`, `OTOCO` |
+| subOrderList | JSON Array | YES | List of sub-orders. `OTO` and `OCO` require exactly 2; `OTOCO` requires exactly 3 |
+
+**Sub-order fields (each element in `subOrderList`):**
+
+| Name | Type | Mandatory | Description |
+|------|------|-----------|-------------|
+| strategySubId | STRING | YES | Sub-order sequence number starting from 1, must be sequential and match position in array |
+| securityType | STRING | YES | Security type of the order |
+| symbol | STRING | YES | Trading pair |
+| side | STRING | YES | `BUY` or `SELL` |
+| positionSide | STRING | NO | `BOTH`, `LONG`, `SHORT`. Default `BOTH` in one-way mode |
+| type | STRING | YES | `LIMIT`, `MARKET`, `STOP`, `STOP_MARKET`, `TAKE_PROFIT`, `TAKE_PROFIT_MARKET`, `TRAILING_STOP_MARKET` |
+| quantity | STRING | YES* | Order quantity. Not required when `closePosition=true` |
+| price | STRING | YES* | Required for `LIMIT`, `STOP`, `TAKE_PROFIT` |
+| stopPrice | STRING | YES* | Required for `STOP`, `STOP_MARKET`, `TAKE_PROFIT`, `TAKE_PROFIT_MARKET` |
+| timeInForce | STRING | YES* | Required for `LIMIT`; optional for stop orders (default `GTC`). `IOC` and `FOK` are not supported |
+| workingType | STRING | NO | `CONTRACT_PRICE` or `MARK_PRICE`. Default `CONTRACT_PRICE` |
+| reduceOnly | STRING | NO | Reduce-only flag |
+| closePosition | STRING | NO | Close-position flag |
+| priceProtect | STRING | NO | Price protection flag |
+| clientOrderId | STRING | NO | Client-assigned order ID |
+| activationPrice | STRING | NO | Activation price for `TRAILING_STOP_MARKET` |
+| callbackRate | STRING | NO | Callback rate for `TRAILING_STOP_MARKET` |
+| firstDrivenId | STRING | NO | `strategySubId` of the driving sub-order for the first trigger condition |
+| firstDrivenOn | STRING | NO | Event type that activates the first trigger |
+| firstTrigger | STRING | NO | First trigger action |
+| secondDrivenId | STRING | NO | `strategySubId` of the driving sub-order for the second trigger condition |
+| secondDrivenOn | STRING | NO | Event type that activates the second trigger |
+| secondTrigger | STRING | NO | Second trigger action |
+
+---
+
+## Update Strategy Order (TRADE)
+
+> **Response:**
+
+```javascript
+[
+    {
+        "strategyId": 123456789,
+        "clientStrategyId": "myStrategy1",
+        "strategyType": "OTO",
+        "strategyStatus": "WORKING",
+        "updatedSubOrder": 1,
+        "updateStatus": "SUCCESS",
+        "updateTime": 1699900000000,
+        "failureCode": 0,
+        "failureReason": ""
+    }
+]
+```
+
+`POST /fapi/v3/updateStrategyOrder`
+
+Update one or more sub-orders of an existing strategy order. Returns an array with one result per updated sub-order.
+
+**Weight:** 50
+
+**Parameters:**
+
+| Name | Type | Mandatory | Description |
+|------|------|-----------|-------------|
+| strategyId | LONG | YES | Strategy order ID to update |
+| strategyType | ENUM | YES | Strategy type: `OTO`, `OCO`, `OTOCO` |
+| subOrderList | JSON Array | YES | Sub-orders to update. Max 2 items for `OTO`/`OCO`, max 3 for `OTOCO` |
+
+**Sub-order fields (each element in `subOrderList`):**
+
+| Name | Type | Mandatory | Description |
+|------|------|-----------|-------------|
+| strategySubId | STRING | YES | Sequence number of the sub-order to update |
+| securityType | STRING | YES | Security type |
+| symbol | STRING | YES | Trading pair |
+| side | STRING | YES | `BUY` or `SELL` |
+| positionSide | STRING | NO | `BOTH`, `LONG`, `SHORT` |
+| type | STRING | YES | Order type |
+| quantity | STRING | NO | New order quantity |
+| price | STRING | NO | New price (applicable for `LIMIT`, `STOP`, `TAKE_PROFIT`) |
+| stopPrice | STRING | NO | New stop price |
+| timeInForce | STRING | NO | New time in force |
+| workingType | STRING | NO | New working type |
+| reduceOnly | STRING | NO | |
+| closePosition | STRING | NO | |
+| priceProtect | STRING | NO | |
+| activationPrice | STRING | NO | For `TRAILING_STOP_MARKET` only |
+| callbackRate | STRING | NO | For `TRAILING_STOP_MARKET` only |
+
+---
+
+## Query Strategy Open Order (USER_DATA)
+
+> **Response:**
+
+```javascript
+{
+    "strategyId": 123456789,
+    "clientStrategyId": "myStrategy1",
+    "strategyType": "OTO",
+    "strategyStatus": "WORKING",
+    "bookTime": 1699900000000,
+    "updateTime": 1699900001000,
+    "subOrders": [
+        {
+            "strategyId": 123456789,
+            "orderId": 987654321,
+            "clientOrderId": "myOrder1",
+            "status": "NEW",
+            "strategySubId": 1,
+            "firstDrivenId": 0,
+            "firstDrivenOn": "",
+            "firstTrigger": "",
+            "secondDrivenId": 0,
+            "secondDrivenOn": "",
+            "secondTrigger": "",
+            "securityType": "FUTURE",
+            "symbol": "BTCUSDT",
+            "side": "BUY",
+            "positionSide": "LONG",
+            "type": "LIMIT",
+            "timeInForce": "GTC",
+            "quantity": "0.001",
+            "reduceOnly": false,
+            "closePosition": false,
+            "price": "50000",
+            "avgPrice": "0",
+            "priceProtect": false,
+            "stopPrice": "0",
+            "activatePrice": null,
+            "callbackRate": null,
+            "workingType": "CONTRACT_PRICE",
+            "triggerTime": 0
+        }
+    ]
+}
+```
+
+`GET /fapi/v3/strategyOpenOrder`
+
+Query a current open strategy order. Either `strategyId` or `clientStrategyId` must be provided, but not both.
+
+**Weight:** 5
+
+**Parameters:**
+
+| Name | Type | Mandatory | Description |
+|------|------|-----------|-------------|
+| strategyId | LONG | NO* | Strategy order ID |
+| clientStrategyId | STRING | NO* | Client-assigned strategy ID |
+| strategyType | STRING | YES | Strategy type: `OTO`, `OCO`, `OTOCO` |
+
+*Either `strategyId` or `clientStrategyId` must be provided (mutually exclusive).
+
+---
+
+## Query Strategy History Order (USER_DATA)
+
+> **Response:**
+
+```javascript
+{
+    "strategyId": 123456789,
+    "clientStrategyId": "myStrategy1",
+    "strategyType": "OTO",
+    "strategyStatus": "EXPIRED",
+    "bookTime": 1699800000000,
+    "updateTime": 1699800060000,
+    "subOrders": [
+        {
+            "strategyId": 123456789,
+            "orderId": 987654321,
+            "clientOrderId": "myOrder1",
+            "status": "FILLED",
+            "strategySubId": 1,
+            "firstDrivenId": 0,
+            "firstDrivenOn": "",
+            "firstTrigger": "",
+            "secondDrivenId": 0,
+            "secondDrivenOn": "",
+            "secondTrigger": "",
+            "securityType": "FUTURE",
+            "symbol": "BTCUSDT",
+            "side": "BUY",
+            "positionSide": "LONG",
+            "type": "LIMIT",
+            "timeInForce": "GTC",
+            "quantity": "0.001",
+            "reduceOnly": false,
+            "closePosition": false,
+            "price": "50000",
+            "avgPrice": "50000",
+            "priceProtect": false,
+            "stopPrice": "0",
+            "activatePrice": null,
+            "callbackRate": null,
+            "workingType": "CONTRACT_PRICE",
+            "triggerTime": 1699800030000
+        }
+    ]
+}
+```
+
+`GET /fapi/v3/strategyHistoryOrder`
+
+Query historical strategy orders. Either `strategyId` or `clientStrategyId` must be provided, but not both. Maximum lookback window is 90 days.
+
+**Weight:** 5
+
+**Parameters:**
+
+| Name | Type | Mandatory | Description |
+|------|------|-----------|-------------|
+| strategyId | LONG | NO* | Strategy order ID |
+| clientStrategyId | STRING | NO* | Client-assigned strategy ID |
+| strategyType | STRING | YES | Strategy type: `OTO`, `OCO`, `OTOCO` |
+| startTime | LONG | NO | Start time in milliseconds. Data older than 90 days cannot be queried |
+| endTime | LONG | NO | End time in milliseconds |
+| limit | INT | NO | Number of results returned. Default 500; max 1000 |
+
+*Either `strategyId` or `clientStrategyId` must be provided (mutually exclusive).
+
+---
 
 # Bind Sub-Account (USER_DATA)
 

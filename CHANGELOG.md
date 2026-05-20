@@ -20,6 +20,21 @@ Added `stpMode` (ENUM, optional) to the place-order parameter list. When specifi
 
 ---
 
+## 2026-05-20
+
+### Added
+
+#### Strategy Order APIs / 策略订单接口
+
+- `POST /fapi/v3/placeStrategyOrder` — Place Strategy Order / 策略下单
+- `POST /fapi/v3/updateStrategyOrder` — Update Strategy Order / 更新策略订单
+- `GET /fapi/v3/strategyOrder` — Query Strategy Open Order / 查询策略当前挂单
+- `GET /fapi/v3/strategyOrder/history` — Query Strategy History Order / 查询策略历史订单
+
+Supports OTO, OCO, and OTOCO strategy types.
+
+---
+
 ## 2026-05-19
 
 ### Added
