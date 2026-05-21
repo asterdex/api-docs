@@ -63,6 +63,8 @@
 - [账户和交易接口](#账户和交易接口)
 	- [更改持仓模式(TRADE)](#更改持仓模式trade)
 	- [查询持仓模式(USER_DATA)](#查询持仓模式user_data)
+	- [更改STP模式(TRADE)](#更改stp模式trade)
+	- [查询STP模式(USER_DATA)](#查询stp模式user_data)
 	- [更改联合保证金模式(TRADE)](#更改联合保证金模式trade)
 	- [查询联合保证金模式(USER_DATA)](#查询联合保证金模式user_data)
 	- [下单 (TRADE)](#下单-trade)
@@ -446,6 +448,12 @@ if __name__ == '__main__':
 
 * ACK
 * RESULT
+
+**自成交防止模式 (stpMode)**
+
+* EXPIRE_TAKER 撤销taker订单
+* EXPIRE_MAKER 撤销maker订单
+* EXPIRE_BOTH 同时撤销双方订单
 
 **K线间隔:**
 
@@ -2249,6 +2257,60 @@ GET /fapi/v3/positionSide/dual``
 **权重:**
 30
 
+## 更改STP模式(TRADE)
+
+> **响应:**
+
+```javascript
+{
+	"code": 200,
+	"msg": "success"
+}
+```
+
+``
+POST /fapi/v3/stpMode``
+
+变换用户在 ***所有symbol*** 合约上的STP（自成交防止）模式。
+
+**权重:**
+1
+
+**参数:**
+
+| 名称 | 类型 | 是否必需 | 描述 |
+|------|------|---------|------|
+| stpMode | ENUM | YES | `EXPIRE_TAKER`: 撤销taker订单；`EXPIRE_MAKER`: 撤销maker订单；`EXPIRE_BOTH`: 同时撤销双方订单 |
+| nonce | LONG | YES | 微秒级时间戳 |
+| signer | STRING | YES | API钱包地址 |
+| signature | STRING | YES | 签名 |
+
+## 查询STP模式(USER_DATA)
+
+> **响应:**
+
+```javascript
+{
+	"stpMode": "EXPIRE_TAKER" // 当前STP模式
+}
+```
+
+``
+GET /fapi/v3/stpMode``
+
+查询用户目前在 ***所有symbol*** 合约上的STP（自成交防止）模式。
+
+**权重:**
+30
+
+**参数:**
+
+| 名称 | 类型 | 是否必需 | 描述 |
+|------|------|---------|------|
+| nonce | LONG | YES | 微秒级时间戳 |
+| signer | STRING | YES | API钱包地址 |
+| signature | STRING | YES | 签名 |
+
 ## 更改联合保证金模式(TRADE)
 
 > **响应:**
@@ -2362,6 +2424,7 @@ newOrderRespType | ENUM    | NO       | "ACK", "RESULT", 默认 "ACK"
 pegPriceType     | ENUM    | NO       | BBO peg 模式: `COUNTERPARTY_1` 或 `QUEUE_1`。在 `LIMIT` 订单上设置此参数后，撮合引擎在触发时基于订单簿的 BBO 加 `pegOffset` 解析实际价格。默认不使用 peg。
 pegOffset        | DECIMAL | NO       | 当 `pegPriceType` 已设置时，相对 BBO 的有符号偏移量。买单应为非正值（如 `-0.5`），卖单为非负值。单位与 `price` 相同，必须是 `tickSize` 的倍数。
 priceLimit       | DECIMAL | NO       | BBO peg 订单的绝对价格上下限。买单：上限——peg 不会高于此；卖单：下限。必须 > 0 且为 `tickSize` 倍数。默认无限制。
+stpMode          | ENUM    | NO       | 本订单的自成交防止（STP）模式，覆盖账户级默认设置。`EXPIRE_TAKER`：撤销taker订单；`EXPIRE_MAKER`：撤销maker订单；`EXPIRE_BOTH`：同时撤销双方订单。
 
 根据 order `type`的不同，某些参数强制要求，具体如下:
 
