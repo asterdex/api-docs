@@ -69,6 +69,8 @@
 - [Account/Trades Endpoints](#accounttrades-endpoints)
   - [Change Position Mode(TRADE)](#change-position-modetrade)
   - [Get Current Position Mode(USER_DATA)](#get-current-position-modeuser_data)
+  - [Change STP Mode (TRADE)](#change-stp-modetrade)
+  - [Get Current STP Mode (USER_DATA)](#get-current-stp-modeuser_data)
   - [Change Multi-Assets Mode (TRADE)](#change-multi-assets-mode-trade)
   - [Get Current Multi-Assets Mode (USER_DATA)](#get-current-multi-assets-mode-user_data)
   - [New Order  (TRADE)](#new-order--trade)
@@ -462,6 +464,12 @@ if __name__ == '__main__':
 
 * ACK
 * RESULT
+
+**STP Mode (stpMode)**
+
+* EXPIRE_TAKER
+* EXPIRE_MAKER
+* EXPIRE_BOTH
 
 **Kline/Candlestick chart intervals:**
 
@@ -2081,6 +2089,58 @@ Get user's position mode (Hedge Mode or One-way Mode ) on ***EVERY symbol***
 | recvWindow | LONG | NO        |             |
 | timestamp  | LONG | YES       |             |
 
+## Change STP Mode (TRADE)
+
+> **Response:**
+
+```javascript
+{
+	"code": 200,
+	"msg": "success"
+}
+```
+
+``POST /fapi/v3/stpMode``
+
+Change user's Self-Trade Prevention (STP) mode on ***EVERY symbol***
+
+**Weight:**
+1
+
+**Parameters:**
+
+| Name | Type | Mandatory | Description |
+|------|------|-----------|-------------|
+| stpMode | ENUM | YES | `EXPIRE_TAKER`: expire taker order; `EXPIRE_MAKER`: expire maker order; `EXPIRE_BOTH`: expire both maker and taker orders |
+| nonce | LONG | YES | Microsecond-level timestamp |
+| signer | STRING | YES | API wallet address |
+| signature | STRING | YES | Signature |
+
+## Get Current STP Mode (USER_DATA)
+
+> **Response:**
+
+```javascript
+{
+	"stpMode": "EXPIRE_TAKER" // Current STP mode
+}
+```
+
+``GET /fapi/v3/stpMode``
+
+Get user's current Self-Trade Prevention (STP) mode on ***EVERY symbol***
+
+**Weight:**
+30
+
+**Parameters:**
+
+| Name | Type | Mandatory | Description |
+|------|------|-----------|-------------|
+| nonce | LONG | YES | Microsecond-level timestamp |
+| signer | STRING | YES | API wallet address |
+| signature | STRING | YES | Signature |
+
 ## Change Multi-Assets Mode (TRADE)
 
 > **Response:**
@@ -2193,6 +2253,7 @@ Send in a new order.
 | pegPriceType     | ENUM    | NO        | BBO peg mode: `COUNTERPARTY_1` or `QUEUE_1`. When set on a `LIMIT` order, the engine resolves the actual price from the order book at trigger time using the BBO + `pegOffset`. Defaults to no peg. |
 | pegOffset        | DECIMAL | NO        | Signed offset from BBO when `pegPriceType` is set. BUY orders should use a non-positive value (e.g. `-0.5`); SELL non-negative. Units: same scale as `price` (must be a `tickSize` multiple).        |
 | priceLimit       | DECIMAL | NO        | Absolute price cap for BBO-pegged orders. BUY: ceiling — peg never resolves above this; SELL: floor. Must be > 0 and a multiple of `tickSize`. Defaults to no cap.                                   |
+| stpMode          | ENUM    | NO        | Self-Trade Prevention mode for this order. Overrides the account-level default. `EXPIRE_TAKER`: cancel the taker side; `EXPIRE_MAKER`: cancel the maker side; `EXPIRE_BOTH`: cancel both sides.      |
 | recvWindow       | LONG    | NO        |                                                                                                                                        |
 | timestamp        | LONG    | YES       |                                                                                                                                        |
 
