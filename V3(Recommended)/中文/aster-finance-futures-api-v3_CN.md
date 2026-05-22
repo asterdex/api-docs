@@ -99,6 +99,10 @@
 	- [获取用户MMP (USER_DATA)](#获取用户mmp-user_data)
 	- [删除用户MMP (USER_DATA)](#删除用户mmp-user_data)
 	- [重置用户MMP (USER_DATA)](#重置用户mmp-user_data)		
+	- [策略下单 (TRADE)](#策略下单-trade)
+	- [更新策略订单 (TRADE)](#更新策略订单-trade)
+	- [查询策略当前挂单 (USER_DATA)](#查询策略当前挂单-user_data)
+	- [查询策略历史订单 (USER_DATA)](#查询策略历史订单-user_data)
 	- [绑定子账户 (USER_DATA)](#绑定子账户-user_data)		
 	- [创建子账户 (TRADE)](#创建子账户-trade)		
 	- [查询子账户列表 (USER_DATA)](#查询子账户列表-user_data)		
@@ -3961,6 +3965,256 @@ POST /fapi/v3/mmpReset``
 名称  |  类型  | 是否必需 |  描述
 ------------ | ------------ | ------------ | ------------
 symbol | STRING | YES	
+
+## 策略下单 (TRADE)
+
+> **响应:**
+
+```javascript
+{
+    "strategyId": 123456789,
+    "clientStrategyId": "myStrategy1",
+    "strategyType": "OTO",
+    "strategyStatus": "WORKING",
+    "updateTime": 1699900000000,
+    "failureCode": 0,
+    "failureReason": ""
+}
+```
+
+`POST /fapi/v3/placeStrategyOrder`
+
+下策略订单。支持 OTO（一单触发另一单）、OCO（一单取消另一单）、OTOCO（一单触发并取消另外两单）三种策略类型。
+
+**权重:** 50
+
+**参数:**
+
+| 名称 | 类型 | 是否必需 | 描述 |
+|------|------|---------|------|
+| clientStrategyId | STRING | NO | 客户端自定义策略 ID |
+| strategyType | ENUM | YES | 策略类型：`OTO`、`OCO`、`OTOCO` |
+| subOrderList | JSON Array | YES | 子订单列表。`OTO` 和 `OCO` 恰好需要 2 个子订单；`OTOCO` 恰好需要 3 个 |
+
+**`subOrderList` 中每个子订单的字段：**
+
+| 名称 | 类型 | 是否必需 | 描述 |
+|------|------|---------|------|
+| strategySubId | STRING | YES | 子订单序号，从 1 开始，必须与数组位置保持一致 |
+| securityType | STRING | YES | 订单的资产类型 |
+| symbol | STRING | YES | 交易对 |
+| side | STRING | YES | `BUY` 或 `SELL` |
+| positionSide | STRING | NO | `BOTH`、`LONG`、`SHORT`，单向持仓模式下默认 `BOTH` |
+| type | STRING | YES | `LIMIT`、`MARKET`、`STOP`、`STOP_MARKET`、`TAKE_PROFIT`、`TAKE_PROFIT_MARKET`、`TRAILING_STOP_MARKET` |
+| quantity | STRING | YES* | 委托数量。`closePosition=true` 时可不填 |
+| price | STRING | YES* | `LIMIT`、`STOP`、`TAKE_PROFIT` 时必填 |
+| stopPrice | STRING | YES* | `STOP`、`STOP_MARKET`、`TAKE_PROFIT`、`TAKE_PROFIT_MARKET` 时必填 |
+| timeInForce | STRING | YES* | `LIMIT` 时必填；止损类订单可选（默认 `GTC`）。不支持 `IOC` 和 `FOK` |
+| workingType | STRING | NO | `CONTRACT_PRICE` 或 `MARK_PRICE`，默认 `CONTRACT_PRICE` |
+| reduceOnly | STRING | NO | 是否仅减仓 |
+| closePosition | STRING | NO | 是否全部平仓 |
+| priceProtect | STRING | NO | 是否开启价格保护 |
+| clientOrderId | STRING | NO | 客户端自定义订单 ID |
+| activationPrice | STRING | NO | `TRAILING_STOP_MARKET` 专用激活价格 |
+| callbackRate | STRING | NO | `TRAILING_STOP_MARKET` 回调比例 |
+| firstDrivenId | STRING | NO | 第一触发条件的驱动子订单 `strategySubId` |
+| firstDrivenOn | STRING | NO | 激活第一触发条件的事件类型 |
+| firstTrigger | STRING | NO | 第一触发动作 |
+| secondDrivenId | STRING | NO | 第二触发条件的驱动子订单 `strategySubId` |
+| secondDrivenOn | STRING | NO | 激活第二触发条件的事件类型 |
+| secondTrigger | STRING | NO | 第二触发动作 |
+
+---
+
+## 更新策略订单 (TRADE)
+
+> **响应:**
+
+```javascript
+[
+    {
+        "strategyId": 123456789,
+        "clientStrategyId": "myStrategy1",
+        "strategyType": "OTO",
+        "strategyStatus": "WORKING",
+        "updatedSubOrder": 1,
+        "updateStatus": "SUCCESS",
+        "updateTime": 1699900000000,
+        "failureCode": 0,
+        "failureReason": ""
+    }
+]
+```
+
+`POST /fapi/v3/updateStrategyOrder`
+
+修改已有策略订单中的一个或多个子订单。返回数组，每个子订单对应一条更新结果。
+
+**权重:** 50
+
+**参数:**
+
+| 名称 | 类型 | 是否必需 | 描述 |
+|------|------|---------|------|
+| strategyId | LONG | YES | 要修改的策略订单 ID |
+| strategyType | ENUM | YES | 策略类型：`OTO`、`OCO`、`OTOCO` |
+| subOrderList | JSON Array | YES | 要修改的子订单列表。`OTO`/`OCO` 最多 2 个，`OTOCO` 最多 3 个 |
+
+**`subOrderList` 中每个子订单的字段：**
+
+| 名称 | 类型 | 是否必需 | 描述 |
+|------|------|---------|------|
+| strategySubId | STRING | YES | 要修改的子订单序号 |
+| securityType | STRING | YES | 资产类型 |
+| symbol | STRING | YES | 交易对 |
+| side | STRING | YES | `BUY` 或 `SELL` |
+| positionSide | STRING | NO | `BOTH`、`LONG`、`SHORT` |
+| type | STRING | YES | 订单类型 |
+| quantity | STRING | NO | 新委托数量 |
+| price | STRING | NO | 新价格（适用于 `LIMIT`、`STOP`、`TAKE_PROFIT`） |
+| stopPrice | STRING | NO | 新止损价 |
+| timeInForce | STRING | NO | 新的有效方式 |
+| workingType | STRING | NO | 新的触发价格类型 |
+| reduceOnly | STRING | NO | |
+| closePosition | STRING | NO | |
+| priceProtect | STRING | NO | |
+| activationPrice | STRING | NO | 仅适用于 `TRAILING_STOP_MARKET` |
+| callbackRate | STRING | NO | 仅适用于 `TRAILING_STOP_MARKET` |
+
+---
+
+## 查询策略当前挂单 (USER_DATA)
+
+> **响应:**
+
+```javascript
+{
+    "strategyId": 123456789,
+    "clientStrategyId": "myStrategy1",
+    "strategyType": "OTO",
+    "strategyStatus": "WORKING",
+    "bookTime": 1699900000000,
+    "updateTime": 1699900001000,
+    "subOrders": [
+        {
+            "strategyId": 123456789,
+            "orderId": 987654321,
+            "clientOrderId": "myOrder1",
+            "status": "NEW",
+            "strategySubId": 1,
+            "firstDrivenId": 0,
+            "firstDrivenOn": "",
+            "firstTrigger": "",
+            "secondDrivenId": 0,
+            "secondDrivenOn": "",
+            "secondTrigger": "",
+            "securityType": "FUTURE",
+            "symbol": "BTCUSDT",
+            "side": "BUY",
+            "positionSide": "LONG",
+            "type": "LIMIT",
+            "timeInForce": "GTC",
+            "quantity": "0.001",
+            "reduceOnly": false,
+            "closePosition": false,
+            "price": "50000",
+            "avgPrice": "0",
+            "priceProtect": false,
+            "stopPrice": "0",
+            "activatePrice": null,
+            "callbackRate": null,
+            "workingType": "CONTRACT_PRICE",
+            "triggerTime": 0
+        }
+    ]
+}
+```
+
+`GET /fapi/v3/strategyOpenOrder`
+
+查询当前挂单中的策略订单。`strategyId` 与 `clientStrategyId` 必须且只能提供其中一个。
+
+**权重:** 5
+
+**参数:**
+
+| 名称 | 类型 | 是否必需 | 描述 |
+|------|------|---------|------|
+| strategyId | LONG | NO* | 策略订单 ID |
+| clientStrategyId | STRING | NO* | 客户端自定义策略 ID |
+| strategyType | STRING | YES | 策略类型：`OTO`、`OCO`、`OTOCO` |
+
+*`strategyId` 与 `clientStrategyId` 二选一，不可同时传入。
+
+---
+
+## 查询策略历史订单 (USER_DATA)
+
+> **响应:**
+
+```javascript
+{
+    "strategyId": 123456789,
+    "clientStrategyId": "myStrategy1",
+    "strategyType": "OTO",
+    "strategyStatus": "EXPIRED",
+    "bookTime": 1699800000000,
+    "updateTime": 1699800060000,
+    "subOrders": [
+        {
+            "strategyId": 123456789,
+            "orderId": 987654321,
+            "clientOrderId": "myOrder1",
+            "status": "FILLED",
+            "strategySubId": 1,
+            "firstDrivenId": 0,
+            "firstDrivenOn": "",
+            "firstTrigger": "",
+            "secondDrivenId": 0,
+            "secondDrivenOn": "",
+            "secondTrigger": "",
+            "securityType": "FUTURE",
+            "symbol": "BTCUSDT",
+            "side": "BUY",
+            "positionSide": "LONG",
+            "type": "LIMIT",
+            "timeInForce": "GTC",
+            "quantity": "0.001",
+            "reduceOnly": false,
+            "closePosition": false,
+            "price": "50000",
+            "avgPrice": "50000",
+            "priceProtect": false,
+            "stopPrice": "0",
+            "activatePrice": null,
+            "callbackRate": null,
+            "workingType": "CONTRACT_PRICE",
+            "triggerTime": 1699800030000
+        }
+    ]
+}
+```
+
+`GET /fapi/v3/strategyHistoryOrder`
+
+查询历史策略订单。`strategyId` 与 `clientStrategyId` 必须且只能提供其中一个。最大可查询范围为 90 天。
+
+**权重:** 5
+
+**参数:**
+
+| 名称 | 类型 | 是否必需 | 描述 |
+|------|------|---------|------|
+| strategyId | LONG | NO* | 策略订单 ID |
+| clientStrategyId | STRING | NO* | 客户端自定义策略 ID |
+| strategyType | STRING | YES | 策略类型：`OTO`、`OCO`、`OTOCO` |
+| startTime | LONG | NO | 起始时间（毫秒），最远可查 90 天前的数据 |
+| endTime | LONG | NO | 结束时间（毫秒） |
+| limit | INT | NO | 返回条数，默认 500，最大 1000 |
+
+*`strategyId` 与 `clientStrategyId` 二选一，不可同时传入。
+
+---
 
 # 绑定子账户 (USER_DATA)
 
