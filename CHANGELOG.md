@@ -4,19 +4,16 @@
 
 ### Added
 
-#### `POST /fapi/v3/stpMode` — Change STP Mode / 更改STP模式
+#### `POST /aster-chain/v3/transfer` — Transfer to Address / 转账至地址
 
-A new TRADE endpoint that sets the account-level **Self-Trade Prevention (STP) mode** applied to all orders by default. Accepted values: `EXPIRE_TAKER`, `EXPIRE_MAKER`, `EXPIRE_BOTH`.
+A new WITHDRAW-authenticated endpoint for transferring assets to another registered Aster Chain user address. Returns `transferId`, `asset`, `amount`, `toAddress`, `timestamp`, and `status`.
 
-#### `GET /fapi/v3/stpMode` — Get Current STP Mode / 查询STP模式
+#### STP Mode APIs / 自成交防止模式接口
 
-A new USER_DATA endpoint that returns the account's current STP mode.
+- `POST /fapi/v3/stpMode` — Change STP Mode / 更改STP模式 (TRADE, weight 1)
+- `GET /fapi/v3/stpMode` — Get Current STP Mode / 查询STP模式 (USER_DATA, weight 30)
 
-### Changed
-
-#### `POST /fapi/v3/order` — New Order: added optional `stpMode` parameter
-
-Added `stpMode` (ENUM, optional) to the place-order parameter list. When specified, it overrides the account-level STP default for that individual order.
+Supports `EXPIRE_TAKER`, `EXPIRE_MAKER`, `EXPIRE_BOTH`. Added `stpMode` optional parameter to `POST /fapi/v3/order` for per-order STP override.
 
 ---
 
