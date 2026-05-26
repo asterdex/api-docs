@@ -1836,7 +1836,7 @@ Retrieve the trade history for a specified trading pair of an account
 
 # WebSocket market data feed
 
-* The base URL for all wss endpoints listed in this document is: **wss://sstream.asterdex.com**  
+* The base URL for all wss endpoints listed in this document is: **wss://pstream.asterdex-testnet.com**  
 * Streams have either a single raw stream or a combined stream  
 * Single raw streams format is \*\*/ws/\*\*  
 * The URL format for combined streams is \*\*/stream?streams=//\*\*  
@@ -2242,7 +2242,7 @@ Pushes the changed parts of the orderbook (if any) every second or every 100 mil
 
 ## How to correctly maintain a local copy of an order book
 
-1. Subscribe to **wss://sstream.asterdex.com/ws/btc_up_dowm_5m_1778483280_yusdt@depth**  
+1. Subscribe to **wss://pstream.asterdex-testnet.com/ws/btc_up_dowm_5m_1778483280_yusdt@depth**  
 2. Start caching the received updates. For the same price level, later updates overwrite earlier ones.  
 3. Fetch the REST endpoint [**https://papi.asterdex-testnet.com/api/v3/depth?symbol=BTC_UP_DOWN_5M_1778483280_YUSDT\&limit=1000**](https://papi.asterdex-testnet.com/api/v3/depth?symbol=BTC_UP_DOWN_5M_1778483280_YUSDT&limit=1000) to obtain a 1000-level depth snapshot  
 4. Discard from the currently cached messages those with `u` \<= the `lastUpdateId` obtained in step 3 (drop older, expired information)  
@@ -2258,7 +2258,7 @@ Pushes the changed parts of the orderbook (if any) every second or every 100 mil
 * You can extend the 60-minute validity of a `listenKey` by sending a `PUT` request  
 * You can immediately close the current data stream and invalidate the `listenKey` by sending a `DELETE` for a `listenKey`  
 * Sending a `POST` on an account with a valid `listenKey` will return the currently valid `listenKey` and extend its validity by 60 minutes  
-* The WebSocket interface baseurl: **wss://sstream.asterdex.com**  
+* The WebSocket interface baseurl: **wss://pstream.asterdex-testnet.com**  
 * The stream name for subscribing to the user account data stream is \*\*/ws/\*\*  
 * Each connection is valid for no more than 24 hours; please handle disconnections and reconnections appropriately
 
