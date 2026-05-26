@@ -1901,7 +1901,7 @@ limit | INT | NO | 默认 500; 最大 1000.
 ---
 # Websocket 行情推送
 
-* 本篇所列出的所有wss接口的baseurl为: **wss://sstream.asterdex.com**
+* 本篇所列出的所有wss接口的baseurl为: **wss://pstream.asterdex-testnet.com**
 * Streams有单一原始 stream 或组合 stream
 * 单一原始 streams 格式为 **/ws/\<streamName\>**
 * 组合streams的URL格式为 **/stream?streams=\<streamName1\>/\<streamName2\>/\<streamName3\>**
@@ -2339,7 +2339,7 @@ m -> 分钟; h -> 小时; d -> 天; w -> 周; M -> 月
 **Update Speed:** 1000ms 或 100ms
 
 ## 如何正确在本地维护一个orderbook副本
-1. 订阅 **wss://sstream.asterdex.com/ws/bnbbtc@depth**
+1. 订阅 **wss://pstream.asterdex-testnet.com/ws/bnbbtc@depth**
 2. 开始缓存收到的更新。同一个价位，后收到的更新覆盖前面的。
 3. 访问Rest接口 **https://papi.asterdex-testnet.com/api/v3/depth?symbol=BNBBTC&limit=1000** 获得一个1000档的深度快照
 4. 将目前缓存到的信息中`u` <= 步骤3中获取到的快照中的`lastUpdateId`的部分丢弃(丢弃更早的信息，已经过期)。
@@ -2360,7 +2360,7 @@ m -> 分钟; h -> 小时; d -> 天; w -> 周; M -> 月
 * 可以通过 `PUT` 一个 `listenKey` 延长60分钟有效期
 * 可以通过`DELETE`一个 `listenKey` 立即关闭当前数据流，并使该`listenKey` 无效
 * 在具有有效`listenKey`的帐户上执行`POST`将返回当前有效的`listenKey`并将其有效期延长60分钟
-* websocket接口的baseurl: **wss://sstream.asterdex.com**
+* websocket接口的baseurl: **wss://pstream.asterdex-testnet.com**
 * U订阅账户数据流的stream名称为 **/ws/\<listenKey\>**
 * 每个链接有效期不超过24小时，请妥善处理断线重连。
 
