@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-05-26
+
+### Added
+
+#### Prediction API Testnet Documentation / 预测市场 API 测试网文档
+
+Added full API reference documentation for the Prediction API on testnet (`https://papi.asterdex-testnet.com`), covering:
+
+- **Market data**: `GET /api/v3/prediction/ping`, `GET /api/v3/prediction/time`, `GET /api/v3/prediction/exchangeInfo`, depth, trades, klines, tickers, best order book
+- **Trading**: `POST /api/v3/order` (Place order), `DELETE /api/v3/order` (Cancel order), `GET /api/v3/order`, open orders, all orders, cancel all open orders
+- **Prediction market**: mint (`POST /api/v3/prediction/mint`), burn (`POST /api/v3/prediction/burn`), positions (`GET /api/v3/prediction/positionRisk`), position history, settlement history
+- **Account**: perp-spot transfer, withdraw fee, withdraw, account info, trade history
+- **WebSocket streams**: trades, klines, tickers, order book depth (limited & incremental), listen key lifecycle, `ACCOUNT_UPDATE` payload
+
+Documentation available in both English (`V3(Recommended)/EN/aster-finance-prediction-api-tesetnet.md`) and Chinese (`V3(Recommended)/中文/aster-finance-prediction-api-testnet.md`).
+
+---
+
 ## 2026-05-21
 
 ### Added
