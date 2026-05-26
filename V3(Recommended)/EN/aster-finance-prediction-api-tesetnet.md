@@ -81,7 +81,7 @@ You are advised to use WebSocket messages to obtain the corresponding data as mu
 ### Order rate limits
 
 * Each successful order response will include a `X-MBX-ORDER-COUNT-(intervalNum)(intervalLetter)` header containing the number of order limit units currently used by the account.  
-* When the number of orders exceeds the limit, you will receive a response with status 429 but without the `Retry-After` header. Please check the order rate limits in `GET api/v3/exchangeInfo` (rateLimitType \= ORDERS) and wait until the ban period ends.  
+* When the number of orders exceeds the limit, you will receive a response with status 429 but without the `Retry-After` header. Please check the order rate limits in `GET api/v3/prediction/exchangeInfo` (rateLimitType \= ORDERS) and wait until the ban period ends.  
 * Rejected or unsuccessful orders are not guaranteed to include the above header in the response.  
 * **Order placement rate limits are counted per account.**
 
@@ -310,24 +310,10 @@ This defines how long an order can remain valid before expiring.
 
 **K-line interval:**
 
-m (minutes), h (hours), d (days), w (weeks), M (months)
+m (minutes)
 
 * 1s (added)
 * 1m  
-* 3m  
-* 5m  
-* 15m  
-* 30m  
-* 1h  
-* 2h  
-* 4h  
-* 6h  
-* 8h  
-* 12h  
-* 1d  
-* 3d  
-* 1w  
-* 1M
 
 **Rate limit type (rateLimitType)**
 
