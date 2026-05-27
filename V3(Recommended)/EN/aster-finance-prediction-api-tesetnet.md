@@ -475,6 +475,9 @@ In order to comply with the `market lot size`, the `quantity` must satisfy the f
                 "LIMIT",
                 "MARKET"
             ],                                    // Supported order types
+            "settleIntervalSeconds": 5,  //twap price internal
+            "settlementDataPointCount": 5, //twap price data count
+            "reduceOnly": false,  //reduceOnly
             "timeInForce": [
                 "GTC",
                 "IOC",
