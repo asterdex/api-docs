@@ -2562,7 +2562,7 @@ listenKey | STRING | YES
 
 > **Topic Subscribe:**
 
-* eventName@evnet
+* eventName@event
 
 ```javascript
 {
