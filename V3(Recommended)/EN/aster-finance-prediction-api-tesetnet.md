@@ -2479,7 +2479,7 @@ Orders are updated via the `executionReport` event
   'p': '2076.40762162',                     // Price
   'r': 0,                                   // Remaining data points
   't': 1779846960000,                       // Push timestamp
-  'w': 'Y'                                  // Winning result: Y = UP, N = DOWN
+  'w': 'Y'                                  // Winning result (only present in the last push): Y = UP, N = DOWN
 }
 ```
 
