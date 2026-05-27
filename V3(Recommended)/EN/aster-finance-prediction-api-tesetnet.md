@@ -2447,7 +2447,7 @@ Orders are updated via the `executionReport` event
 
 > **Topic Subscribe:**
 
-* eventName@evnet
+* eventName@event
 
 ```javascript
 {
