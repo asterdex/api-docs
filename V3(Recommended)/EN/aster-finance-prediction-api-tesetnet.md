@@ -2443,6 +2443,48 @@ Orders are updated via the `executionReport` event
     * m[1]: Maker address
 
 
+## Event: Prediction Event Twap Update
+
+> **Topic Subscribe:**
+
+* eventName@evnet
+
+```javascript
+{
+  "method": "SUBSCRIBE",
+  "params": [
+    "btc_up_down_5m@event"
+  ],
+  "id": 3
+}
+```
+
+> **Payload:**
+
+```javascript
+{
+  'e': 'market_start',                      // Event start; pushes the initial price
+  'm': 'ETH_UP_DOWN_5M_1779846360',         // Event name
+  'y': 'ETH_UP_DOWN_5M_1779846360_YUSDT',  // Long (UP) symbol name
+  'n': 'ETH_UP_DOWN_5M_1779846360_NUSDT',  // Short (DOWN) symbol name
+  'p': '2073.68023256',                     // Initial price
+  't': 1779846360000                        // Push timestamp
+}
+
+{
+  'e': 'market_twap',                       // TWAP data update; pushes each TWAP sample point
+  'm': 'ETH_UP_DOWN_5M_1779846660',         // Event name
+  'y': 'ETH_UP_DOWN_5M_1779846660_YUSDT',  // Long (UP) symbol name
+  'n': 'ETH_UP_DOWN_5M_1779846660_NUSDT',  // Short (DOWN) symbol name
+  'p': '2076.40762162',                     // Price
+  'r': 0,                                   // Remaining data points
+  't': 1779846960000,                       // Push timestamp
+  'w': 'Y'                                  // Winning result: Y = UP, N = DOWN
+}
+```
+
+
+
 \#错误代码
 
 error JSON payload:
