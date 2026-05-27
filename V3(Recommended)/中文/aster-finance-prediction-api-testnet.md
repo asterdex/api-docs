@@ -2558,6 +2558,47 @@ listenKey | STRING | YES
 
 
 
+## Event: 预测市场结算Twap数据更新
+
+> **Topic Subscribe:**
+
+* eventName@event
+
+```javascript
+{
+  "method": "SUBSCRIBE",
+  "params": [
+    "btc_up_down_5m@event"
+  ],
+  "id": 3
+}
+```
+
+> **Payload:**
+
+```javascript
+{
+  'e': 'market_start',                      // 事件开始，推送初始价格
+  'm': 'ETH_UP_DOWN_5M_1779846360',         // 事件名称
+  'y': 'ETH_UP_DOWN_5M_1779846360_YUSDT',  // 上涨 symbol 名称
+  'n': 'ETH_UP_DOWN_5M_1779846360_NUSDT',  // 下跌 symbol 名称
+  'p': '2073.68023256',                     // 初始价格
+  't': 1779846360000                        // 推送时间
+}
+
+{
+  'e': 'market_twap',                       // 事件 TWAP 数据更新，推送每次的 TWAP 取点数据
+  'm': 'ETH_UP_DOWN_5M_1779846660',         // 事件名称
+  'y': 'ETH_UP_DOWN_5M_1779846660_YUSDT',  // 上涨 symbol 名称
+  'n': 'ETH_UP_DOWN_5M_1779846660_NUSDT',  // 下跌 symbol 名称
+  'p': '2076.40762162',                     // 价格
+  'r': 0,                                   // 剩余数据点数量
+  't': 1779846960000,                       // 推送时间
+  'w': 'Y'                                  // 获胜结果（仅在最后一条推送中出现）：Y 代表上涨，N 代表下跌
+}
+```
+
+
 #错误代码
 
 > error JSON payload:
