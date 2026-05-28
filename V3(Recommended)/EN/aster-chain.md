@@ -17,6 +17,20 @@
   - [Deposit Stake (TRADE)](#deposit-stake-trade)
   - [Update Lock Period (TRADE)](#update-lock-period-trade)
   - [Claim Rewards (TRADE)](#claim-rewards-trade)
+- [Aster-Chain Perp Withdraw & Transfer Endpoints](#aster-chain-perp-withdraw--transfer-endpoints)
+  - [User Withdraw (WITHDRAW)](#user-withdraw-withdraw)
+  - [User Solana Withdraw (WITHDRAW)](#user-solana-withdraw-withdraw)
+  - [Get Withdraw Info (USER_DATA)](#get-withdraw-info-user_data)
+  - [Deposit/Withdraw History (USER_DATA)](#depositwithdraw-history-user_data)
+  - [Wallet Transfer (TRADE)](#wallet-transfer-trade)
+  - [Transfer History (USER_DATA)](#transfer-history-user_data)
+- [Aster-Chain Spot Withdraw & Transfer Endpoints](#aster-chain-spot-withdraw--transfer-endpoints)
+  - [User Withdraw (WITHDRAW)](#user-withdraw-withdraw-1)
+  - [User Solana Withdraw (WITHDRAW)](#user-solana-withdraw-withdraw-1)
+  - [Get Withdraw Info (USER_DATA)](#get-withdraw-info-user_data-1)
+  - [Deposit/Withdraw History (USER_DATA)](#depositwithdraw-history-user_data-1)
+  - [Wallet Transfer (TRADE)](#wallet-transfer-trade-1)
+  - [Transfer History (USER_DATA)](#transfer-history-user_data-1)
 
 ---
 
@@ -299,3 +313,425 @@ Claim accumulated staking rewards. The on-chain action type is `TokenDelegate` (
 | nonce | LONG | YES | Microsecond timestamp |
 | user | STRING | YES | Source account wallet address |
 | signature | STRING | YES | EIP-712 signature, signed with the `user` account's wallet private key |
+
+---
+
+# Aster-Chain Perp Withdraw & Transfer Endpoints
+
+## User Withdraw (WITHDRAW)
+
+> **Response:**
+
+```javascript
+{
+    "withdrawId": "987654321",
+    "hash": "0xabc123..."
+}
+```
+
+`POST /aster-chain/v3/perp/user-withdraw`
+
+Submit a withdrawal request from the perp account to an on-chain address.
+
+**Weight:** 5
+
+**Parameters:**
+
+| Name | Type | Mandatory | Description |
+|------|------|-----------|-------------|
+| asset | STRING | YES | Asset name (e.g. `"USDT"`) |
+| chainId | INTEGER | YES | Target chain ID |
+| amount | STRING | YES | Withdrawal amount |
+| fee | STRING | YES | Withdrawal fee |
+| receiver | STRING | YES | Recipient on-chain address |
+| userNonce | STRING | YES | User-side nonce included in the signature |
+| userSignature | STRING | YES | User signature over the withdrawal parameters |
+
+---
+
+## User Solana Withdraw (WITHDRAW)
+
+> **Response:**
+
+```javascript
+{
+    "withdrawId": "987654321",
+    "hash": "0xabc123..."
+}
+```
+
+`POST /aster-chain/v3/perp/user-solana-withdraw`
+
+Submit a withdrawal request from the perp account to a Solana address.
+
+**Weight:** 5
+
+**Parameters:**
+
+| Name | Type | Mandatory | Description |
+|------|------|-----------|-------------|
+| asset | STRING | YES | Asset name (e.g. `"USDT"`) |
+| chainId | INTEGER | YES | Target chain ID |
+| amount | STRING | YES | Withdrawal amount |
+| fee | STRING | YES | Withdrawal fee |
+| receiver | STRING | YES | Recipient Solana address |
+| userNonce | STRING | YES | User-side nonce included in the signature |
+| userSignature | STRING | YES | User signature over the withdrawal parameters |
+
+---
+
+## Get Withdraw Info (USER_DATA)
+
+> **Response:**
+
+```javascript
+{
+    "userDailyLimit": "10000",
+    "userRemainingDailyLimit": "9500",
+    "totalDailyLimit": "100000",
+    "totalRemainingDailyLimit": "95000",
+    "balances": {
+        "USDT": {
+            "currency": "USDT",
+            "spotTotalWithdrawAmount": "0",
+            "perpTotalWithdrawAmount": "500",
+            "dailyLimit": "5000",
+            "chainBalances": {
+                "1": {
+                    "chainId": 1,
+                    "spotMaxWithdrawAmount": "1000",
+                    "perpMaxWithdrawAmount": "4500",
+                    "chainLimit": "5000",
+                    "withdrawFee": "0.5"
+                }
+            }
+        }
+    }
+}
+```
+
+`GET /aster-chain/v3/perp/user-withdraw-info`
+
+Query the current user's withdrawal limits and available balances per asset and chain.
+
+**Weight:** 1
+
+**Parameters:**
+
+None
+
+---
+
+## Deposit/Withdraw History (USER_DATA)
+
+> **Response:**
+
+```javascript
+[
+    {
+        "id": "12345",
+        "type": "WITHDRAW",   // "DEPOSIT" or "WITHDRAW"
+        "asset": "USDT",
+        "amount": "100",
+        "state": "COMPLETED",
+        "txHash": "0xabc123...",
+        "time": 1699900800000,
+        "chainId": 1,
+        "accountType": "perp"
+    }
+]
+```
+
+`GET /aster-chain/v3/perp/deposit-withdraw-history`
+
+Query the deposit and withdrawal history for the current user's perp account.
+
+**Weight:** 5
+
+**Parameters:**
+
+| Name | Type | Mandatory | Description |
+|------|------|-----------|-------------|
+| chainId | STRING | NO | Filter records by chain ID |
+
+---
+
+## Wallet Transfer (TRADE)
+
+> **Response:**
+
+```javascript
+{
+    "tranId": 123456789,
+    "status": "SUCCESS"
+}
+```
+
+`POST /aster-chain/v3/perp/wallet/transfer`
+
+Transfer assets between the spot wallet and the perp account.
+
+**Weight:** 5
+
+**Parameters:**
+
+| Name | Type | Mandatory | Description |
+|------|------|-----------|-------------|
+| asset | STRING | YES | Asset name (e.g. `"USDT"`) |
+| amount | DECIMAL | YES | Transfer amount, must be greater than 0 |
+| clientTranId | STRING | YES | Client-defined transfer ID |
+| kindType | STRING | YES | Transfer direction: `"SPOT_FUTURE"` (spot → perp) or `"FUTURE_SPOT"` (perp → spot) |
+| nonce | LONG | YES | Microsecond timestamp |
+| user | STRING | YES | Source account wallet address |
+| signature | STRING | YES | EIP-712 signature, signed with the `user` account's wallet private key |
+
+---
+
+## Transfer History (USER_DATA)
+
+> **Response:**
+
+```javascript
+{
+    "total": 2,
+    "rows": [
+        {
+            "asset": "USDT",
+            "tranId": 123456789,
+            "amount": "100",
+            "kindType": "SPOT_FUTURE",   // "SPOT_FUTURE" or "FUTURE_SPOT"
+            "createTime": 1699900800000,
+            "updateTime": 1699900810000,
+            "status": "SUCCESS"          // "SUCCESS", "FAIL", or "PENDING"
+        }
+    ]
+}
+```
+
+`GET /aster-chain/v3/perp/transfer/history`
+
+Query the wallet transfer history between spot and perp for the current user.
+
+**Weight:** 5
+
+**Parameters:**
+
+| Name | Type | Mandatory | Description |
+|------|------|-----------|-------------|
+| asset | STRING | NO | Filter by asset name |
+| startTime | LONG | NO | Start time in milliseconds |
+| endTime | LONG | NO | End time in milliseconds (defaults to current time) |
+| page | INTEGER | NO | Page number, default `1` |
+| pageSize | INTEGER | NO | Records per page, default `10`, max `100` |
+| order | STRING | NO | Sort order: `"ASC"` or `"DESC"` (default `"DESC"`) |
+
+---
+
+# Aster-Chain Spot Withdraw & Transfer Endpoints
+
+## User Withdraw (WITHDRAW)
+
+> **Response:**
+
+```javascript
+{
+    "withdrawId": "987654321",
+    "hash": "0xabc123..."
+}
+```
+
+`POST /aster-chain/v3/spot/user-withdraw`
+
+Submit a withdrawal request from the spot account to an on-chain address.
+
+**Weight:** 5
+
+**Parameters:**
+
+| Name | Type | Mandatory | Description |
+|------|------|-----------|-------------|
+| asset | STRING | YES | Asset name (e.g. `"USDT"`) |
+| chainId | INTEGER | YES | Target chain ID |
+| amount | STRING | YES | Withdrawal amount |
+| fee | STRING | YES | Withdrawal fee |
+| receiver | STRING | YES | Recipient on-chain address |
+| userNonce | STRING | YES | User-side nonce included in the signature |
+| userSignature | STRING | YES | User signature over the withdrawal parameters |
+
+---
+
+## User Solana Withdraw (WITHDRAW)
+
+> **Response:**
+
+```javascript
+{
+    "withdrawId": "987654321",
+    "hash": "0xabc123..."
+}
+```
+
+`POST /aster-chain/v3/spot/user-solana-withdraw`
+
+Submit a withdrawal request from the spot account to a Solana address.
+
+**Weight:** 5
+
+**Parameters:**
+
+| Name | Type | Mandatory | Description |
+|------|------|-----------|-------------|
+| asset | STRING | YES | Asset name (e.g. `"USDT"`) |
+| chainId | INTEGER | YES | Target chain ID |
+| amount | DECIMAL | YES | Withdrawal amount |
+| fee | DECIMAL | YES | Withdrawal fee |
+| receiver | STRING | YES | Recipient Solana address |
+| userNonce | STRING | YES | User-side nonce included in the signature |
+| userSignature | STRING | YES | User signature over the withdrawal parameters |
+
+---
+
+## Get Withdraw Info (USER_DATA)
+
+> **Response:**
+
+```javascript
+{
+    "userDailyLimit": "10000",
+    "userRemainingDailyLimit": "9500",
+    "totalDailyLimit": "100000",
+    "totalRemainingDailyLimit": "95000",
+    "balances": {
+        "USDT": {
+            "currency": "USDT",
+            "spotTotalWithdrawAmount": "500",
+            "perpTotalWithdrawAmount": "0",
+            "dailyLimit": "5000",
+            "chainBalances": {
+                "1": {
+                    "chainId": 1,
+                    "spotMaxWithdrawAmount": "4500",
+                    "perpMaxWithdrawAmount": "1000",
+                    "chainLimit": "5000",
+                    "withdrawFee": "0.5"
+                }
+            }
+        }
+    }
+}
+```
+
+`GET /aster-chain/v3/spot/user-withdraw-info`
+
+Query the current user's withdrawal limits and available balances per asset and chain for the spot account.
+
+**Weight:** 1
+
+**Parameters:**
+
+None
+
+---
+
+## Deposit/Withdraw History (USER_DATA)
+
+> **Response:**
+
+```javascript
+[
+    {
+        "id": "12345",
+        "type": "WITHDRAW",   // "DEPOSIT" or "WITHDRAW"
+        "asset": "USDT",
+        "amount": "100",
+        "state": "COMPLETED",
+        "txHash": "0xabc123...",
+        "time": 1699900800000,
+        "chainId": 1,
+        "accountType": "spot"
+    }
+]
+```
+
+`GET /aster-chain/v3/spot/deposit-withdraw-history`
+
+Query the deposit and withdrawal history for the current user's spot account.
+
+**Weight:** 5
+
+**Parameters:**
+
+| Name | Type | Mandatory | Description |
+|------|------|-----------|-------------|
+| chainId | STRING | NO | Filter records by chain ID |
+
+---
+
+## Wallet Transfer (TRADE)
+
+> **Response:**
+
+```javascript
+{
+    "tranId": 123456789,
+    "status": "SUCCESS"
+}
+```
+
+`POST /aster-chain/v3/spot/wallet/transfer`
+
+Transfer assets between the spot wallet and the perp account.
+
+**Weight:** 5
+
+**Parameters:**
+
+| Name | Type | Mandatory | Description |
+|------|------|-----------|-------------|
+| asset | STRING | YES | Asset name (e.g. `"USDT"`) |
+| amount | DECIMAL | YES | Transfer amount, must be greater than 0 |
+| clientTranId | STRING | YES | Client-defined transfer ID |
+| kindType | STRING | YES | Transfer direction: `"SPOT_FUTURE"` (spot → perp) or `"FUTURE_SPOT"` (perp → spot) |
+| nonce | LONG | YES | Microsecond timestamp |
+| user | STRING | YES | Source account wallet address |
+| signature | STRING | YES | EIP-712 signature, signed with the `user` account's wallet private key |
+
+---
+
+## Transfer History (USER_DATA)
+
+> **Response:**
+
+```javascript
+{
+    "total": 2,
+    "rows": [
+        {
+            "asset": "USDT",
+            "tranId": 123456789,
+            "amount": "100",
+            "kindType": "SPOT_FUTURE",   // "SPOT_FUTURE" or "FUTURE_SPOT"
+            "createTime": 1699900800000,
+            "updateTime": 1699900810000,
+            "status": "SUCCESS"          // "SUCCESS", "FAIL", or "PENDING"
+        }
+    ]
+}
+```
+
+`GET /aster-chain/v3/spot/transfer/history`
+
+Query the wallet transfer history between spot and perp for the current user.
+
+**Weight:** 5
+
+**Parameters:**
+
+| Name | Type | Mandatory | Description |
+|------|------|-----------|-------------|
+| asset | STRING | NO | Filter by asset name |
+| startTime | LONG | NO | Start time in milliseconds |
+| endTime | LONG | NO | End time in milliseconds (defaults to current time) |
+| page | INTEGER | NO | Page number, default `1` |
+| pageSize | INTEGER | NO | Records per page, default `10`, max `100` |
+| order | STRING | NO | Sort order: `"ASC"` or `"DESC"` (default `"DESC"`) |
