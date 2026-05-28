@@ -23,14 +23,12 @@
   - [Get Withdraw Info (USER_DATA)](#get-withdraw-info-user_data)
   - [Deposit/Withdraw History (USER_DATA)](#depositwithdraw-history-user_data)
   - [Wallet Transfer (TRADE)](#wallet-transfer-trade)
-  - [Transfer History (USER_DATA)](#transfer-history-user_data)
 - [Aster-Chain Spot Withdraw & Transfer Endpoints](#aster-chain-spot-withdraw--transfer-endpoints)
   - [User Withdraw (WITHDRAW)](#user-withdraw-withdraw-1)
   - [User Solana Withdraw (WITHDRAW)](#user-solana-withdraw-withdraw-1)
-  - [Get Withdraw Info (USER_DATA)](#get-withdraw-info-user_data-1)
-  - [Deposit/Withdraw History (USER_DATA)](#depositwithdraw-history-user_data-1)
   - [Wallet Transfer (TRADE)](#wallet-transfer-trade-1)
-  - [Transfer History (USER_DATA)](#transfer-history-user_data-1)
+- [Aster-Chain Withdraw Endpoints](#aster-chain-withdraw-endpoints)
+  - [Estimate Withdraw Fee (NONE)](#estimate-withdraw-fee-none)
 
 ---
 
@@ -487,46 +485,6 @@ Transfer assets between the spot wallet and the perp account.
 
 ---
 
-## Transfer History (USER_DATA)
-
-> **Response:**
-
-```javascript
-{
-    "total": 2,
-    "rows": [
-        {
-            "asset": "USDT",
-            "tranId": 123456789,
-            "amount": "100",
-            "kindType": "SPOT_FUTURE",   // "SPOT_FUTURE" or "FUTURE_SPOT"
-            "createTime": 1699900800000,
-            "updateTime": 1699900810000,
-            "status": "SUCCESS"          // "SUCCESS", "FAIL", or "PENDING"
-        }
-    ]
-}
-```
-
-`GET /aster-chain/v3/perp/transfer/history`
-
-Query the wallet transfer history between spot and perp for the current user.
-
-**Weight:** 5
-
-**Parameters:**
-
-| Name | Type | Mandatory | Description |
-|------|------|-----------|-------------|
-| asset | STRING | NO | Filter by asset name |
-| startTime | LONG | NO | Start time in milliseconds |
-| endTime | LONG | NO | End time in milliseconds (defaults to current time) |
-| page | INTEGER | NO | Page number, default `1` |
-| pageSize | INTEGER | NO | Records per page, default `10`, max `100` |
-| order | STRING | NO | Sort order: `"ASC"` or `"DESC"` (default `"DESC"`) |
-
----
-
 # Aster-Chain Spot Withdraw & Transfer Endpoints
 
 ## User Withdraw (WITHDRAW)
@@ -588,48 +546,6 @@ Submit a withdrawal request from the spot account to a Solana address.
 | receiver | STRING | YES | Recipient Solana address |
 | userNonce | STRING | YES | User-side nonce included in the signature |
 | userSignature | STRING | YES | User signature over the withdrawal parameters |
-
----
-
-## Get Withdraw Info (USER_DATA)
-
-> **Response:**
-
-```javascript
-{
-    "userDailyLimit": "10000",
-    "userRemainingDailyLimit": "9500",
-    "totalDailyLimit": "100000",
-    "totalRemainingDailyLimit": "95000",
-    "balances": {
-        "USDT": {
-            "currency": "USDT",
-            "spotTotalWithdrawAmount": "500",
-            "perpTotalWithdrawAmount": "0",
-            "dailyLimit": "5000",
-            "chainBalances": {
-                "1": {
-                    "chainId": 1,
-                    "spotMaxWithdrawAmount": "4500",
-                    "perpMaxWithdrawAmount": "1000",
-                    "chainLimit": "5000",
-                    "withdrawFee": "0.5"
-                }
-            }
-        }
-    }
-}
-```
-
-`GET /aster-chain/v3/spot/user-withdraw-info`
-
-Query the current user's withdrawal limits and available balances per asset and chain for the spot account.
-
-**Weight:** 1
-
-**Parameters:**
-
-None
 
 ---
 
@@ -698,40 +614,32 @@ Transfer assets between the spot wallet and the perp account.
 
 ---
 
-## Transfer History (USER_DATA)
+# Aster-Chain Withdraw Endpoints
+
+## Estimate Withdraw Fee (NONE)
 
 > **Response:**
 
 ```javascript
 {
-    "total": 2,
-    "rows": [
-        {
-            "asset": "USDT",
-            "tranId": 123456789,
-            "amount": "100",
-            "kindType": "SPOT_FUTURE",   // "SPOT_FUTURE" or "FUTURE_SPOT"
-            "createTime": 1699900800000,
-            "updateTime": 1699900810000,
-            "status": "SUCCESS"          // "SUCCESS", "FAIL", or "PENDING"
-        }
-    ]
+    "gasPrice": 1000000000,
+    "gasLimit": 21000,
+    "nativePrice": "1800.00",
+    "tokenPrice": "1.00",
+    "gasCost": "0.000021",
+    "gasUsdValue": "0.038"
 }
 ```
 
-`GET /aster-chain/v3/spot/transfer/history`
+`GET /aster-chain/v3/withdraw/estimateFee`
 
-Query the wallet transfer history between spot and perp for the current user.
+Estimate the gas fee for a withdrawal on the specified chain and asset.
 
-**Weight:** 5
+**Weight:** 1
 
 **Parameters:**
 
 | Name | Type | Mandatory | Description |
 |------|------|-----------|-------------|
-| asset | STRING | NO | Filter by asset name |
-| startTime | LONG | NO | Start time in milliseconds |
-| endTime | LONG | NO | End time in milliseconds (defaults to current time) |
-| page | INTEGER | NO | Page number, default `1` |
-| pageSize | INTEGER | NO | Records per page, default `10`, max `100` |
-| order | STRING | NO | Sort order: `"ASC"` or `"DESC"` (default `"DESC"`) |
+| chainId | INTEGER | YES | Target chain ID |
+| asset | STRING | YES | Asset name (e.g. `"USDT"`) |
