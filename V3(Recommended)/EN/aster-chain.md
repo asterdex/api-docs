@@ -549,39 +549,6 @@ Submit a withdrawal request from the spot account to a Solana address.
 
 ---
 
-## Deposit/Withdraw History (USER_DATA)
-
-> **Response:**
-
-```javascript
-[
-    {
-        "id": "12345",
-        "type": "WITHDRAW",   // "DEPOSIT" or "WITHDRAW"
-        "asset": "USDT",
-        "amount": "100",
-        "state": "COMPLETED",
-        "txHash": "0xabc123...",
-        "time": 1699900800000,
-        "chainId": 1,
-        "accountType": "spot"
-    }
-]
-```
-
-`GET /aster-chain/v3/spot/deposit-withdraw-history`
-
-Query the deposit and withdrawal history for the current user's spot account.
-
-**Weight:** 5
-
-**Parameters:**
-
-| Name | Type | Mandatory | Description |
-|------|------|-----------|-------------|
-| chainId | STRING | NO | Filter records by chain ID |
-
----
 
 ## Wallet Transfer (TRADE)
 
