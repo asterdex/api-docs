@@ -17,6 +17,18 @@
   - [追加质押 (TRADE)](#追加质押-trade)
   - [更新锁定期 (TRADE)](#更新锁定期-trade)
   - [领取奖励 (TRADE)](#领取奖励-trade)
+- [Aster-Chain 合约提现与划转接口](#aster-chain-合约提现与划转接口)
+  - [合约提现 (WITHDRAW)](#合约提现-withdraw)
+  - [合约 Solana 提现 (WITHDRAW)](#合约-solana-提现-withdraw)
+  - [查询提现信息 (USER_DATA)](#查询提现信息-user_data)
+  - [充提记录 (USER_DATA)](#充提记录-user_data)
+  - [钱包划转 (TRADE)](#钱包划转-trade)
+- [Aster-Chain 现货提现与划转接口](#aster-chain-现货提现与划转接口)
+  - [现货提现 (WITHDRAW)](#现货提现-withdraw)
+  - [现货 Solana 提现 (WITHDRAW)](#现货-solana-提现-withdraw)
+  - [钱包划转 (TRADE)](#钱包划转-trade-1)
+- [Aster-Chain 提现接口](#aster-chain-提现接口)
+  - [估算提现手续费 (NONE)](#估算提现手续费-none)
 
 ---
 
@@ -299,3 +311,301 @@
 | nonce | LONG | YES | 微秒时间戳 |
 | user | STRING | YES | 发起账户钱包地址 |
 | signature | STRING | YES | EIP-712 签名，使用 `user` 账户的钱包私钥签名 |
+
+---
+
+# Aster-Chain 合约提现与划转接口
+
+## 合约提现 (WITHDRAW)
+
+> **响应:**
+
+```javascript
+{
+    "withdrawId": "987654321",
+    "hash": "0xabc123..."
+}
+```
+
+`POST /aster-chain/v3/perp/user-withdraw`
+
+从合约账户提现至链上地址。
+
+**权重:** 5
+
+**参数:**
+
+| 名称 | 类型 | 是否必需 | 描述 |
+|------|------|---------|------|
+| asset | STRING | YES | 资产名称（如 `"USDT"`） |
+| chainId | INTEGER | YES | 目标链 ID |
+| amount | STRING | YES | 提现金额 |
+| fee | STRING | YES | 提现手续费 |
+| receiver | STRING | YES | 接收方链上地址 |
+| userNonce | STRING | YES | 签名中包含的用户端 nonce |
+| userSignature | STRING | YES | 用户对提现参数的签名 |
+
+---
+
+## 合约 Solana 提现 (WITHDRAW)
+
+> **响应:**
+
+```javascript
+{
+    "withdrawId": "987654321",
+    "hash": "0xabc123..."
+}
+```
+
+`POST /aster-chain/v3/perp/user-solana-withdraw`
+
+从合约账户提现至 Solana 地址。
+
+**权重:** 5
+
+**参数:**
+
+| 名称 | 类型 | 是否必需 | 描述 |
+|------|------|---------|------|
+| asset | STRING | YES | 资产名称（如 `"USDT"`） |
+| chainId | INTEGER | YES | 目标链 ID |
+| amount | STRING | YES | 提现金额 |
+| fee | STRING | YES | 提现手续费 |
+| receiver | STRING | YES | 接收方 Solana 地址 |
+| userNonce | STRING | YES | 签名中包含的用户端 nonce |
+| userSignature | STRING | YES | 用户对提现参数的签名 |
+
+---
+
+## 查询提现信息 (USER_DATA)
+
+> **响应:**
+
+```javascript
+{
+    "userDailyLimit": "10000",
+    "userRemainingDailyLimit": "9500",
+    "totalDailyLimit": "100000",
+    "totalRemainingDailyLimit": "95000",
+    "balances": {
+        "USDT": {
+            "currency": "USDT",
+            "spotTotalWithdrawAmount": "0",
+            "perpTotalWithdrawAmount": "500",
+            "dailyLimit": "5000",
+            "chainBalances": {
+                "1": {
+                    "chainId": 1,
+                    "spotMaxWithdrawAmount": "1000",
+                    "perpMaxWithdrawAmount": "4500",
+                    "chainLimit": "5000",
+                    "withdrawFee": "0.5"
+                }
+            }
+        }
+    }
+}
+```
+
+`GET /aster-chain/v3/perp/user-withdraw-info`
+
+查询当前用户各资产、各链的提现限额及可用余额。
+
+**权重:** 1
+
+**参数:**
+
+无
+
+---
+
+## 充提记录 (USER_DATA)
+
+> **响应:**
+
+```javascript
+[
+    {
+        "id": "12345",
+        "type": "WITHDRAW",   // "DEPOSIT" 或 "WITHDRAW"
+        "asset": "USDT",
+        "amount": "100",
+        "state": "COMPLETED",
+        "txHash": "0xabc123...",
+        "time": 1699900800000,
+        "chainId": 1,
+        "accountType": "perp"
+    }
+]
+```
+
+`GET /aster-chain/v3/perp/deposit-withdraw-history`
+
+查询当前用户合约账户的充值与提现历史记录。
+
+**权重:** 5
+
+**参数:**
+
+| 名称 | 类型 | 是否必需 | 描述 |
+|------|------|---------|------|
+| chainId | STRING | NO | 按链 ID 过滤记录 |
+
+---
+
+## 钱包划转 (TRADE)
+
+> **响应:**
+
+```javascript
+{
+    "tranId": 123456789,
+    "status": "SUCCESS"
+}
+```
+
+`POST /aster-chain/v3/perp/wallet/transfer`
+
+在现货钱包与合约账户之间划转资产。
+
+**权重:** 5
+
+**参数:**
+
+| 名称 | 类型 | 是否必需 | 描述 |
+|------|------|---------|------|
+| asset | STRING | YES | 资产名称（如 `"USDT"`） |
+| amount | DECIMAL | YES | 划转金额，必须大于 0 |
+| clientTranId | STRING | YES | 客户端自定义划转 ID |
+| kindType | STRING | YES | 划转方向：`"SPOT_FUTURE"`（现货 → 合约）或 `"FUTURE_SPOT"`（合约 → 现货） |
+| nonce | LONG | YES | 微秒时间戳 |
+| user | STRING | YES | 发起账户钱包地址 |
+| signature | STRING | YES | EIP-712 签名，使用 `user` 账户的钱包私钥签名 |
+
+---
+
+# Aster-Chain 现货提现与划转接口
+
+## 现货提现 (WITHDRAW)
+
+> **响应:**
+
+```javascript
+{
+    "withdrawId": "987654321",
+    "hash": "0xabc123..."
+}
+```
+
+`POST /aster-chain/v3/spot/user-withdraw`
+
+从现货账户提现至链上地址。
+
+**权重:** 5
+
+**参数:**
+
+| 名称 | 类型 | 是否必需 | 描述 |
+|------|------|---------|------|
+| asset | STRING | YES | 资产名称（如 `"USDT"`） |
+| chainId | INTEGER | YES | 目标链 ID |
+| amount | STRING | YES | 提现金额 |
+| fee | STRING | YES | 提现手续费 |
+| receiver | STRING | YES | 接收方链上地址 |
+| userNonce | STRING | YES | 签名中包含的用户端 nonce |
+| userSignature | STRING | YES | 用户对提现参数的签名 |
+
+---
+
+## 现货 Solana 提现 (WITHDRAW)
+
+> **响应:**
+
+```javascript
+{
+    "withdrawId": "987654321",
+    "hash": "0xabc123..."
+}
+```
+
+`POST /aster-chain/v3/spot/user-solana-withdraw`
+
+从现货账户提现至 Solana 地址。
+
+**权重:** 5
+
+**参数:**
+
+| 名称 | 类型 | 是否必需 | 描述 |
+|------|------|---------|------|
+| asset | STRING | YES | 资产名称（如 `"USDT"`） |
+| chainId | INTEGER | YES | 目标链 ID |
+| amount | DECIMAL | YES | 提现金额 |
+| fee | DECIMAL | YES | 提现手续费 |
+| receiver | STRING | YES | 接收方 Solana 地址 |
+| userNonce | STRING | YES | 签名中包含的用户端 nonce |
+| userSignature | STRING | YES | 用户对提现参数的签名 |
+
+---
+
+## 钱包划转 (TRADE)
+
+> **响应:**
+
+```javascript
+{
+    "tranId": 123456789,
+    "status": "SUCCESS"
+}
+```
+
+`POST /aster-chain/v3/spot/wallet/transfer`
+
+在现货钱包与合约账户之间划转资产。
+
+**权重:** 5
+
+**参数:**
+
+| 名称 | 类型 | 是否必需 | 描述 |
+|------|------|---------|------|
+| asset | STRING | YES | 资产名称（如 `"USDT"`） |
+| amount | DECIMAL | YES | 划转金额，必须大于 0 |
+| clientTranId | STRING | YES | 客户端自定义划转 ID |
+| kindType | STRING | YES | 划转方向：`"SPOT_FUTURE"`（现货 → 合约）或 `"FUTURE_SPOT"`（合约 → 现货） |
+| nonce | LONG | YES | 微秒时间戳 |
+| user | STRING | YES | 发起账户钱包地址 |
+| signature | STRING | YES | EIP-712 签名，使用 `user` 账户的钱包私钥签名 |
+
+---
+
+# Aster-Chain 提现接口
+
+## 估算提现手续费 (NONE)
+
+> **响应:**
+
+```javascript
+{
+    "gasPrice": 1000000000,
+    "gasLimit": 21000,
+    "nativePrice": "1800.00",
+    "tokenPrice": "1.00",
+    "gasCost": "0.000021",
+    "gasUsdValue": "0.038"
+}
+```
+
+`GET /aster-chain/v3/withdraw/estimateFee`
+
+估算指定链和资产的提现 Gas 手续费。
+
+**权重:** 1
+
+**参数:**
+
+| 名称 | 类型 | 是否必需 | 描述 |
+|------|------|---------|------|
+| chainId | INTEGER | YES | 目标链 ID |
+| asset | STRING | YES | 资产名称（如 `"USDT"`） |
