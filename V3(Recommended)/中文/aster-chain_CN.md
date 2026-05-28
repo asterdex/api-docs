@@ -23,14 +23,12 @@
   - [查询提现信息 (USER_DATA)](#查询提现信息-user_data)
   - [充提记录 (USER_DATA)](#充提记录-user_data)
   - [钱包划转 (TRADE)](#钱包划转-trade)
-  - [划转记录 (USER_DATA)](#划转记录-user_data)
 - [Aster-Chain 现货提现与划转接口](#aster-chain-现货提现与划转接口)
   - [现货提现 (WITHDRAW)](#现货提现-withdraw)
   - [现货 Solana 提现 (WITHDRAW)](#现货-solana-提现-withdraw)
-  - [查询提现信息 (USER_DATA)](#查询提现信息-user_data-1)
-  - [充提记录 (USER_DATA)](#充提记录-user_data-1)
   - [钱包划转 (TRADE)](#钱包划转-trade-1)
-  - [划转记录 (USER_DATA)](#划转记录-user_data-1)
+- [Aster-Chain 提现接口](#aster-chain-提现接口)
+  - [估算提现手续费 (NONE)](#估算提现手续费-none)
 
 ---
 
@@ -487,46 +485,6 @@
 
 ---
 
-## 划转记录 (USER_DATA)
-
-> **响应:**
-
-```javascript
-{
-    "total": 2,
-    "rows": [
-        {
-            "asset": "USDT",
-            "tranId": 123456789,
-            "amount": "100",
-            "kindType": "SPOT_FUTURE",   // "SPOT_FUTURE" 或 "FUTURE_SPOT"
-            "createTime": 1699900800000,
-            "updateTime": 1699900810000,
-            "status": "SUCCESS"          // "SUCCESS"、"FAIL" 或 "PENDING"
-        }
-    ]
-}
-```
-
-`GET /aster-chain/v3/perp/transfer/history`
-
-查询当前用户现货与合约间的划转历史记录。
-
-**权重:** 5
-
-**参数:**
-
-| 名称 | 类型 | 是否必需 | 描述 |
-|------|------|---------|------|
-| asset | STRING | NO | 按资产名称过滤 |
-| startTime | LONG | NO | 起始时间（毫秒） |
-| endTime | LONG | NO | 结束时间（毫秒），默认为当前时间 |
-| page | INTEGER | NO | 页码，默认 `1` |
-| pageSize | INTEGER | NO | 每页记录数，默认 `10`，最大 `100` |
-| order | STRING | NO | 排序方式：`"ASC"` 或 `"DESC"`（默认 `"DESC"`） |
-
----
-
 # Aster-Chain 现货提现与划转接口
 
 ## 现货提现 (WITHDRAW)
@@ -591,82 +549,6 @@
 
 ---
 
-## 查询提现信息 (USER_DATA)
-
-> **响应:**
-
-```javascript
-{
-    "userDailyLimit": "10000",
-    "userRemainingDailyLimit": "9500",
-    "totalDailyLimit": "100000",
-    "totalRemainingDailyLimit": "95000",
-    "balances": {
-        "USDT": {
-            "currency": "USDT",
-            "spotTotalWithdrawAmount": "500",
-            "perpTotalWithdrawAmount": "0",
-            "dailyLimit": "5000",
-            "chainBalances": {
-                "1": {
-                    "chainId": 1,
-                    "spotMaxWithdrawAmount": "4500",
-                    "perpMaxWithdrawAmount": "1000",
-                    "chainLimit": "5000",
-                    "withdrawFee": "0.5"
-                }
-            }
-        }
-    }
-}
-```
-
-`GET /aster-chain/v3/spot/user-withdraw-info`
-
-查询当前用户现货账户各资产、各链的提现限额及可用余额。
-
-**权重:** 1
-
-**参数:**
-
-无
-
----
-
-## 充提记录 (USER_DATA)
-
-> **响应:**
-
-```javascript
-[
-    {
-        "id": "12345",
-        "type": "WITHDRAW",   // "DEPOSIT" 或 "WITHDRAW"
-        "asset": "USDT",
-        "amount": "100",
-        "state": "COMPLETED",
-        "txHash": "0xabc123...",
-        "time": 1699900800000,
-        "chainId": 1,
-        "accountType": "spot"
-    }
-]
-```
-
-`GET /aster-chain/v3/spot/deposit-withdraw-history`
-
-查询当前用户现货账户的充值与提现历史记录。
-
-**权重:** 5
-
-**参数:**
-
-| 名称 | 类型 | 是否必需 | 描述 |
-|------|------|---------|------|
-| chainId | STRING | NO | 按链 ID 过滤记录 |
-
----
-
 ## 钱包划转 (TRADE)
 
 > **响应:**
@@ -698,40 +580,32 @@
 
 ---
 
-## 划转记录 (USER_DATA)
+# Aster-Chain 提现接口
+
+## 估算提现手续费 (NONE)
 
 > **响应:**
 
 ```javascript
 {
-    "total": 2,
-    "rows": [
-        {
-            "asset": "USDT",
-            "tranId": 123456789,
-            "amount": "100",
-            "kindType": "SPOT_FUTURE",   // "SPOT_FUTURE" 或 "FUTURE_SPOT"
-            "createTime": 1699900800000,
-            "updateTime": 1699900810000,
-            "status": "SUCCESS"          // "SUCCESS"、"FAIL" 或 "PENDING"
-        }
-    ]
+    "gasPrice": 1000000000,
+    "gasLimit": 21000,
+    "nativePrice": "1800.00",
+    "tokenPrice": "1.00",
+    "gasCost": "0.000021",
+    "gasUsdValue": "0.038"
 }
 ```
 
-`GET /aster-chain/v3/spot/transfer/history`
+`GET /aster-chain/v3/withdraw/estimateFee`
 
-查询当前用户现货与合约间的划转历史记录。
+估算指定链和资产的提现 Gas 手续费。
 
-**权重:** 5
+**权重:** 1
 
 **参数:**
 
 | 名称 | 类型 | 是否必需 | 描述 |
 |------|------|---------|------|
-| asset | STRING | NO | 按资产名称过滤 |
-| startTime | LONG | NO | 起始时间（毫秒） |
-| endTime | LONG | NO | 结束时间（毫秒），默认为当前时间 |
-| page | INTEGER | NO | 页码，默认 `1` |
-| pageSize | INTEGER | NO | 每页记录数，默认 `10`，最大 `100` |
-| order | STRING | NO | 排序方式：`"ASC"` 或 `"DESC"`（默认 `"DESC"`） |
+| chainId | INTEGER | YES | 目标链 ID |
+| asset | STRING | YES | 资产名称（如 `"USDT"`） |
