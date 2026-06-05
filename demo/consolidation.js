@@ -195,7 +195,7 @@ async function main() {
         sendToMainAddressRes = await send(spot_send_toAddress, { 'asset': config.asset, "amount": config.amount, "toAddress": main_address })
         console.log('sendToMainAddressRes:', sendToMainAddressRes)
         use_new_apikey = false
-        if(sendToMainAddressRes['status'] = 'SUCCESS'){
+        if(sendToMainAddressRes && sendToMainAddressRes['status'] === 'SUCCESS'){
             console.log('归集成功:', config.address);
         }else{
             console.log('归集失败:', config.address);
@@ -221,7 +221,7 @@ async function main() {
         'userSignature': withdraw_ignature, 'receiver': main_address, 'asset': withdraw_asset, 'amount': withdraw_amount
     })
 
-    if(spotWithdraw['hash'] != ''){
+    if(spotWithdraw && spotWithdraw['hash']){
         console.log('提现成功:', spotWithdraw['hash']);
     }else{
         console.log('提现失败:', spotWithdraw);

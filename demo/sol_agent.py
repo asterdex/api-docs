@@ -3,7 +3,7 @@ import urllib
 
 import base58
 from eth_account import Account
-from eth_account.messages import encode_structured_data
+from eth_account.messages import encode_typed_data
 from nacl.signing import SigningKey
 import time
 import requests
@@ -92,22 +92,19 @@ def sign(message, all_bytes=None) :
     print("signature hex:", signature.hex())
     return base58.b58encode(signature).decode()
 
-_last_ms = 0
-_i = 0
+_last_nonce = 0
 _nonce_lock = threading.Lock()
 
 def get_nonce():
-    global _last_ms, _i
+    # Microsecond timestamp; the server requires microsecond precision within 10s.
+    # Locked and strictly monotonic so concurrent callers never reuse a nonce.
+    global _last_nonce
     with _nonce_lock:
-        now_ms = int(time.time())
-
-        if now_ms == _last_ms:
-            _i += 1
-        else:
-            _last_ms = now_ms
-            _i = 0
-
-        return now_ms * 1_000_000 + _i
+        n = time.time_ns() // 1000
+        if n <= _last_nonce:
+            n = _last_nonce + 1
+        _last_nonce = n
+        return n
 
 def send_by_url(api) :
     my_dict = api['params']
@@ -117,7 +114,7 @@ def send_by_url(api) :
 
     my_dict['nonce'] = str(get_nonce())
     my_dict['user'] = user
-    print(str(get_nonce()))
+    print(my_dict['nonce'])
 
     signature = ''
     param = ''
@@ -130,7 +127,7 @@ def send_by_url(api) :
         param = urllib.parse.urlencode(my_dict)
         print(param)
         typed_data['message']['msg'] = param
-        message = encode_structured_data(typed_data)
+        message = encode_typed_data(full_message=typed_data)
         signature = Account.sign_message(message, private_key=signer_pri_key).signature.hex()
 
     url = url + '?' + param + '&signature=' + signature

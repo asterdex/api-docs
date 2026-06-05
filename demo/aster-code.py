@@ -1,8 +1,9 @@
 import time
+import threading
 
 import requests
 from eth_account import Account
-from eth_account.messages import  encode_structured_data
+from eth_account.messages import encode_typed_data
 from copy import deepcopy
 import json
 
@@ -113,7 +114,7 @@ def sign_v3_eip712(private_key, message, primary_type) -> str:
     print(data)
 
     print(sign_data)
-    msg = encode_structured_data(sign_data)
+    msg = encode_typed_data(full_message=sign_data)
     signed = Account.sign_message(msg, private_key=private_key)
     return signed.signature.hex()
 
@@ -151,26 +152,25 @@ def sign_v3(private_key, message) -> str:
   # print(typed_data_sign)
   # print(message)
 
-  msg = encode_structured_data(typed_data_sign)
+  msg = encode_typed_data(full_message=typed_data_sign)
   signed = Account.sign_message(msg, private_key=private_key)
   print(signed.signature.hex())
 
   return signed.signature.hex()
 
-_last_ms = 0
-_i = 0
+_last_nonce = 0
+_nonce_lock = threading.Lock()
 
 def get_nonce():
-    global _last_ms, _i
-    now_ms = int(time.time())
-
-    if now_ms == _last_ms:
-        _i += 1
-    else:
-        _last_ms = now_ms
-        _i = 0
-
-    return now_ms * 1_000_000 + _i
+    # Microsecond timestamp; the server requires microsecond precision within 10s.
+    # Locked and strictly monotonic so concurrent callers never reuse a nonce.
+    global _last_nonce
+    with _nonce_lock:
+        n = time.time_ns() // 1000
+        if n <= _last_nonce:
+            n = _last_nonce + 1
+        _last_nonce = n
+        return n
 
 def send_by_url(method_config):
     param = method_config['params']
