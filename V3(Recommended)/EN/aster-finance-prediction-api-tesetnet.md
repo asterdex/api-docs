@@ -1604,6 +1604,98 @@ Notes:
 * Burn operations are still available after the market is `CLOSED`
 
 
+## Prediction market split (TRADE)
+
+**Response**
+
+```javascript
+{
+    "clientOrderId": "xxx",                        // Client order ID
+    "qty": "10.00000000",                          // Quantity of outcome tokens received per outcome
+    "counterparties": [                            // List of outcome tokens and their prices
+        {
+            "symbol": "EVENT4_ALGERIA_WIN_YUSDT",  // Outcome token symbol
+            "price": "0.15000000"                  // Last price of the outcome token
+        },
+        {
+            "symbol": "EVENT4_ARGENTINA_WIN_YUSDT",
+            "price": "0.25000000"
+        }
+    ],
+    "sourceNoLastPrice": "0.85000000"              // Last price of the NO token of the source symbol
+}
+```
+
+`POST /api/v3/prediction/split`
+
+For multi-outcome prediction events, convert quote asset (USDT) into outcome tokens for the specified prediction market. The account spends quote asset and receives equal quantities of outcome tokens for the target market.
+
+**Weight:** 1
+
+**Parameters:**
+
+| Name | Type | Is it required? | Description |
+| :---- | :---- | :---- | :---- |
+| event | STRING | YES | Prediction event name (e.g. `EVENT4`) |
+| symbol | STRING | YES | The YES or NO token trading pair of the target prediction market |
+| quantity | DECIMAL | YES | Number of outcome token sets to receive; must be a positive whole integer |
+| newClientOrderId | STRING | NO | Client-customized unique order ID. If not provided, one will be generated automatically. |
+| signer | STRING | YES | API wallet address |
+| nonce | STRING | YES | Current time in microseconds |
+| signature | STRING | YES | Signature |
+
+Notes:
+* `symbol` must be a valid prediction market token trading pair (YES or NO) with status `TRADING` or `PENDING_TRADING`; the system resolves the corresponding YES token automatically
+* `quantity` must be a whole number with no decimal places
+* `counterparties` contains the symbol and last price for each outcome token involved in the split
+* `sourceNoLastPrice` is the last price of the NO token for the source symbol at the time of the split
+
+
+## Prediction market merge (TRADE)
+
+**Response**
+
+```javascript
+{
+    "clientOrderId": "xxx",                        // Client order ID
+    "qty": "10.00000000",                          // Total quote asset (USDT) returned
+    "counterparties": [                            // List of outcome tokens consumed and their prices
+        {
+            "symbol": "EVENT4_ALGERIA_WIN_YUSDT",  // Outcome token symbol consumed
+            "price": "0.15000000"                  // Last price of the outcome token
+        },
+        {
+            "symbol": "EVENT4_ARGENTINA_WIN_YUSDT",
+            "price": "0.25000000"
+        }
+    ]
+}
+```
+
+`POST /api/v3/prediction/merge`
+
+For multi-outcome prediction events, return a set of outcome tokens to redeem quote asset (USDT). The account submits equal quantities of all outcome tokens for the event and receives quote asset in return.
+
+**Weight:** 1
+
+**Parameters:**
+
+| Name | Type | Is it required? | Description |
+| :---- | :---- | :---- | :---- |
+| event | STRING | YES | Prediction event name (e.g. `EVENT4`) |
+| quantity | DECIMAL | YES | Number of outcome token sets to submit; must be a positive whole integer |
+| newClientOrderId | STRING | NO | Client-customized unique order ID. If not provided, one will be generated automatically. |
+| signer | STRING | YES | API wallet address |
+| nonce | STRING | YES | Current time in microseconds |
+| signature | STRING | YES | Signature |
+
+Notes:
+* The account must hold sufficient balance of all outcome tokens for the specified event
+* `quantity` must be a whole number with no decimal places
+* `qty` in the response is denominated in the quote asset (USDT)
+* `counterparties` contains the symbol and last price for each outcome token consumed during the merge
+
+
 ## Query prediction market current positions (USER\_DATA)
 
 **Response**
