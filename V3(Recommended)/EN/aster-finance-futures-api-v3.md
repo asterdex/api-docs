@@ -3849,7 +3849,7 @@ Place a new strategy order. Supports OTO (One-Triggers-the-Other), OCO (One-Canc
 | Name | Type | Mandatory | Description |
 |------|------|-----------|-------------|
 | strategySubId | STRING | YES | Sub-order sequence number starting from 1, must be sequential and match position in array |
-| securityType | STRING | YES | Security type of the order |
+| securityType | STRING | YES | Security type of the order: `USDT_FUTURES`, `COIN_FUTURES`, `OPTIONS` |
 | symbol | STRING | YES | Trading pair |
 | side | STRING | YES | `BUY` or `SELL` |
 | positionSide | STRING | NO | `BOTH`, `LONG`, `SHORT`. Default `BOTH` in one-way mode |
@@ -3866,8 +3866,8 @@ Place a new strategy order. Supports OTO (One-Triggers-the-Other), OCO (One-Canc
 | activationPrice | STRING | NO | Activation price for `TRAILING_STOP_MARKET` |
 | callbackRate | STRING | NO | Callback rate for `TRAILING_STOP_MARKET` |
 | firstDrivenId | STRING | NO | `strategySubId` of the driving sub-order for the first trigger condition |
-| firstDrivenOn | STRING | NO | Event type that activates the first trigger |
-| firstTrigger | STRING | NO | First trigger action |
+| firstDrivenOn | STRING | NO | Event type that activates the first trigger: `NEW`, `PARTIALLY_FILLED_OR_FILLED`, `FILLED`, `CANCELED`, `REPLACED`, `STOPPED`, `REJECTED`, `EXPIRED` |
+| firstTrigger | STRING | NO | First trigger action: `PLACE_ORDER`, `CANCEL_ORDER` |
 | secondDrivenId | STRING | NO | `strategySubId` of the driving sub-order for the second trigger condition |
 | secondDrivenOn | STRING | NO | Event type that activates the second trigger |
 | secondTrigger | STRING | NO | Second trigger action |

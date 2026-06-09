@@ -4001,7 +4001,7 @@ symbol | STRING | YES
 | 名称 | 类型 | 是否必需 | 描述 |
 |------|------|---------|------|
 | strategySubId | STRING | YES | 子订单序号，从 1 开始，必须与数组位置保持一致 |
-| securityType | STRING | YES | 订单的资产类型 |
+| securityType | STRING | YES | 订单的资产类型：`USDT_FUTURES`、`COIN_FUTURES`、`OPTIONS` |
 | symbol | STRING | YES | 交易对 |
 | side | STRING | YES | `BUY` 或 `SELL` |
 | positionSide | STRING | NO | `BOTH`、`LONG`、`SHORT`，单向持仓模式下默认 `BOTH` |
@@ -4018,8 +4018,8 @@ symbol | STRING | YES
 | activationPrice | STRING | NO | `TRAILING_STOP_MARKET` 专用激活价格 |
 | callbackRate | STRING | NO | `TRAILING_STOP_MARKET` 回调比例 |
 | firstDrivenId | STRING | NO | 第一触发条件的驱动子订单 `strategySubId` |
-| firstDrivenOn | STRING | NO | 激活第一触发条件的事件类型 |
-| firstTrigger | STRING | NO | 第一触发动作 |
+| firstDrivenOn | STRING | NO | 激活第一触发条件的事件类型：`NEW`、`PARTIALLY_FILLED_OR_FILLED`、`FILLED`、`CANCELED`、`REPLACED`、`STOPPED`、`REJECTED`、`EXPIRED` |
+| firstTrigger | STRING | NO | 第一触发动作：`PLACE_ORDER`、`CANCEL_ORDER` |
 | secondDrivenId | STRING | NO | 第二触发条件的驱动子订单 `strategySubId` |
 | secondDrivenOn | STRING | NO | 激活第二触发条件的事件类型 |
 | secondTrigger | STRING | NO | 第二触发动作 |
