@@ -17,6 +17,7 @@
   - [追加质押 (TRADE)](#追加质押-trade)
   - [更新锁定期 (TRADE)](#更新锁定期-trade)
   - [领取奖励 (TRADE)](#领取奖励-trade)
+  - [查询锁定 Aster 总量 (NONE)](#查询锁定-aster-总量-none)
 - [Aster-Chain 合约提现与划转接口](#aster-chain-合约提现与划转接口)
   - [合约提现 (WITHDRAW)](#合约提现-withdraw)
   - [合约 Solana 提现 (WITHDRAW)](#合约-solana-提现-withdraw)
@@ -311,6 +312,29 @@
 | nonce | LONG | YES | 微秒时间戳 |
 | user | STRING | YES | 发起账户钱包地址 |
 | signature | STRING | YES | EIP-712 签名，使用 `user` 账户的钱包私钥签名 |
+
+---
+
+## 查询锁定 Aster 总量 (NONE)
+
+> **响应:**
+
+```javascript
+{
+    "periodCode": "208_WEEKS",
+    "totalVolume": 291534089.64644974
+}
+```
+
+`GET /aster-chain/v3/staking/getLockedAster`
+
+查询全网所有 208 周质押仓位中锁定的 ASTER 代币总量。
+
+**权重:** 20
+
+**参数:**
+
+无
 
 ---
 
