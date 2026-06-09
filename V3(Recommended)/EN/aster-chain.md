@@ -17,6 +17,7 @@
   - [Deposit Stake (TRADE)](#deposit-stake-trade)
   - [Update Lock Period (TRADE)](#update-lock-period-trade)
   - [Claim Rewards (TRADE)](#claim-rewards-trade)
+  - [Get Locked Aster (NONE)](#get-locked-aster-none)
 - [Aster-Chain Perp Withdraw & Transfer Endpoints](#aster-chain-perp-withdraw--transfer-endpoints)
   - [User Withdraw (WITHDRAW)](#user-withdraw-withdraw)
   - [User Solana Withdraw (WITHDRAW)](#user-solana-withdraw-withdraw)
@@ -311,6 +312,29 @@ Claim accumulated staking rewards. The on-chain action type is `TokenDelegate` (
 | nonce | LONG | YES | Microsecond timestamp |
 | user | STRING | YES | Source account wallet address |
 | signature | STRING | YES | EIP-712 signature, signed with the `user` account's wallet private key |
+
+---
+
+## Get Locked Aster (NONE)
+
+> **Response:**
+
+```javascript
+{
+    "periodCode": "208_WEEKS",
+    "totalVolume": 291534089.64644974
+}
+```
+
+`GET /aster-chain/v3/staking/getLockedAster`
+
+Query the total amount of ASTER tokens locked across all 208-week staking positions on the network.
+
+**Weight:** 20
+
+**Parameters:**
+
+None
 
 ---
 
