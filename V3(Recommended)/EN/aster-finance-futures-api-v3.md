@@ -113,6 +113,8 @@
   - [Migrate User Assets (WITHDRAW)](#migrate-user-assets-withdraw)
   - [Migrate User Assets History (USER_DATA)](#migrate-user-assets-history-user_data)
   - [Register and Approve Agent (PUBLIC)](#register-and-approve-agent-public)
+  - [Get Direct Announcements (USER_DATA)](#get-direct-announcements-user_data)
+  - [Get Direct Announcement By ID (USER_DATA)](#get-direct-announcement-by-id-user_data)
 - [User Data Streams](#user-data-streams)
   - [Start User Data Stream (USER_STREAM)](#start-user-data-stream-user_stream)
   - [Keepalive User Data Stream (USER_STREAM)](#keepalive-user-data-stream-user_stream)
@@ -4573,6 +4575,124 @@ typed_data = {
 * This endpoint combines agent registration and permission granting into a single call, equivalent to the standalone registration step followed by `approveAgent`.
 
 
+
+# Get Direct Announcements (USER_DATA)
+
+> **Response:**
+
+```javascript
+{
+  "total": 2,
+  "rows": [
+    {
+      "id": 1001,
+      "contents": [
+        {
+          "language": "en",
+          "title": "Platform Maintenance Notice",
+          "subtitle": "Scheduled downtime",
+          "content": "The platform will undergo scheduled maintenance on 2026-06-20 from 02:00 to 04:00 UTC."
+        },
+        {
+          "language": "zh",
+          "title": "平台维护公告",
+          "subtitle": "定期停机",
+          "content": "平台将于2026年6月20日UTC时间02:00至04:00进行定期维护。"
+        }
+      ],
+      "category": "MAINTENANCE",
+      "publishTime": 1750000000000,
+      "jumpLink": "https://www.asterdex.com/en/announcement/1001"
+    }
+  ]
+}
+```
+
+`GET /fapi/v3/announcement/direct`
+
+Retrieves the list of direct announcements for the authenticated user, with pagination support.
+
+**Weight:** 1
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| page | INT | NO | Page number, starting from `1`. Default: `1` |
+| size | INT | NO | Number of results per page. Default: `20` |
+
+**Response Fields:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| total | LONG | Total number of announcements |
+| rows | ARRAY | List of announcement objects |
+| rows[].id | LONG | Announcement ID |
+| rows[].contents | ARRAY | Multi-language content list |
+| rows[].contents[].language | STRING | Language code (e.g. `en`, `zh`) |
+| rows[].contents[].title | STRING | Announcement title |
+| rows[].contents[].subtitle | STRING | Announcement subtitle |
+| rows[].contents[].content | STRING | Announcement body text |
+| rows[].category | STRING | Announcement category |
+| rows[].publishTime | LONG | Publish timestamp (milliseconds) |
+| rows[].jumpLink | STRING | Link to the full announcement page |
+
+---
+
+# Get Direct Announcement By ID (USER_DATA)
+
+> **Response:**
+
+```javascript
+{
+  "id": 1001,
+  "contents": [
+    {
+      "language": "en",
+      "title": "Platform Maintenance Notice",
+      "subtitle": "Scheduled downtime",
+      "content": "The platform will undergo scheduled maintenance on 2026-06-20 from 02:00 to 04:00 UTC."
+    },
+    {
+      "language": "zh",
+      "title": "平台维护公告",
+      "subtitle": "定期停机",
+      "content": "平台将于2026年6月20日UTC时间02:00至04:00进行定期维护。"
+    }
+  ],
+  "category": "MAINTENANCE",
+  "publishTime": 1750000000000,
+  "jumpLink": "https://www.asterdex.com/en/announcement/1001"
+}
+```
+
+`GET /fapi/v3/announcement/directById`
+
+Retrieves a single direct announcement by its ID for the authenticated user.
+
+**Weight:** 1
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| id | LONG | YES | Announcement ID |
+
+**Response Fields:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | LONG | Announcement ID |
+| contents | ARRAY | Multi-language content list |
+| contents[].language | STRING | Language code (e.g. `en`, `zh`) |
+| contents[].title | STRING | Announcement title |
+| contents[].subtitle | STRING | Announcement subtitle |
+| contents[].content | STRING | Announcement body text |
+| category | STRING | Announcement category |
+| publishTime | LONG | Publish timestamp (milliseconds) |
+| jumpLink | STRING | Link to the full announcement page |
+
+---
 
 # User Data Streams
 

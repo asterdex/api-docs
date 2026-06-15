@@ -111,6 +111,8 @@
 	- [用户资产迁移 (WITHDRAW)](#用户资产迁移-withdraw)		
 	- [用户资产迁移历史 (USER_DATA)](#用户资产迁移历史-user_data)		
 	- [注册并授权 Agent (PUBLIC)](#注册并授权-agent-public)		
+	- [查询直发公告列表 (USER_DATA)](#查询直发公告列表-user_data)
+	- [按ID查询直发公告 (USER_DATA)](#按id查询直发公告-user_data)
 - [Websocket 账户信息推送](#websocket-账户信息推送)
 	- [生成listenKey (USER_STREAM)](#生成listenkey-user_stream)
 	- [延长listenKey有效期 (USER_STREAM)](#延长listenkey有效期-user_stream)
@@ -4733,6 +4735,124 @@ typed_data = {
 * 本接口**无需鉴权**——无需传入 API Key 或 HMAC 请求头，所有授权均通过链上 `signature` 验证。
 * 本接口将 Agent 注册与权限授予合并为单次调用，等同于独立注册接口与 `approveAgent` 接口的组合操作。
 
+
+# 查询直发公告列表 (USER_DATA)
+
+> **响应:**
+
+```javascript
+{
+  "total": 2,
+  "rows": [
+    {
+      "id": 1001,
+      "contents": [
+        {
+          "language": "en",
+          "title": "Platform Maintenance Notice",
+          "subtitle": "Scheduled downtime",
+          "content": "The platform will undergo scheduled maintenance on 2026-06-20 from 02:00 to 04:00 UTC."
+        },
+        {
+          "language": "zh",
+          "title": "平台维护公告",
+          "subtitle": "定期停机",
+          "content": "平台将于2026年6月20日UTC时间02:00至04:00进行定期维护。"
+        }
+      ],
+      "category": "MAINTENANCE",
+      "publishTime": 1750000000000,
+      "jumpLink": "https://www.asterdex.com/zh-CN/announcement/1001"
+    }
+  ]
+}
+```
+
+`GET /fapi/v3/announcement/direct`
+
+查询当前已认证用户的直发公告列表，支持分页。
+
+**权重:** 1
+
+**参数:**
+
+| 名称 | 类型 | 是否必需 | 描述 |
+|------|------|---------|------|
+| page | INT | NO | 页码，从 `1` 开始，默认值: `1` |
+| size | INT | NO | 每页返回数量，默认值: `20` |
+
+**响应字段:**
+
+| 字段 | 类型 | 描述 |
+|------|------|------|
+| total | LONG | 公告总数 |
+| rows | ARRAY | 公告对象列表 |
+| rows[].id | LONG | 公告 ID |
+| rows[].contents | ARRAY | 多语言内容列表 |
+| rows[].contents[].language | STRING | 语言代码（如 `en`、`zh`） |
+| rows[].contents[].title | STRING | 公告标题 |
+| rows[].contents[].subtitle | STRING | 公告副标题 |
+| rows[].contents[].content | STRING | 公告正文 |
+| rows[].category | STRING | 公告分类 |
+| rows[].publishTime | LONG | 发布时间戳（毫秒） |
+| rows[].jumpLink | STRING | 公告详情页链接 |
+
+---
+
+# 按ID查询直发公告 (USER_DATA)
+
+> **响应:**
+
+```javascript
+{
+  "id": 1001,
+  "contents": [
+    {
+      "language": "en",
+      "title": "Platform Maintenance Notice",
+      "subtitle": "Scheduled downtime",
+      "content": "The platform will undergo scheduled maintenance on 2026-06-20 from 02:00 to 04:00 UTC."
+    },
+    {
+      "language": "zh",
+      "title": "平台维护公告",
+      "subtitle": "定期停机",
+      "content": "平台将于2026年6月20日UTC时间02:00至04:00进行定期维护。"
+    }
+  ],
+  "category": "MAINTENANCE",
+  "publishTime": 1750000000000,
+  "jumpLink": "https://www.asterdex.com/zh-CN/announcement/1001"
+}
+```
+
+`GET /fapi/v3/announcement/directById`
+
+根据公告 ID 查询当前已认证用户的单条直发公告。
+
+**权重:** 1
+
+**参数:**
+
+| 名称 | 类型 | 是否必需 | 描述 |
+|------|------|---------|------|
+| id | LONG | YES | 公告 ID |
+
+**响应字段:**
+
+| 字段 | 类型 | 描述 |
+|------|------|------|
+| id | LONG | 公告 ID |
+| contents | ARRAY | 多语言内容列表 |
+| contents[].language | STRING | 语言代码（如 `en`、`zh`） |
+| contents[].title | STRING | 公告标题 |
+| contents[].subtitle | STRING | 公告副标题 |
+| contents[].content | STRING | 公告正文 |
+| category | STRING | 公告分类 |
+| publishTime | LONG | 发布时间戳（毫秒） |
+| jumpLink | STRING | 公告详情页链接 |
+
+---
 
 # Websocket 账户信息推送
 
