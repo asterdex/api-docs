@@ -123,6 +123,8 @@
 	- [订单/交易 更新推送](#订单交易-更新推送)
 	- [杠杆倍数等账户配置 更新推送](#杠杆倍数等账户配置-更新推送)
 	- [Event: TradePro](#event-tradepro)
+	- [Event: Public Announcement](#event-public-announcement)
+	- [Event: Direct Announcement](#event-direct-announcement)
 - [错误代码](#错误代码)
 	- [10xx - 常规服务器或网络问题](#10xx---常规服务器或网络问题)
 	- [11xx - Request issues](#11xx---request-issues)
@@ -5280,6 +5282,94 @@ None
     * m[0]: Taker 地址（主动成交方）
 
     * m[1]: Maker 地址（挂单方）
+
+## Event: Public Announcement
+
+> **Payload:**
+
+```javascript
+{
+    "e": "announcement",
+    "en": {
+        "i": 161,
+        "t": "test announcement",
+        "s": "sub title",
+        "c": "NEW_LISTING",
+        "d": 1781684565591,
+        "S": false,
+        "j": "https://asterdex.com",
+        "C": "<p>test content</p>"
+    },
+    "zh": {
+        "i": 161,
+        "t": "测试公告",
+        "s": "子标题",
+        "c": "NEW_LISTING",
+        "d": 1781684565591,
+        "S": false,
+        "j": "https://asterdex.com",
+        "C": "<p>测试内容</p>"
+    }
+}
+```
+
+| 字段 | 类型 | 说明 |
+| --- | --- | --- |
+| e | STRING | 事件类型: `announcement` |
+| en | OBJECT | 英文公告内容 |
+| zh | OBJECT | 中文公告内容 |
+| en.i / zh.i | LONG | 公告 ID |
+| en.t / zh.t | STRING | 公告标题 |
+| en.s / zh.s | STRING | 公告副标题 |
+| en.c / zh.c | STRING | 公告分类: `NEW_LISTING` 表示平台公告 |
+| en.d / zh.d | LONG | 公告时间戳（毫秒） |
+| en.S / zh.S | BOOLEAN | 是否已读（`false` 表示未读） |
+| en.j / zh.j | STRING | 跳转链接 URL |
+| en.C / zh.C | STRING | 公告正文（HTML 格式） |
+
+## Event: Direct Announcement
+
+> **Payload:**
+
+```javascript
+{
+    "e": "announcement",
+    "en": {
+        "i": 162,
+        "t": "direct message test",
+        "s": "sub content",
+        "c": "DIRECT",
+        "d": 1781684634276,
+        "S": false,
+        "j": "https://asterdex.finance",
+        "C": "<p>test content</p>"
+    },
+    "zh": {
+        "i": 162,
+        "t": "个人消息测试",
+        "s": "子标题",
+        "c": "DIRECT",
+        "d": 1781684634276,
+        "S": false,
+        "j": "https://asterdex.finance",
+        "C": "<p>测试内容</p>"
+    }
+}
+```
+
+| 字段 | 类型 | 说明 |
+| --- | --- | --- |
+| e | STRING | 事件类型: `announcement` |
+| en | OBJECT | 英文公告内容 |
+| zh | OBJECT | 中文公告内容 |
+| en.i / zh.i | LONG | 公告 ID |
+| en.t / zh.t | STRING | 公告标题 |
+| en.s / zh.s | STRING | 公告副标题 |
+| en.c / zh.c | STRING | 公告分类: `DIRECT` 表示个人消息 |
+| en.d / zh.d | LONG | 公告时间戳（毫秒） |
+| en.S / zh.S | BOOLEAN | 是否已读（`false` 表示未读） |
+| en.j / zh.j | STRING | 跳转链接 URL |
+| en.C / zh.C | STRING | 公告正文（HTML 格式） |
 
 # 错误代码
 
