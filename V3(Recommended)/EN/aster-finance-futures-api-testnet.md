@@ -2400,7 +2400,7 @@ Place a **Chase strategy order** — a BBO-pegged GTX limit order that automatic
 | chaseOffsetType    | STRING  | NO        | `ABSOLUTE` (default) . only supports `ABSOLUTE` for now. Will support or `PERCENTAGE` latter                                                                                                                         |
 | maxChaseOffset     | DECIMAL | NO        | Maximum tolerated distance from the original BBO before the chase auto-cancels. Required if `maxChaseOffsetType` is sent. Must be `> 0`.                                                   |
 | maxChaseOffsetType | STRING  | NO        | `ABSOLUTE` or `PERCENTAGE` (default `ABSOLUTE` when `maxChaseOffset` is sent). `ABSOLUTE`: same unit as price, must be a multiple of `tickSize`. `PERCENTAGE`: ≤ 2 decimal places.          |
-| timeInForce        | ENUM    | NO        | Default `GTX` (post-only). **`NO_FILL` is not allowed** and is rejected with `INVALID_TIF`.                                                                                                |
+| timeInForce        | ENUM    | NO        | Default `GTX` (post-only).                                                                                                |
 | clientStrategyId   | STRING  | NO        | User-defined strategy id. Auto-generated if not sent. **Length ≤ 28 characters** (DB column is `varchar(28)`). Must match `^[\.A-Z\:/a-z0-9_-]{1,28}$`.                                    |
 | recvWindow         | LONG    | NO        |                                                                                                                                                                                            |
 | timestamp          | LONG    | YES       |                                                                                                                                                                                            |
@@ -2413,7 +2413,6 @@ Place a **Chase strategy order** — a BBO-pegged GTX limit order that automatic
 * `chaseOffsetType` / `maxChaseOffsetType` must be `ABSOLUTE` or `PERCENTAGE`; an invalid value returns `INVALID_PARAMETER` (not `INVALID_CHASE_OFFSET`).
 * When `maxChaseOffsetType = PERCENTAGE`, the input value must have ≤ 2 decimal places (it is stored at scale 2 on the wire, e.g. `"1"` → 1.00%, `"100"` → 100.00%).
 * When `maxChaseOffsetType = ABSOLUTE`, `maxChaseOffset` must be a multiple of `tickSize`.
-* `timeInForce` cannot be `NO_FILL`.
 * `clientStrategyId` length must be ≤ 28 characters.
 * OI cap check: for `quantityUnit = QUOTE`, the gateway converts to BASE quantity for the symbol-leverage OI bracket check using `qtyBase = qtyQuote × 10^quantityDecimal / markPrice`.
 

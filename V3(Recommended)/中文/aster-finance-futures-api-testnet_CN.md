@@ -2592,7 +2592,7 @@ price  |  DECIMAL | NO | 委托价格
 | chaseOffsetType    | STRING  | NO         | `ABSOLUTE`（默认）。v1 仅支持 `ABSOLUTE`。`PERCENTAGE` 后续支持。                                                                                                          |
 | maxChaseOffset     | DECIMAL | NO         | 相对原始 BBO 允许偏移的最大距离，超出后追单自动撤销。当 `maxChaseOffsetType` 已传时必填。必须 > 0。                                                                  |
 | maxChaseOffsetType | STRING  | NO         | `ABSOLUTE` 或 `PERCENTAGE`（默认 `ABSOLUTE`）。`ABSOLUTE`：同价格单位，必须为 `tickSize` 倍数；`PERCENTAGE`：≤ 2 位小数。                                            |
-| timeInForce        | ENUM    | NO         | 默认 `GTX`（post-only）。**不允许 `NO_FILL`**，否则返回 `INVALID_TIF`。                                                                                            |
+| timeInForce        | ENUM    | NO         | 默认 `GTX`（post-only）。                                                                                            |
 | clientStrategyId   | STRING  | NO         | 用户自定义策略 id。未传则自动生成。**长度 ≤ 28 字符**（DB 字段为 `varchar(28)`）。须满足 `^[\.A-Z\:/a-z0-9_-]{1,28}$`。                                              |
 | recvWindow         | LONG    | NO         |                                                                                                                                                                  |
 | timestamp          | LONG    | YES        |                                                                                                                                                                  |
@@ -2605,7 +2605,6 @@ price  |  DECIMAL | NO | 委托价格
 * `chaseOffsetType` / `maxChaseOffsetType` 必须为 `ABSOLUTE` 或 `PERCENTAGE`；非法值返回 `INVALID_PARAMETER`（不再误用 `INVALID_CHASE_OFFSET`）。
 * `maxChaseOffsetType = PERCENTAGE` 时，输入值小数位数 ≤ 2（线上以 ×100 存储，如 `"1"` → 1.00%，`"100"` → 100.00%）。
 * `maxChaseOffsetType = ABSOLUTE` 时，`maxChaseOffset` 必须为 `tickSize` 倍数。
-* `timeInForce` 不允许 `NO_FILL`。
 * `clientStrategyId` 长度必须 ≤ 28 字符。
 * OI cap 校验：`quantityUnit = QUOTE` 时按 mark price 换算到 BASE 数量进行 symbol-leverage OI 档位校验，公式 `qtyBase = qtyQuote × 10^quantityDecimal / markPrice`。
 
