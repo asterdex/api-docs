@@ -69,6 +69,7 @@
 	- [查询联合保证金模式(USER_DATA)](#查询联合保证金模式user_data)
 	- [下单 (TRADE)](#下单-trade)
 	- [测试下单接口 (TRADE)](#测试下单接口-trade)
+	- [追单 (TRADE)](#追单-trade)
 	- [批量下单 (TRADE)](#批量下单-trade)
 	- [查询订单 (USER_DATA)](#查询订单-user_data)
 	- [撤销订单 (TRADE)](#撤销订单-trade)
@@ -2590,7 +2591,7 @@ price  |  DECIMAL | NO | 委托价格
 | reduceOnly         | STRING  | NO         | `"true"` 或 `"false"`（大小写不敏感）。任何其他值会被拒绝。默认 `"false"`。                                                                                        |
 | chaseOffset        | DECIMAL | NO         | 距 BBO 的偏移量。默认 `"0"`（完全贴近 BBO）。必须 ≥ 0 且为 `tickSize` 的倍数。买单价 = `bid1 − chaseOffset`；卖单价 = `ask1 + chaseOffset`。                          |
 | chaseOffsetType    | STRING  | NO         | `ABSOLUTE`（默认）。v1 仅支持 `ABSOLUTE`。`PERCENTAGE` 后续支持。                                                                                                          |
-| maxChaseOffset     | DECIMAL | NO         | 相对原始 BBO 允许偏移的最大距离，超出后追单自动撤销。当 `maxChaseOffsetType` 已传时必填。必须 > 0。                                                                  |
+| maxChaseOffset     | DECIMAL | NO         | 相对原始 BBO 允许偏移的最大距离，超出后追单自动撤销。必须 > 0。若不传，则不应用基于距离的自动撤销，且所传的 `maxChaseOffsetType` 将被忽略。                          |
 | maxChaseOffsetType | STRING  | NO         | `ABSOLUTE` 或 `PERCENTAGE`（默认 `ABSOLUTE`）。`ABSOLUTE`：同价格单位，必须为 `tickSize` 倍数；`PERCENTAGE`：≤ 2 位小数。                                            |
 | timeInForce        | ENUM    | NO         | 默认 `GTX`（post-only）。                                                                                            |
 | clientStrategyId   | STRING  | NO         | 用户自定义策略 id。未传则自动生成。**长度 ≤ 28 字符**（DB 字段为 `varchar(28)`）。须满足 `^[\.A-Z\:/a-z0-9_-]{1,28}$`。                                              |
@@ -2603,6 +2604,8 @@ price  |  DECIMAL | NO | 委托价格
 * `reduceOnly` 仅接受 `"true"` / `"false"`（大小写不敏感）。其他值返回 `INVALID_PARAMETER`，参数名为 `reduceOnly`。
 * `chaseOffset` 必须 ≥ 0 且为 `tickSize` 倍数。
 * `chaseOffsetType` / `maxChaseOffsetType` 必须为 `ABSOLUTE` 或 `PERCENTAGE`；非法值返回 `INVALID_PARAMETER`（不再误用 `INVALID_CHASE_OFFSET`）。
+* `chaseOffsetType` 目前仅支持 `ABSOLUTE`。`PERCENTAGE` 为合法值，但 `chaseOffset` 尚未实现，返回 `UNSUPPORTED_OPERATION`。（`maxChaseOffsetType` 两者均支持。）
+* 数量 / 名义价值下限（仅开仓单；`reduceOnly` 单豁免名义价值下限）：`quantityUnit = BASE` 时，`quantity` 必须 ≥ 交易对 `marketMinQty`（否则 `QTY_LESS_THAN_MIN_QTY`），且 `quantity × markPrice` 必须 ≥ 交易对 `minNotional`（否则 `MIN_NOTIONAL`）；`quantityUnit = QUOTE` 时，计价金额必须 ≥ `minNotional`（否则 `MIN_NOTIONAL`），且 `quoteQty / markPrice` 必须 ≥ `marketMinQty`（否则 `QTY_LESS_THAN_MIN_QTY`）。
 * `maxChaseOffsetType = PERCENTAGE` 时，输入值小数位数 ≤ 2（线上以 ×100 存储，如 `"1"` → 1.00%，`"100"` → 100.00%）。
 * `maxChaseOffsetType = ABSOLUTE` 时，`maxChaseOffset` 必须为 `tickSize` 倍数。
 * `clientStrategyId` 长度必须 ≤ 28 字符。
