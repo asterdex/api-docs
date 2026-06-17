@@ -457,81 +457,162 @@ In order to comply with the `market lot size`, the `quantity` must satisfy the f
 **Format in the /exchangeInfo response:**
 
 ```javascript
-"predictionEvents": [
+{
+  "predictionEvents": [
+    {
+      "eventName": "Who will win the 2026 FIFA World Cup?",  // Prediction event name
+      "eventId": "EVENT4",                                    // Event identifier 
+      "oracleSymbol": "",                                     // Predicted symbol (empty for non-price prediction events)
+      "predictionType": "MARKETONLY_MULTIPREDICT",              // Prediction type (MARKETONLY_MULTIPREDICT only for whiteList mm)
+      "sides": [
+        "YES",
+        "NO"
+      ],                                                      // Prediction direction
+      "period": null,                                         // Prediction period in minutes
+      "startTime": 1780840786140,                             // Event start time (Unix ms)
+      "endTime": 0,                                           // Event end time (0 = no end time set)
+      "status": "LIVE",                                       // Event status
+      "currentRoundId": null,                                 // Current round ID 
+      "settleIntervalSeconds": 0,                             // TWAP price interval in seconds
+      "settlementDataPointCount": 0,                          // TWAP price data point count
+      "reduceOnly": false,                                    // Whether only reduce-only orders are allowed
+      "category": "FIFA2026",                                 // Event category
+      "orderTypes": [
+        "LIMIT",
+        "MARKET"
+      ],                                                      // Supported order types
+      "timeInForce": [
+        "GTC",
+        "IOC",
+        "FOK",
+        "GTX"
+      ],                                                      // Supported TIF values
+      "liveRound": null,                                      // Current live round 
+      "rounds": null,                                         // Historical rounds 
+      "markets": [                                            // List of prediction markets for each outcome
         {
-            "eventName": "ETH_UP_DOWN_7D",       // Prediction event name
-            "oracleSymbol": "ETHUSDT",            // Predicted symbol
-            "predictionType": "UP_DOWN",          // Prediction type
-            "sides": [ 
-                "UP",
-                "DOWN"
-            ],                                    // Prediction directions
-            "period": "10080M",                   // Prediction period in minutes
-            "startTime": 1778476080000,           // Event start time
-            "endTime": 1780376880000,             // Event end time
-            "status": "LIVE",                     // Event status
-            "currentRoundId": 3,                  // Current round ID
-            "orderTypes": [  
-                "LIMIT",
-                "MARKET"
-            ],                                    // Supported order types
-            "settleIntervalSeconds": 5,  //twap price internal
-            "settlementDataPointCount": 5, //twap price data count
-            "reduceOnly": false,  //reduceOnly
-            "timeInForce": [
-                "GTC",
-                "IOC",
-                "FOK",
-                "GTX" 
-            ],                                    // Supported TIF values
-            "liveRound":{
-                    "marketName": "USD1_UP_DOWN_5M_1778483280",  // Prediction market name
-                    "symbols": [ 
-                        "USD1_UP_DOWN_5M_1778483280_YUSDT",
-                        "USD1_UP_DOWN_5M_1778483280_NUSDT"
-                    ],                            // Two symbols for the market; Y = up, N = down
-                    "assets": [
-                        "USD1_UP_DOWN_5M_1778483280_Y",
-                        "USD1_UP_DOWN_5M_1778483280_N"
-                    ],                            // Two assets for the market; Y = up, N = down
-                    "roundId": 2,                 // Round ID
-                    "tradingStartTime": 1778482970000,  // Trading start time
-                    "tradingEndTime": 1778483520000,    // Trading end time
-                    "windowStartTime": 1778483280000,   // Window start time
-                    "windowEndTime": 1778483580000,     // Window end time
-                    "roundStatus": "SETTLED",     // Market status
-                    "openPrice": "0.99920000",    // Opening price
-                    "endPrice": "0.99910000",     // Ending price
-                    "winAsset": "USD1_UP_DOWN_5M_1778483280_N",  // Winning asset: Y if up, N if down
-                    "settleTime": 1778483582057,  // Settlement time
-                    "settleHash": "0x3bc0aff52472dafd4b70d3423386a2dabf675fe7cd604e92391e2a4702cf0980"  // On-chain settlement hash
-                },
-            "rounds": [
-                {
-                    "marketName": "USD1_UP_DOWN_5M_1778483280",  // Prediction market name
-                    "symbols": [ 
-                        "USD1_UP_DOWN_5M_1778483280_YUSDT",
-                        "USD1_UP_DOWN_5M_1778483280_NUSDT"
-                    ],                            // Two symbols for the market; Y = up, N = down
-                    "assets": [
-                        "USD1_UP_DOWN_5M_1778483280_Y",
-                        "USD1_UP_DOWN_5M_1778483280_N"
-                    ],                            // Two assets for the market; Y = up, N = down
-                    "roundId": 2,                 // Round ID
-                    "tradingStartTime": 1778482970000,  // Trading start time
-                    "tradingEndTime": 1778483520000,    // Trading end time
-                    "windowStartTime": 1778483280000,   // Window start time
-                    "windowEndTime": 1778483580000,     // Window end time
-                    "roundStatus": "SETTLED",     // Market status
-                    "openPrice": "0.99920000",    // Opening price
-                    "endPrice": "0.99910000",     // Ending price
-                    "winAsset": "USD1_UP_DOWN_5M_1778483280_N",  // Winning asset: Y if up, N if down
-                    "settleTime": 1778483582057,  // Settlement time
-                    "settleHash": "0x3bc0aff52472dafd4b70d3423386a2dabf675fe7cd604e92391e2a4702cf0980"  // On-chain settlement hash
-                }
-            ]
+          "marketName": "EVENT4_ALGERIA_WIN",                 // Prediction market name
+          "symbols": [
+            "EVENT4_ALGERIA_WIN_YUSDT",
+            "EVENT4_ALGERIA_WIN_NUSDT"
+          ],                                                  // Two symbols for the market; Y = YES, N = NO
+          "assets": [
+            "EVENT4_ALGERIA_WIN_Y",
+            "EVENT4_ALGERIA_WIN_N"
+          ],                                                  // Two assets for the market; Y = YES, N = NO
+          "roundId": 0,                                       // Round ID
+          "tradingStartTime": 1780840786140,                  // Trading start time (Unix ms)
+          "tradingEndTime": 0,                                // Trading end time (0 = no end time set)
+          "windowStartTime": 1780840786140,                   // Window start time (Unix ms)
+          "windowEndTime": 0,                                 // Window end time (0 = no end time set)
+          "roundStatus": "TRADING",                           // Market status
+          "openPrice": null,                                  // Opening price (null before settlement)
+          "endPrice": null,                                   // Ending price (null before settlement)
+          "winAsset": "EVENT4_ALGERIA_WIN_N",                 // Winning asset: Y if YES wins, N if NO wins
+          "settleTime": 0,                                    // Settlement time (0 = not settled)
+          "settleHash": null                                  // On-chain settlement hash (null if not settled)
+        },
+        {
+          "marketName": "EVENT4_ARGENTINA_WIN",               // Prediction market name
+          "symbols": [
+            "EVENT4_ARGENTINA_WIN_YUSDT",
+            "EVENT4_ARGENTINA_WIN_NUSDT"
+          ],                                                  // Two symbols for the market; Y = YES, N = NO
+          "assets": [
+            "EVENT4_ARGENTINA_WIN_Y",
+            "EVENT4_ARGENTINA_WIN_N"
+          ],                                                  // Two assets for the market; Y = YES, N = NO
+          "roundId": 0,                                       // Round ID
+          "tradingStartTime": 1780840786140,                  // Trading start time (Unix ms)
+          "tradingEndTime": 0,                                // Trading end time (0 = no end time set)
+          "windowStartTime": 1780840786140,                   // Window start time (Unix ms)
+          "windowEndTime": 0,                                 // Window end time (0 = no end time set)
+          "roundStatus": "TRADING",                           // Market status
+          "openPrice": null,                                  // Opening price (null before settlement)
+          "endPrice": null,                                   // Ending price (null before settlement)
+          "winAsset": "EVENT4_ARGENTINA_WIN_N",               // Winning asset: Y if YES wins, N if NO wins
+          "settleTime": 0,                                    // Settlement time (0 = not settled)
+          "settleHash": null                                  // On-chain settlement hash (null if not settled)
         }
-]
+      ]
+    },
+    {
+      "eventName": "USD1_UP_DOWN_5M",                         // Prediction event name
+      "oracleSymbol": "USD1USDT",                             // Predicted symbol
+      "predictionType": "UP_DOWN",                           // Prediction type
+      "sides": [
+        "UP",
+        "DOWN"
+      ],                                                     // Prediction direction
+      "period": "10080M",                                    // Prediction period in minutes
+      "startTime": 1778476080000,                            // Event start time (Unix ms)
+      "endTime": 1780376880000,                              // Event end time (Unix ms)
+      "status": "LIVE",                                      // Event status
+      "currentRoundId": 3,                                   // Current round ID
+      "orderTypes": [
+        "LIMIT",
+        "MARKET"
+      ],                                                     // Supported order types
+      "settleIntervalSeconds": 5,                            // TWAP price interval in seconds
+      "settlementDataPointCount": 5,                         // TWAP price data point count
+      "reduceOnly": false,                                   // Whether only reduce-only orders are allowed
+      "category": "",                                        // Event category
+      "timeInForce": [
+        "GTC",
+        "IOC",
+        "FOK",
+        "GTX"
+      ],                                                     // Supported TIF values
+      "liveRound": {                                         // Current live round
+        "marketName": "USD1_UP_DOWN_5M_1778483280",          // Prediction market name
+        "symbols": [
+          "USD1_UP_DOWN_5M_1778483280_YUSDT",
+          "USD1_UP_DOWN_5M_1778483280_NUSDT"
+        ],                                                   // Two symbols for the market; Y = up, N = down
+        "assets": [
+          "USD1_UP_DOWN_5M_1778483280_Y",
+          "USD1_UP_DOWN_5M_1778483280_N"
+        ],                                                   // Two assets for the market; Y = up, N = down
+        "roundId": 2,                                        // Round ID
+        "tradingStartTime": 1778482970000,                   // Trading start time (Unix ms)
+        "tradingEndTime": 1778483520000,                     // Trading end time (Unix ms)
+        "windowStartTime": 1778483280000,                    // Window start time (Unix ms)
+        "windowEndTime": 1778483580000,                      // Window end time (Unix ms)
+        "roundStatus": "SETTLED",                            // Market status
+        "openPrice": "0.99920000",                           // Opening price
+        "endPrice": "0.99910000",                            // Ending price
+        "winAsset": "USD1_UP_DOWN_5M_1778483280_N",          // Winning asset: Y if up, N if down
+        "settleTime": 1778483582057,                         // Settlement time (Unix ms)
+        "settleHash": "0x3bc0aff52472dafd4b70d3423386a2dabf675fe7cd604e92391e2a4702cf0980"  // On-chain settlement hash
+      },
+      "rounds": [                                            // Historical rounds
+        {
+          "marketName": "USD1_UP_DOWN_5M_1778483280",        // Prediction market name
+          "symbols": [
+            "USD1_UP_DOWN_5M_1778483280_YUSDT",
+            "USD1_UP_DOWN_5M_1778483280_NUSDT"
+          ],                                                 // Two symbols for the market; Y = up, N = down
+          "assets": [
+            "USD1_UP_DOWN_5M_1778483280_Y",
+            "USD1_UP_DOWN_5M_1778483280_N"
+          ],                                                 // Two assets for the market; Y = up, N = down
+          "roundId": 2,                                      // Round ID
+          "tradingStartTime": 1778482970000,                 // Trading start time (Unix ms)
+          "tradingEndTime": 1778483520000,                   // Trading end time (Unix ms)
+          "windowStartTime": 1778483280000,                  // Window start time (Unix ms)
+          "windowEndTime": 1778483580000,                    // Window end time (Unix ms)
+          "roundStatus": "SETTLED",                          // Market status
+          "openPrice": "0.99920000",                         // Opening price
+          "endPrice": "0.99910000",                          // Ending price
+          "winAsset": "USD1_UP_DOWN_5M_1778483280_N",        // Winning asset: Y if up, N if down
+          "settleTime": 1778483582057,                       // Settlement time (Unix ms)
+          "settleHash": "0x3bc0aff52472dafd4b70d3423386a2dabf675fe7cd604e92391e2a4702cf0980"  // On-chain settlement hash
+        }
+      ]
+    }
+  ]
+}
+
 ```
 
 `status` is the event status:
@@ -552,6 +633,15 @@ In order to comply with the `market lot size`, the `quantity` must satisfy the f
 
 * After settlement, the market will be automatically delisted after a period (24H). Delisted markets are no longer displayed.
 * For events with `status` of `CLOSED` or `INVALID`, only `reduceOnly` Market Sell orders can be placed.
+
+
+`predictionType` is the prediction event type:
+
+| PredictionType | Description |
+| :---- | :---- |
+| `UP_DOWN` | Price direction prediction (up or down) |
+| `MULTIVARIATE` | Multi-variable prediction with multiple possible outcomes |
+| `MARKETONLY_MULTIPREDICT` | Market-only multi-outcome prediction (only for whiteList mm) |
 
 # Market data API
 
@@ -1512,6 +1602,98 @@ Notes:
 * `quantity` represents the number of pairs to burn simultaneously; the account must hold the corresponding amounts of both YES and NO tokens
 * `yesPrice` and `noPrice` are `null` in the burn response
 * Burn operations are still available after the market is `CLOSED`
+
+
+## Prediction market split (TRADE)
+
+**Response**
+
+```javascript
+{
+    "clientOrderId": "xxx",                        // Client order ID
+    "qty": "10.00000000",                          // Quantity of outcome tokens received per outcome
+    "counterparties": [                            // List of outcome tokens and their prices
+        {
+            "symbol": "EVENT4_ALGERIA_WIN_YUSDT",  // Outcome token symbol
+            "price": "0.15000000"                  // Last price of the outcome token
+        },
+        {
+            "symbol": "EVENT4_ARGENTINA_WIN_YUSDT",
+            "price": "0.25000000"
+        }
+    ],
+    "sourceNoLastPrice": "0.85000000"              // Last price of the NO token of the source symbol
+}
+```
+
+`POST /api/v3/prediction/split`
+
+For multi-outcome prediction events, convert quote asset (USDT) into outcome tokens for the specified prediction market. The account spends quote asset and receives equal quantities of outcome tokens for the target market.
+
+**Weight:** 1
+
+**Parameters:**
+
+| Name | Type | Is it required? | Description |
+| :---- | :---- | :---- | :---- |
+| event | STRING | YES | Prediction event name (e.g. `EVENT4`) |
+| symbol | STRING | YES | The YES or NO token trading pair of the target prediction market |
+| quantity | DECIMAL | YES | Number of outcome token sets to receive; must be a positive whole integer |
+| newClientOrderId | STRING | NO | Client-customized unique order ID. If not provided, one will be generated automatically. |
+| signer | STRING | YES | API wallet address |
+| nonce | STRING | YES | Current time in microseconds |
+| signature | STRING | YES | Signature |
+
+Notes:
+* `symbol` must be a valid prediction market token trading pair (YES or NO) with status `TRADING` or `PENDING_TRADING`; the system resolves the corresponding YES token automatically
+* `quantity` must be a whole number with no decimal places
+* `counterparties` contains the symbol and last price for each outcome token involved in the split
+* `sourceNoLastPrice` is the last price of the NO token for the source symbol at the time of the split
+
+
+## Prediction market merge (TRADE)
+
+**Response**
+
+```javascript
+{
+    "clientOrderId": "xxx",                        // Client order ID
+    "qty": "10.00000000",                          // Total quote asset (USDT) returned
+    "counterparties": [                            // List of outcome tokens consumed and their prices
+        {
+            "symbol": "EVENT4_ALGERIA_WIN_YUSDT",  // Outcome token symbol consumed
+            "price": "0.15000000"                  // Last price of the outcome token
+        },
+        {
+            "symbol": "EVENT4_ARGENTINA_WIN_YUSDT",
+            "price": "0.25000000"
+        }
+    ]
+}
+```
+
+`POST /api/v3/prediction/merge`
+
+For multi-outcome prediction events, return a set of outcome tokens to redeem quote asset (USDT). The account submits equal quantities of all outcome tokens for the event and receives quote asset in return.
+
+**Weight:** 1
+
+**Parameters:**
+
+| Name | Type | Is it required? | Description |
+| :---- | :---- | :---- | :---- |
+| event | STRING | YES | Prediction event name (e.g. `EVENT4`) |
+| quantity | DECIMAL | YES | Number of outcome token sets to submit; must be a positive whole integer |
+| newClientOrderId | STRING | NO | Client-customized unique order ID. If not provided, one will be generated automatically. |
+| signer | STRING | YES | API wallet address |
+| nonce | STRING | YES | Current time in microseconds |
+| signature | STRING | YES | Signature |
+
+Notes:
+* The account must hold sufficient balance of all outcome tokens for the specified event
+* `quantity` must be a whole number with no decimal places
+* `qty` in the response is denominated in the quote asset (USDT)
+* `counterparties` contains the symbol and last price for each outcome token consumed during the merge
 
 
 ## Query prediction market current positions (USER\_DATA)
