@@ -2473,7 +2473,6 @@ Send in a new order.
 | newOrderRespType | ENUM    | NO        | "ACK", "RESULT", default "ACK"                                                                                                         |
 | pegPriceType     | ENUM    | NO        | BBO peg mode: `COUNTERPARTY_1` or `QUEUE_1`. When set on a `LIMIT` order, the engine resolves the actual price from the order book at trigger time using the BBO + `pegOffset`. Defaults to no peg. |
 | pegOffset        | DECIMAL | NO        | Signed offset from BBO when `pegPriceType` is set. BUY orders should use a non-positive value (e.g. `-0.5`); SELL non-negative. Units: same scale as `price` (must be a `tickSize` multiple).        |
-| priceLimit       | DECIMAL | NO        | Absolute price cap for BBO-pegged orders. BUY: ceiling — peg never resolves above this; SELL: floor. Must be > 0 and a multiple of `tickSize`. Defaults to no cap.                                   |
 | stpMode          | ENUM    | NO        | Self-Trade Prevention mode for this order. Overrides the account-level default. `EXPIRE_TAKER`: cancel the taker side; `EXPIRE_MAKER`: cancel the maker side; `EXPIRE_BOTH`: cancel both sides.      |
 
 Additional mandatory parameters based on `type`:
@@ -2594,7 +2593,6 @@ price  |  DECIMAL | NO | Order price
     "chaseOffsetType": "ABSOLUTE",
     "maxChaseOffset": "10.0",
     "maxChaseOffsetType": "ABSOLUTE",
-    "priceLimit": "50100.00",
     "timeInForce": "GTX",
     "strategyStatus": "NEW",
     "bookTime": 1747728000000,
@@ -2622,7 +2620,6 @@ Place a **Chase strategy order** — a BBO-pegged GTX limit order that automatic
 | chaseOffsetType    | STRING  | NO        | `ABSOLUTE` (default). only supports `ABSOLUTE` for now. Will support or `PERCENTAGE` latter later.                                                                                                                         |
 | maxChaseOffset     | DECIMAL | NO        | Maximum tolerated distance from the original BBO before the chase auto-cancels. Required if `maxChaseOffsetType` is sent. Must be `> 0`.                                                   |
 | maxChaseOffsetType | STRING  | NO        | `ABSOLUTE` or `PERCENTAGE` (default `ABSOLUTE` when `maxChaseOffset` is sent). `ABSOLUTE`: same unit as price, must be a multiple of `tickSize`. `PERCENTAGE`: ≤ 2 decimal places.          |
-| priceLimit         | DECIMAL | NO        | Absolute price cap. BUY: ceiling — chase never crosses above this; SELL: floor. Must be > 0 and a multiple of `tickSize`.                                                                  |
 | timeInForce        | ENUM    | NO        | Default `GTX` (post-only). **`NO_FILL` is not allowed** and is rejected with `INVALID_TIF`.                                                                                                |
 | clientStrategyId   | STRING  | NO        | User-defined strategy id. Auto-generated if not sent. **Length ≤ 28 characters** (DB column is `varchar(28)`). Must match `^[\.A-Z\:/a-z0-9_-]{1,28}$`.                                    |
 
@@ -2643,8 +2640,7 @@ Place a **Chase strategy order** — a BBO-pegged GTX limit order that automatic
 * The initial order is placed as a GTX (post-only) limit with `pegPriceType = QUEUE_1` and signed `pegOffset` (negative for BUY, positive for SELL).
 * The strategy service polls every second and amends the order price as the BBO moves, keeping the order at `bid1 − chaseOffset` (BUY) or `ask1 + chaseOffset` (SELL).
 * If the market moves beyond `maxChaseOffset` from the original BBO, the chase **auto-cancels** with reason `OFFSET_CANCELLED`.
-* If the new peg price would breach `priceLimit`, the chase clamps to `priceLimit` and stops further re-pegs in that direction.
-* The chase terminates on FILL, user cancel (via standard `DELETE /fapi/v3/order`), `maxChaseOffset` breach, or `priceLimit` clamp + no further improvement opportunity.
+* The chase terminates on FILL, user cancel (via standard `DELETE /fapi/v3/order`), or `maxChaseOffset` breach.
 
 ## Place Multiple Orders  (TRADE)
 
