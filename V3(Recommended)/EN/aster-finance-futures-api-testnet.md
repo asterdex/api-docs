@@ -74,6 +74,7 @@
   - [Change Multi-Assets Mode (TRADE)](#change-multi-assets-mode-trade)
   - [Get Current Multi-Assets Mode (USER_DATA)](#get-current-multi-assets-mode-user_data)
   - [New Order  (TRADE)](#new-order--trade)
+  - [Place Chase Order (TRADE)](#place-chase-order-trade)
   - [Place Multiple Orders  (TRADE)](#place-multiple-orders--trade)
   - [Transfer Between Futures And Spot (USER_DATA)](#transfer-between-futures-and-spot-user_data)
   - [Query Order (USER_DATA)](#query-order-user_data)
@@ -2398,7 +2399,7 @@ Place a **Chase strategy order** — a BBO-pegged GTX limit order that automatic
 | reduceOnly         | STRING  | NO        | `"true"` or `"false"` (case-insensitive). Any other value is rejected. Default `"false"`.                                                                                                  |
 | chaseOffset        | DECIMAL | NO        | Distance from BBO to peg the order. Default `"0"` (exact BBO peg). Must be ≥ 0 and a multiple of `tickSize`. BUY price = `bid1 − chaseOffset`; SELL price = `ask1 + chaseOffset`.           |
 | chaseOffsetType    | STRING  | NO        | `ABSOLUTE` (default) . only supports `ABSOLUTE` for now. Will support or `PERCENTAGE` latter                                                                                                                         |
-| maxChaseOffset     | DECIMAL | NO        | Maximum tolerated distance from the original BBO before the chase auto-cancels. Required if `maxChaseOffsetType` is sent. Must be `> 0`.                                                   |
+| maxChaseOffset     | DECIMAL | NO        | Maximum tolerated distance from the original BBO before the chase auto-cancels. Must be `> 0`. If omitted, no distance-based auto-cancel is applied and any `maxChaseOffsetType` sent is ignored.        |
 | maxChaseOffsetType | STRING  | NO        | `ABSOLUTE` or `PERCENTAGE` (default `ABSOLUTE` when `maxChaseOffset` is sent). `ABSOLUTE`: same unit as price, must be a multiple of `tickSize`. `PERCENTAGE`: ≤ 2 decimal places.          |
 | timeInForce        | ENUM    | NO        | Default `GTX` (post-only).                                                                                                |
 | clientStrategyId   | STRING  | NO        | User-defined strategy id. Auto-generated if not sent. **Length ≤ 28 characters** (DB column is `varchar(28)`). Must match `^[\.A-Z\:/a-z0-9_-]{1,28}$`.                                    |
@@ -2411,6 +2412,8 @@ Place a **Chase strategy order** — a BBO-pegged GTX limit order that automatic
 * `reduceOnly` accepts only `"true"` / `"false"` (case-insensitive). Any other string returns `INVALID_PARAMETER` with `reduceOnly` as the offending param name.
 * `chaseOffset` must be ≥ 0 and a multiple of `tickSize`.
 * `chaseOffsetType` / `maxChaseOffsetType` must be `ABSOLUTE` or `PERCENTAGE`; an invalid value returns `INVALID_PARAMETER` (not `INVALID_CHASE_OFFSET`).
+* `chaseOffsetType` currently supports only `ABSOLUTE`. `PERCENTAGE` is a valid value but is not yet implemented for `chaseOffset` and returns `UNSUPPORTED_OPERATION`. (`maxChaseOffsetType` supports both.)
+* Quantity / notional floor (entry orders only; `reduceOnly` orders are exempt from the notional minimum): for `quantityUnit = BASE`, `quantity` must be ≥ the symbol's `marketMinQty` (else `QTY_LESS_THAN_MIN_QTY`) and `quantity × markPrice` must be ≥ the symbol's `minNotional` (else `MIN_NOTIONAL`); for `quantityUnit = QUOTE`, the quote amount must be ≥ `minNotional` (else `MIN_NOTIONAL`) and `quoteQty / markPrice` must be ≥ `marketMinQty` (else `QTY_LESS_THAN_MIN_QTY`).
 * When `maxChaseOffsetType = PERCENTAGE`, the input value must have ≤ 2 decimal places (it is stored at scale 2 on the wire, e.g. `"1"` → 1.00%, `"100"` → 100.00%).
 * When `maxChaseOffsetType = ABSOLUTE`, `maxChaseOffset` must be a multiple of `tickSize`.
 * `clientStrategyId` length must be ≤ 28 characters.
