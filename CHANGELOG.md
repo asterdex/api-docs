@@ -73,7 +73,7 @@ Supports OTO, OCO, and OTOCO strategy types.
 
 #### `POST /fapi/v3/chase` — Place Chase Order / 下追单
 
-A new public endpoint that **places a BBO-pegged GTX limit order with automatic price tracking**. The strategy service polls each tick and re-pegs the order to `bid1 − chaseOffset` (BUY) or `ask1 + chaseOffset` (SELL). The chase auto-cancels when the market moves beyond `maxChaseOffset` from the original BBO. Supports `priceLimit`, `quantityUnit` (`BASE` / `QUOTE`), and optional `maxChaseOffset` in `ABSOLUTE` or `PERCENTAGE` units.
+A new public endpoint that **places a BBO-pegged GTX limit order with automatic price tracking**. The strategy service polls each tick and re-pegs the order to `bid1 − chaseOffset` (BUY) or `ask1 + chaseOffset` (SELL). The chase auto-cancels when the market moves beyond `maxChaseOffset` from the original BBO. Supports `quantityUnit` (`BASE` / `QUOTE`), and optional `maxChaseOffset` in `ABSOLUTE` or `PERCENTAGE` units.
 
 ### Changed
 

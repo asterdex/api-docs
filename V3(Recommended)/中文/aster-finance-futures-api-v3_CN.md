@@ -2514,7 +2514,6 @@ priceProtect | STRING | NO | 条件单触发保护："TRUE","FALSE", 默认"FALS
 newOrderRespType | ENUM    | NO       | "ACK", "RESULT", 默认 "ACK"
 pegPriceType     | ENUM    | NO       | BBO peg 模式: `COUNTERPARTY_1` 或 `QUEUE_1`。在 `LIMIT` 订单上设置此参数后，撮合引擎在触发时基于订单簿的 BBO 加 `pegOffset` 解析实际价格。默认不使用 peg。
 pegOffset        | DECIMAL | NO       | 当 `pegPriceType` 已设置时，相对 BBO 的有符号偏移量。买单应为非正值（如 `-0.5`），卖单为非负值。单位与 `price` 相同，必须是 `tickSize` 的倍数。
-priceLimit       | DECIMAL | NO       | BBO peg 订单的绝对价格上下限。买单：上限——peg 不会高于此；卖单：下限。必须 > 0 且为 `tickSize` 倍数。默认无限制。
 stpMode          | ENUM    | NO       | 本订单的自成交防止（STP）模式，覆盖账户级默认设置。`EXPIRE_TAKER`：撤销taker订单；`EXPIRE_MAKER`：撤销maker订单；`EXPIRE_BOTH`：同时撤销双方订单。
 
 根据 order `type`的不同，某些参数强制要求，具体如下:
@@ -2657,7 +2656,6 @@ price  |  DECIMAL | NO | 委托价格
     "chaseOffsetType": "ABSOLUTE",
     "maxChaseOffset": "10.0",
     "maxChaseOffsetType": "ABSOLUTE",
-    "priceLimit": "50100.00",
     "timeInForce": "GTX",
     "strategyStatus": "NEW",
     "bookTime": 1747728000000,
@@ -2685,7 +2683,6 @@ price  |  DECIMAL | NO | 委托价格
 | chaseOffsetType    | STRING  | NO         | `ABSOLUTE`（默认）。v1 仅支持 `ABSOLUTE`。`PERCENTAGE` 后续支持。                                                                                                          |
 | maxChaseOffset     | DECIMAL | NO         | 相对原始 BBO 允许偏移的最大距离，超出后追单自动撤销。当 `maxChaseOffsetType` 已传时必填。必须 > 0。                                                                  |
 | maxChaseOffsetType | STRING  | NO         | `ABSOLUTE` 或 `PERCENTAGE`（默认 `ABSOLUTE`）。`ABSOLUTE`：同价格单位，必须为 `tickSize` 倍数；`PERCENTAGE`：≤ 2 位小数。                                            |
-| priceLimit         | DECIMAL | NO         | 绝对价格上下限。买单：上限（追单不会高于此）；卖单：下限。必须 > 0 且为 `tickSize` 倍数。                                                                            |
 | timeInForce        | ENUM    | NO         | 默认 `GTX`（post-only）。                                                                                            |
 | clientStrategyId   | STRING  | NO         | 用户自定义策略 id。未传则自动生成。**长度 ≤ 28 字符**（DB 字段为 `varchar(28)`）。须满足 `^[\.A-Z\:/a-z0-9_-]{1,28}$`。                                              |
 
@@ -2705,8 +2702,7 @@ price  |  DECIMAL | NO | 委托价格
 * 初始订单以 GTX（post-only）LIMIT 形式发出，`pegPriceType = QUEUE_1`、`pegOffset` 取符号（买单为负，卖单为正）。
 * 策略服务每秒轮询，将订单价格修改为 `bid1 − chaseOffset`（买单）或 `ask1 + chaseOffset`（卖单），跟随 BBO 移动。
 * 当市场偏移超过 `maxChaseOffset` 时**自动撤销**，原因为 `OFFSET_CANCELLED`。
-* 新的 peg 价若会突破 `priceLimit`，追单将 clamp 在 `priceLimit` 并在该方向停止继续追价。
-* 追单在以下情形终止：成交、用户撤单（`DELETE /fapi/v3/order`）、`maxChaseOffset` 触发、`priceLimit` clamp 且无新的优化空间。
+* 追单在以下情形终止：成交、用户撤单（`DELETE /fapi/v3/order`）、`maxChaseOffset` 触发。
 
 ## 批量下单 (TRADE)
 
