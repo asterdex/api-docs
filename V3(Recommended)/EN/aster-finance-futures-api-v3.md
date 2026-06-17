@@ -4446,17 +4446,37 @@ toAccountAddress={toAccountAddress}&asset={asset}&amount={amount}&kindType={kind
 ```javascript
 {
     "batchId": "a1B2c3D4e5F6g7H8i9J0k1",
-    "fromUserId": 12345678,
-    "toUserId": 87654321,
-    "status": "SUCCESS",            // migration status
-    "items": [
+    "totalCount": 2,                    // total number of records
+    "successCount": 1,                  // number of successful records (status=S)
+    "processingCount": 0,               // number of processing records (status=P)
+    "failCount": 0,                     // number of failed records (status=F)
+    "initCount": 1,                     // number of pending records (status=I)
+    "details": [
         {
+            "id": 1001,
             "asset": "USDT",
-            "amount": "500.00000000"
+            "amount": "500.00000000",
+            "tranId": 9876543210,
+            "status": "S",              // I=pending, S=success, F=failed
+            "fromStatus": "S",          // S=success, F=failed, P=processing
+            "fromErrorCode": null,
+            "fromResponse": null,
+            "toStatus": "S",            // S=success, F=failed, P=processing
+            "toErrorCode": null,
+            "toResponse": null
         },
         {
+            "id": 1002,
             "asset": "BTC",
-            "amount": "0.05000000"
+            "amount": "0.05000000",
+            "tranId": null,             // null if not yet processed
+            "status": "I",              // I=pending, S=success, F=failed
+            "fromStatus": null,
+            "fromErrorCode": null,
+            "fromResponse": null,
+            "toStatus": null,
+            "toErrorCode": null,
+            "toResponse": null
         }
     ]
 }

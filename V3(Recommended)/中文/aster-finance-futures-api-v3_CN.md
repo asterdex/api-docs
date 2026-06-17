@@ -4605,17 +4605,37 @@ toAccountAddress={toAccountAddress}&asset={asset}&amount={amount}&kindType={kind
 ```javascript
 {
     "batchId": "a1B2c3D4e5F6g7H8i9J0k1",
-    "fromUserId": 12345678,
-    "toUserId": 87654321,
-    "status": "SUCCESS",            // 迁移状态
-    "items": [
+    "totalCount": 2,                    // 总条数
+    "successCount": 1,                  // 成功条数（status=S）
+    "processingCount": 0,               // 处理中条数（status=P）
+    "failCount": 0,                     // 失败条数（status=F）
+    "initCount": 1,                     // 待执行条数（status=I）
+    "details": [
         {
-            "asset": "USDT",
-            "amount": "500.00000000"
+            "id": 1001,
+            "asset": "USDT",            // 币种
+            "amount": "500.00000000",   // 金额
+            "tranId": 9876543210,       // 划转ID（null 表示尚未处理）
+            "status": "S",              // 执行状态：I=待处理, S=划转成功, F=划转失败
+            "fromStatus": "S",          // 转出状态：S=成功, F=失败, P=处理中
+            "fromErrorCode": null,      // 转出错误码
+            "fromResponse": null,       // 转出响应信息
+            "toStatus": "S",            // 转入状态：S=成功, F=失败, P=处理中
+            "toErrorCode": null,        // 转入错误码
+            "toResponse": null          // 转入响应信息
         },
         {
+            "id": 1002,
             "asset": "BTC",
-            "amount": "0.05000000"
+            "amount": "0.05000000",
+            "tranId": null,             // null 表示尚未处理
+            "status": "I",              // 执行状态：I=待处理, S=划转成功, F=划转失败
+            "fromStatus": null,
+            "fromErrorCode": null,
+            "fromResponse": null,
+            "toStatus": null,
+            "toErrorCode": null,
+            "toResponse": null
         }
     ]
 }
