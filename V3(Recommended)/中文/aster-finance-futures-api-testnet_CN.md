@@ -4271,6 +4271,8 @@ msg: user={user}&nonce={nonce}&agentName={agentName}&agentAddress={agentAddress}
 
 > **EVM 地址专用：** 将上述 `msg` 字符串作为 EIP-712 结构化数据中 `message.msg` 的值进行签名，结构如下：
 
+> **⚠️ 注意：** `domain.chainId` 必须使用请求参数 `signatureChainId` 的值（EVM 地址填 `56`，Solana 地址填 `101`），而非固定值 `714`。
+
 ```
 typed_data = {
   "types": {
@@ -4288,7 +4290,7 @@ typed_data = {
   "domain": {
     "name": "AsterSignTransaction",
     "version": "1",
-    "chainId": 714,
+    "chainId": signatureChainId,
     "verifyingContract": "0x0000000000000000000000000000000000000000"
   },
   "message": {
@@ -4301,7 +4303,7 @@ typed_data = {
 
 | 账户类型 | 签名算法 | 编码格式 |
 |---|---|---|
-| EVM 地址 | EIP-712 Typed Data（chainId=56，message.msg=消息体） | Hex |
+| EVM 地址 | EIP-712 Typed Data（chainId=signatureChainId，message.msg=消息体） | Hex |
 | Solana 地址 | Ed25519 | Base58 |
 
 ---

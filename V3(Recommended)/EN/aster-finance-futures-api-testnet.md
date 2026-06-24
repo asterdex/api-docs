@@ -4037,6 +4037,8 @@ msg: user={user}&nonce={nonce}&agentName={agentName}&agentAddress={agentAddress}
 
 > **EVM addresses only:** wrap the `msg` string above as `message.msg` in the following EIP-712 typed data structure before signing:
 
+> **⚠️ Note:** `domain.chainId` must be set to the value of the request parameter `signatureChainId` (`56` for EVM addresses, `101` for Solana addresses) — do **not** use the fixed value `714`.
+
 ```
 typed_data = {
   "types": {
@@ -4054,7 +4056,7 @@ typed_data = {
   "domain": {
     "name": "AsterSignTransaction",
     "version": "1",
-    "chainId": 714,
+    "chainId": signatureChainId,
     "verifyingContract": "0x0000000000000000000000000000000000000000"
   },
   "message": {
@@ -4067,7 +4069,7 @@ typed_data = {
 
 | Account Type | Signing Algorithm | Encoding |
 |---|---|---|
-| EVM Address | EIP-712 Typed Data (chainId=56, message.msg=message body) | Hex |
+| EVM Address | EIP-712 Typed Data (chainId=signatureChainId, message.msg=message body) | Hex |
 | Solana Address | Ed25519 | Base58 |
 
 ---
