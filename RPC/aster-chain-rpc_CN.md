@@ -101,7 +101,18 @@ curl -X POST "https://tapi.asterdex.com/info" \
           }
         ]
       }
-    ]
+    ],
+    "staking": {
+      "totalStakedAmount": "125000.00000000",
+      "totalUnclaimedRewards": [
+        {
+          "asset": "ASTER",
+          "amount": "3820.45120000"
+        }
+      ],
+      "totalPendingStakeAmount": "50.00000000",
+      "totalPendingUnstakeAmount": "100.00000000"
+    }
   },
   "id": {},
   "jsonrpc": "2.0"
@@ -133,7 +144,13 @@ positions[].positions[].isolatedWallet | STRING | 逐仓钱包余额
 positions[].positions[].adl | INT | ADL 排队等级
 positions[].positions[].positionSide | STRING | 持仓方向：`BOTH`、`LONG` 或 `SHORT`
 positions[].positions[].marginValue | STRING | 保证金价值
-
+staking | OBJECT | 质押信息（任一金额为 0 时该字段返回 `null`；隐私模式开启时整个响应不返回）
+staking.totalStakedAmount | STRING | 当前质押 ASTER 总额
+staking.totalUnclaimedRewards | ARRAY | 未领取奖励列表
+staking.totalUnclaimedRewards[].asset | STRING | 奖励资产（当前为 `ASTER`）
+staking.totalUnclaimedRewards[].amount | STRING | 未领取奖励数量
+staking.totalPendingStakeAmount | STRING | 待处理质押总额
+staking.totalPendingUnstakeAmount | STRING | 待处理解押总额
 
 ## 查询当前挂单
 

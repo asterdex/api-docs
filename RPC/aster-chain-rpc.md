@@ -101,7 +101,18 @@ curl -X POST "https://tapi.asterdex.com/info" \
           }
         ]
       }
-    ]
+    ],
+    "staking": {
+      "totalStakedAmount": "125000.00000000",
+      "totalUnclaimedRewards": [
+        {
+          "asset": "ASTER",
+          "amount": "3820.45120000"
+        }
+      ],
+      "totalPendingStakeAmount": "50.00000000",
+      "totalPendingUnstakeAmount": "100.00000000"
+    }
   },
   "id": {},
   "jsonrpc": "2.0"
@@ -133,7 +144,13 @@ positions[].positions[].isolatedWallet | STRING | Isolated wallet balance
 positions[].positions[].adl | INT | ADL quantile
 positions[].positions[].positionSide | STRING | Position side: `BOTH`, `LONG`, or `SHORT`
 positions[].positions[].marginValue | STRING | Margin value
-
+staking | OBJECT | Staking summary (a field returns `null` when its amount is 0; the whole response is omitted under privacy mode)
+staking.totalStakedAmount | STRING | Total staked ASTER
+staking.totalUnclaimedRewards | ARRAY | Unclaimed rewards
+staking.totalUnclaimedRewards[].asset | STRING | Reward asset (currently `ASTER`)
+staking.totalUnclaimedRewards[].amount | STRING | Unclaimed reward amount
+staking.totalPendingStakeAmount | STRING | Total pending stake
+staking.totalPendingUnstakeAmount | STRING | Total pending unstake
 
 ## Get Open Orders
 
