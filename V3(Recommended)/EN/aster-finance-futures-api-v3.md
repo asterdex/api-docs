@@ -3846,7 +3846,7 @@ Place a new strategy order. Supports OTO (One-Triggers-the-Other), OCO (One-Canc
 | clientStrategyId | STRING | NO | Client-assigned unique strategy ID |
 | strategyType | ENUM | YES | Strategy type: `OTO`, `OCO`, `OTOCO` |
 | subOrderList | JSON Array | YES | List of sub-orders. `OTO` and `OCO` require exactly 2; `OTOCO` requires exactly 3 |
-| builder | STRING | NO | Builder identifier |
+| builder | STRING | NO | Builder address |
 | feeRate | DECIMAL | NO | Custom fee rate |
 
 **Sub-order fields (each element in `subOrderList`):**
@@ -5877,11 +5877,4 @@ Codes are universal,but messages can vary.
 
 * Price is lower than stop price multiplier floor.
 * Limit price can't be lower than %s.
-
----
-
-## Changelog
-
-### 2026-06-30
-- `POST /fapi/v3/placeStrategyOrder`: Added `builder` (STRING, optional) and `feeRate` (DECIMAL, optional) to top-level parameters.
 
