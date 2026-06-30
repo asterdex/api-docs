@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-06-30
+
+### Changed
+
+#### `POST /fapi/v3/placeStrategyOrder` — Place Strategy Order: added `builder` and `feeRate` parameters
+
+Added two optional top-level parameters:
+- `builder` (STRING, optional) — Builder address
+- `feeRate` (DECIMAL, optional) — Custom fee rate
+
+---
+
 ## 2026-05-26
 
 ### Added
