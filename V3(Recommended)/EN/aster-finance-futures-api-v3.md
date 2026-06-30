@@ -3846,6 +3846,8 @@ Place a new strategy order. Supports OTO (One-Triggers-the-Other), OCO (One-Canc
 | clientStrategyId | STRING | NO | Client-assigned unique strategy ID |
 | strategyType | ENUM | YES | Strategy type: `OTO`, `OCO`, `OTOCO` |
 | subOrderList | JSON Array | YES | List of sub-orders. `OTO` and `OCO` require exactly 2; `OTOCO` requires exactly 3 |
+| builder | STRING | NO | Builder address |
+| feeRate | DECIMAL | NO | Custom fee rate |
 
 **Sub-order fields (each element in `subOrderList`):**
 
