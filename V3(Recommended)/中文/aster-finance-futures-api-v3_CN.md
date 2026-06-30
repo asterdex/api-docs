@@ -3998,6 +3998,8 @@ symbol | STRING | YES
 | clientStrategyId | STRING | NO | 客户端自定义策略 ID |
 | strategyType | ENUM | YES | 策略类型：`OTO`、`OCO`、`OTOCO` |
 | subOrderList | JSON Array | YES | 子订单列表。`OTO` 和 `OCO` 恰好需要 2 个子订单；`OTOCO` 恰好需要 3 个 |
+| builder | STRING | NO | 构建者地址 |
+| feeRate | DECIMAL | NO | 自定义费率 |
 
 **`subOrderList` 中每个子订单的字段：**
 
@@ -6050,4 +6052,11 @@ None
  * 止盈止损订单价格不应低于触发价与报价乘数下限的乘积
  * Limit price can't be lower than %s.
  * 止盈止损订单价格不应低于 `%s`
+
+---
+
+## 更新日志
+
+### 2026-06-30
+- `POST /fapi/v3/placeStrategyOrder`：顶层参数新增 `builder`（STRING，可选）和 `feeRate`（DECIMAL，可选）字段。
 
