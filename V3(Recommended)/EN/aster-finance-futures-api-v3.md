@@ -116,6 +116,8 @@
   - [Register and Approve Agent (PUBLIC)](#register-and-approve-agent-public)
   - [Get Direct Announcements (USER_DATA)](#get-direct-announcements-user_data)
   - [Get Direct Announcement By ID (USER_DATA)](#get-direct-announcement-by-id-user_data)
+  - [Get Builder Trades (USER_DATA)](#get-builder-trades-user_data)
+  - [Get Builder Approved User List (USER_DATA)](#get-builder-approved-user-list-user_data)
 - [User Data Streams](#user-data-streams)
   - [Start User Data Stream (USER_STREAM)](#start-user-data-stream-user_stream)
   - [Keepalive User Data Stream (USER_STREAM)](#keepalive-user-data-stream-user_stream)
@@ -4716,6 +4718,144 @@ Retrieves a single direct announcement by its ID for the authenticated user.
 | category | STRING | Announcement category |
 | publishTime | LONG | Publish timestamp (milliseconds) |
 | jumpLink | STRING | Link to the full announcement page |
+
+---
+
+# Get Builder Trades (USER_DATA)
+
+> **Response:**
+
+```javascript
+{
+  "total": 42,
+  "currentPage": 1,
+  "totalPages": 1,
+  "pageSize": 50,
+  "hasMore": false,
+  "rows": [
+    {
+      "tradeId": 698759,
+      "insertTime": 1751500000000,
+      "symbol": "BTCUSDT",
+      "positionSide": "SHORT",
+      "price": "7819.01",
+      "qty": "0.002",
+      "baseAsset": "BTC",
+      "baseType": "CRYPTO",
+      "quoteAsset": "USDT",
+      "side": "SELL",
+      "activeBuy": false,
+      "feeAsset": "USDT",
+      "totalQuota": "15.63802",
+      "fee": "-0.07819010",
+      "productName": null,
+      "orderId": 25851813,
+      "realizedProfit": "-0.91539999",
+      "marginAsset": "USDT",
+      "userAddress": "0x1234...abcd",
+      "builderFee": "0.00050000"
+    }
+  ]
+}
+```
+
+`GET /fapi/v3/builder/userTrades`
+
+Query the paginated trade history of users trading under the caller's builder code. The authenticated account is used as the builder identity — there is no separate `builder` address parameter.
+
+**Weight:** 5
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| startTime | LONG | NO | Timestamp in ms |
+| endTime | LONG | NO | Timestamp in ms |
+| page | INT | NO | Page number, starting from `1`. Default: `1` |
+| limit | INT | NO | Number of results per page. Default `50`; max `1000` |
+| nonce | LONG | YES | Microsecond-level timestamp, used for replay attack prevention |
+| signer | STRING | YES | Signer address associated with the authenticated account |
+| signature | STRING | YES | Signature over the request body |
+
+* If neither `startTime` nor `endTime` is sent, the recent 7 days' data is returned.
+* The resolved `startTime` must not be earlier than 30 days before the current time, or the request is rejected.
+* `endTime` cannot be more than 1 day ahead of the current server time.
+* Results are ordered by trade time descending.
+
+**Response Fields:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| total | LONG | Total number of matching trades |
+| currentPage | INT | Current page number |
+| totalPages | INT | Total number of pages |
+| pageSize | INT | Number of records per page |
+| hasMore | BOOLEAN | Whether more pages are available |
+| rows | ARRAY | List of trade records |
+| rows[].tradeId | LONG | Trade ID |
+| rows[].insertTime | LONG | Trade time (milliseconds) |
+| rows[].symbol | STRING | Symbol |
+| rows[].positionSide | STRING | Position side: `BOTH`, `LONG`, `SHORT` |
+| rows[].price | STRING | Trade price |
+| rows[].qty | STRING | Trade quantity |
+| rows[].baseAsset | STRING | Base asset |
+| rows[].baseType | STRING | Symbol type: `CRYPTO` or `STOCK` |
+| rows[].quoteAsset | STRING | Quote asset |
+| rows[].side | STRING | Trade side |
+| rows[].activeBuy | BOOLEAN | Whether the trade was an active buy |
+| rows[].feeAsset | STRING | Commission asset |
+| rows[].totalQuota | STRING | Notional value of the trade (price × qty) |
+| rows[].fee | STRING | Commission paid (negative value) |
+| rows[].orderId | LONG | Order ID |
+| rows[].realizedProfit | STRING | Realized profit |
+| rows[].marginAsset | STRING | Margin (settlement) asset |
+| rows[].userAddress | STRING | Wallet address of the trading user |
+| rows[].builderFee | STRING | Builder fee charged on the trade |
+
+---
+
+# Get Builder Approved User List (USER_DATA)
+
+> **Response:**
+
+```javascript
+[
+  {
+    "userAddress": "0x1234...abcd",
+    "builderAddress": "0x5678...efgh",
+    "maxFeeRate": 0.0001,
+    "builderName": "MyBuilder",
+    "approveTime": "2026-07-03T10:00:00.000+00:00"
+  }
+]
+```
+
+`GET /fapi/v3/builder/approvedUserList`
+
+Query the list of users who have approved the caller's address as their builder.
+
+**Weight:** 5
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| startTime | LONG | NO | Only return users approved after this timestamp (ms). If omitted, defaults to `0`, meaning no time filter is applied and all approved users are returned. |
+| nonce | LONG | YES | Microsecond-level timestamp, used for replay attack prevention |
+| signer | STRING | YES | Signer address associated with the authenticated account |
+| signature | STRING | YES | Signature over the request body |
+
+* The authenticated account is used as the builder identity — there is no separate `builder` address parameter.
+
+**Response Fields:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| userAddress | STRING | Wallet address of the approved user |
+| builderAddress | STRING | Builder's wallet address |
+| maxFeeRate | DECIMAL | Maximum fee rate the user granted this builder |
+| builderName | STRING | Builder name set by the user when approving |
+| approveTime | STRING | ISO-8601 timestamp when the user approved the builder |
 
 ---
 

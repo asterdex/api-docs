@@ -114,6 +114,8 @@
 	- [注册并授权 Agent (PUBLIC)](#注册并授权-agent-public)		
 	- [查询直发公告列表 (USER_DATA)](#查询直发公告列表-user_data)
 	- [按ID查询直发公告 (USER_DATA)](#按id查询直发公告-user_data)
+	- [查询Builder交易记录 (USER_DATA)](#查询builder交易记录-user_data)
+	- [查询Builder已授权用户列表 (USER_DATA)](#查询builder已授权用户列表-user_data)
 - [Websocket 账户信息推送](#websocket-账户信息推送)
 	- [生成listenKey (USER_STREAM)](#生成listenkey-user_stream)
 	- [延长listenKey有效期 (USER_STREAM)](#延长listenkey有效期-user_stream)
@@ -4876,6 +4878,145 @@ typed_data = {
 | category | STRING | 公告分类 |
 | publishTime | LONG | 发布时间戳（毫秒） |
 | jumpLink | STRING | 公告详情页链接 |
+
+---
+
+# 查询Builder交易记录 (USER_DATA)
+
+> **响应:**
+
+```javascript
+{
+  "total": 42,
+  "currentPage": 1,
+  "totalPages": 1,
+  "pageSize": 50,
+  "hasMore": false,
+  "rows": [
+    {
+      "tradeId": 698759,
+      "insertTime": 1751500000000,
+      "symbol": "BTCUSDT",
+      "positionSide": "SHORT",
+      "price": "7819.01",
+      "qty": "0.002",
+      "baseAsset": "BTC",
+      "baseType": "CRYPTO",
+      "quoteAsset": "USDT",
+      "side": "SELL",
+      "activeBuy": false,
+      "feeAsset": "USDT",
+      "totalQuota": "15.63802",
+      "fee": "-0.07819010",
+      "productName": null,
+      "orderId": 25851813,
+      "realizedProfit": "-0.91539999",
+      "marginAsset": "USDT",
+      "userAddress": "0x1234...abcd",
+      "builderFee": "0.00050000"
+    }
+  ]
+}
+```
+
+`GET /fapi/v3/builder/userTrades`
+
+查询在当前调用者的Builder代码下交易的用户成交历史，支持分页。以已认证账户本身作为Builder身份，无需单独传入`builder`地址参数。
+
+**权重:** 5
+
+**参数:**
+
+| 名称 | 类型 | 是否必需 | 描述 |
+|------|------|---------|------|
+| startTime | LONG | NO | 起始时间戳（毫秒） |
+| endTime | LONG | NO | 结束时间戳（毫秒） |
+| page | INT | NO | 页码，从 `1` 开始。默认: `1` |
+| limit | INT | NO | 每页返回数量。默认 `50`；最大 `1000` |
+| nonce | LONG | YES | 微秒级时间戳，用于防重放攻击 |
+| signer | STRING | YES | 与当前认证账户关联的 signer 地址 |
+| signature | STRING | YES | 对请求体的签名 |
+
+* 如果 `startTime` 和 `endTime` 都未发送，则返回最近7天的数据。
+* 最终生效的 `startTime` 不能早于当前时间之前30天，否则请求会被拒绝。
+* `endTime` 不能超过当前服务器时间1天以上。
+* 结果按成交时间倒序排列。
+
+**响应字段:**
+
+| 字段 | 类型 | 描述 |
+|------|------|------|
+| total | LONG | 符合条件的成交总数 |
+| currentPage | INT | 当前页码 |
+| totalPages | INT | 总页数 |
+| pageSize | INT | 每页数量 |
+| hasMore | BOOLEAN | 是否还有下一页 |
+| rows | ARRAY | 成交记录列表 |
+| rows[].tradeId | LONG | 成交ID |
+| rows[].insertTime | LONG | 成交时间（毫秒） |
+| rows[].symbol | STRING | 交易对 |
+| rows[].positionSide | STRING | 持仓方向：`BOTH`、`LONG`、`SHORT` |
+| rows[].price | STRING | 成交价格 |
+| rows[].qty | STRING | 成交数量 |
+| rows[].baseAsset | STRING | 基础资产 |
+| rows[].baseType | STRING | 标的类型：`CRYPTO` 或 `STOCK` |
+| rows[].quoteAsset | STRING | 计价资产 |
+| rows[].side | STRING | 买卖方向 |
+| rows[].activeBuy | BOOLEAN | 是否为主动买入 |
+| rows[].feeAsset | STRING | 手续费资产 |
+| rows[].totalQuota | STRING | 成交名义价值（价格 × 数量） |
+| rows[].fee | STRING | 手续费（负值） |
+| rows[].productName | STRING | 当前接口暂未填充该字段（始终为 `null`） |
+| rows[].orderId | LONG | 订单ID |
+| rows[].realizedProfit | STRING | 已实现盈亏 |
+| rows[].marginAsset | STRING | 保证金（结算）资产 |
+| rows[].userAddress | STRING | 交易用户的钱包地址 |
+| rows[].builderFee | STRING | 该笔成交收取的Builder手续费 |
+
+---
+
+# 查询Builder已授权用户列表 (USER_DATA)
+
+> **响应:**
+
+```javascript
+[
+  {
+    "userAddress": "0x1234...abcd",
+    "builderAddress": "0x5678...efgh",
+    "maxFeeRate": 0.0001,
+    "builderName": "MyBuilder",
+    "approveTime": "2026-07-03T10:00:00.000+00:00"
+  }
+]
+```
+
+`GET /fapi/v3/builder/approvedUserList`
+
+查询已将当前调用者地址授权为Builder的用户列表。
+
+**权重:** 5
+
+**参数:**
+
+| 名称 | 类型 | 是否必需 | 描述 |
+|------|------|---------|------|
+| startTime | LONG | NO | 仅返回该时间戳（毫秒）之后授权的用户。若不传，默认为 `0`，即不做时间过滤，返回全部已授权用户 |
+| nonce | LONG | YES | 微秒级时间戳，用于防重放攻击 |
+| signer | STRING | YES | 与当前认证账户关联的 signer 地址 |
+| signature | STRING | YES | 对请求体的签名 |
+
+* 以已认证账户本身作为Builder身份，无需单独传入`builder`地址参数。
+
+**响应字段:**
+
+| 字段 | 类型 | 描述 |
+|------|------|------|
+| userAddress | STRING | 被授权用户的钱包地址 |
+| builderAddress | STRING | Builder的钱包地址 |
+| maxFeeRate | DECIMAL | 用户授权给该Builder的最大手续费率 |
+| builderName | STRING | 用户授权时设置的Builder名称 |
+| approveTime | STRING | 用户授权Builder的时间（ISO-8601格式） |
 
 ---
 

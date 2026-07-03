@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-07-03
+
+### Added
+
+#### `GET /fapi/v3/builder/userTrades` — Get Builder Trades
+
+New USER_DATA endpoint (weight 5) returning the paginated trade history of users trading under the caller's builder code, with `startTime`/`endTime`/`page`/`limit` filters.
+
+#### `GET /fapi/v3/builder/approvedUserList` — Get Builder Approved User List
+
+New USER_DATA endpoint (weight 5) returning the list of users who have approved the caller's address as their builder, with an optional `startTime` filter.
+
+---
+
 ## 2026-06-30
 
 ### Changed
