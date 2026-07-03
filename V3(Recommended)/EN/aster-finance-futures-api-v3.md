@@ -4747,8 +4747,7 @@ Retrieves a single direct announcement by its ID for the authenticated user.
       "activeBuy": false,
       "feeAsset": "USDT",
       "totalQuota": "15.63802",
-      "fee": "-0.07819010",
-      "productName": null,
+      "fee": "0.07819010",
       "orderId": 25851813,
       "realizedProfit": "-0.91539999",
       "marginAsset": "USDT",
@@ -4805,7 +4804,7 @@ Query the paginated trade history of users trading under the caller's builder co
 | rows[].activeBuy | BOOLEAN | Whether the trade was an active buy |
 | rows[].feeAsset | STRING | Commission asset |
 | rows[].totalQuota | STRING | Notional value of the trade (price × qty) |
-| rows[].fee | STRING | Commission paid (negative value) |
+| rows[].fee | STRING | Commission paid |
 | rows[].orderId | LONG | Order ID |
 | rows[].realizedProfit | STRING | Realized profit |
 | rows[].marginAsset | STRING | Margin (settlement) asset |
@@ -4825,7 +4824,7 @@ Query the paginated trade history of users trading under the caller's builder co
     "builderAddress": "0x5678...efgh",
     "maxFeeRate": 0.0001,
     "builderName": "MyBuilder",
-    "approveTime": "2026-07-03T10:00:00.000+00:00"
+    "approveTime": 1768903037082
   }
 ]
 ```
@@ -4856,7 +4855,7 @@ Query the list of users who have approved the caller's address as their builder.
 | builderAddress | STRING | Builder's wallet address |
 | maxFeeRate | DECIMAL | Maximum fee rate the user granted this builder |
 | builderName | STRING | Builder name set by the user when approving |
-| approveTime | STRING | ISO-8601 timestamp when the user approved the builder |
+| approveTime | LONG | Timestamp (ms) when the user approved the builder |
 
 ---
 

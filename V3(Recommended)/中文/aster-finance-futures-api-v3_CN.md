@@ -4907,8 +4907,7 @@ typed_data = {
       "activeBuy": false,
       "feeAsset": "USDT",
       "totalQuota": "15.63802",
-      "fee": "-0.07819010",
-      "productName": null,
+      "fee": "0.07819010",
       "orderId": 25851813,
       "realizedProfit": "-0.91539999",
       "marginAsset": "USDT",
@@ -4965,8 +4964,7 @@ typed_data = {
 | rows[].activeBuy | BOOLEAN | 是否为主动买入 |
 | rows[].feeAsset | STRING | 手续费资产 |
 | rows[].totalQuota | STRING | 成交名义价值（价格 × 数量） |
-| rows[].fee | STRING | 手续费（负值） |
-| rows[].productName | STRING | 当前接口暂未填充该字段（始终为 `null`） |
+| rows[].fee | STRING | 手续费 |
 | rows[].orderId | LONG | 订单ID |
 | rows[].realizedProfit | STRING | 已实现盈亏 |
 | rows[].marginAsset | STRING | 保证金（结算）资产 |
@@ -4986,7 +4984,7 @@ typed_data = {
     "builderAddress": "0x5678...efgh",
     "maxFeeRate": 0.0001,
     "builderName": "MyBuilder",
-    "approveTime": "2026-07-03T10:00:00.000+00:00"
+    "approveTime": 1768903037082
   }
 ]
 ```
@@ -5017,7 +5015,7 @@ typed_data = {
 | builderAddress | STRING | Builder的钱包地址 |
 | maxFeeRate | DECIMAL | 用户授权给该Builder的最大手续费率 |
 | builderName | STRING | 用户授权时设置的Builder名称 |
-| approveTime | STRING | 用户授权Builder的时间（ISO-8601格式） |
+| approveTime | LONG | 用户授权Builder的时间戳（毫秒） |
 
 ---
 
