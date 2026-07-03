@@ -4846,6 +4846,7 @@ Query the list of users who have approved the caller's address as their builder.
 | signature | STRING | YES | Signature over the request body |
 
 * The authenticated account is used as the builder identity — there is no separate `builder` address parameter.
+* Returns at most 1000 records.
 
 **Response Fields:**
 

@@ -5007,6 +5007,7 @@ typed_data = {
 | signature | STRING | YES | 对请求体的签名 |
 
 * 以已认证账户本身作为Builder身份，无需单独传入`builder`地址参数。
+* 最多返回1000条记录。
 
 **响应字段:**
 
