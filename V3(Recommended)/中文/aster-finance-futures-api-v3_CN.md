@@ -232,7 +232,7 @@ MARKET_DATA | 不需要鉴权的接口
 ## 鉴权签名体
 参数 | 描述
 ------------ | ------------
-user | 主账户钱包地址
+user | 母账户钱包地址
 signer | API钱包地址
 nonce | 当前时间戳,单位为微秒
 signature | 签名
@@ -4507,9 +4507,19 @@ subSourceAddr={subSourceAddr}&nonce={nonce}&user={user}&signer={signer}[&subAcco
 | kindType | ENUM | YES | 划转方向（见下表） |
 | nonce | LONG | YES | 微秒级时间戳，用于防重放攻击 |
 | user | STRING | YES | 签名账户的钱包地址（通常为母账户地址；子账户向母账户划转时为子账户地址） |
-| signer | STRING | YES | 与 `user` 关联的 signer 地址 |
 | fromAccountAddress | STRING | NO | 转出钱包地址。当转出账户与 `user` 不一致时必传（如子→子划转，或以第三方身份发起的母→子划转） |
 | signature | STRING | YES | 对消息体的签名，**必须使用 `user` 账户的钱包私钥签名**（见下方签名说明） |
+
+
+**`参数取值` :**
+
+| 转账  | user | fromAccountAddress | toAccountAddress | signature |
+|------|------|------|------|------
+| 母账户转子账户 | 母账户地址 | 母账户地址| 子账户地址 | 使用母账户地址私钥
+| 子账户转母账户 | 母账户地址 | 子账户地址| 母账户地址 | 使用母账户地址私钥
+| 子账户转子账户 | 母账户地址 | 子账户地址A| 子账户地址B | 使用母账户地址私钥
+| 子账户转母账户 | 子账户地址 | 子账户地址| 母账户地址 | 使用子账户地址私钥
+| 子账户转子账户 | 子账户地址A | 子账户地址A| 子账户地址B | 使用子账户地址私钥
 
 **`kindType` 取值:**
 
