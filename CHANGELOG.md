@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-07-07
+
+### Added
+
+#### `DELETE /fapi/v3/guardedCancelOrder` and `DELETE /fapi/v3/guardedBatchOrders` — Cancel Order / Cancel Multiple Orders (Guarded)
+
+Added guarded variants of the existing cancel endpoints, intended for orders placed/authorized on-chain — the on-chain nonce associated with each order guards against duplicate or out-of-order cancellation. Require `signer`, `nonce`, and `signature`; other request parameters and the response schema are identical to `DELETE /fapi/v3/order` and `DELETE /fapi/v3/batchOrders` respectively.
+
+Documented in EN and CN, mainnet and testnet futures API references.
+
+---
+
 ## 2026-07-03
 
 ### Added

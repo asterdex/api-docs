@@ -73,8 +73,10 @@
 	- [批量下单 (TRADE)](#批量下单-trade)
 	- [查询订单 (USER_DATA)](#查询订单-user_data)
 	- [撤销订单 (TRADE)](#撤销订单-trade)
+	- [撤销订单(带保护) (TRADE)](#撤销订单带保护-trade)
 	- [撤销全部订单 (TRADE)](#撤销全部订单-trade)
 	- [批量撤销订单 (TRADE)](#批量撤销订单-trade)
+	- [批量撤销订单(带保护) (TRADE)](#批量撤销订单带保护-trade)
 	- [倒计时撤销所有订单 (TRADE)](#倒计时撤销所有订单-trade)
 	- [查询当前挂单 (USER_DATA)](#查询当前挂单-user_data)
 	- [查看当前全部挂单 (USER_DATA)](#查看当前全部挂单-user_data)
@@ -2835,6 +2837,59 @@ origClientOrderId | STRING | NO       | 用户自定义的订单号
 `orderId` 与 `origClientOrderId` 必须至少发送一个
 
 
+## 撤销订单(带保护) (TRADE)
+
+> **响应:**
+
+```javascript
+{
+ 	"clientOrderId": "myOrder1", // 用户自定义的订单号
+ 	"cumQty": "0",
+ 	"cumQuote": "0", // 成交金额
+ 	"executedQty": "0", // 成交量
+ 	"orderId": 283194212, // 系统订单号
+ 	"origQty": "11", // 原始委托数量
+ 	"price": "0", // 委托价格
+	"reduceOnly": false, // 仅减仓
+	"side": "BUY", // 买卖方向
+	"positionSide": "SHORT", // 持仓方向
+ 	"status": "CANCELED", // 订单状态
+ 	"stopPrice": "9300", // 触发价，对`TRAILING_STOP_MARKET`无效
+ 	"closePosition": false,   // 是否条件全平仓
+ 	"symbol": "BTCUSDT", // 交易对
+ 	"timeInForce": "GTC", // 有效方法
+ 	"origType": "TRAILING_STOP_MARKET",	// 触发前订单类型
+ 	"type": "TRAILING_STOP_MARKET", // 订单类型
+ 	"activatePrice": "9020", // 跟踪止损激活价格, 仅`TRAILING_STOP_MARKET` 订单返回此字段
+  	"priceRate": "0.3",	// 跟踪止损回调比例, 仅`TRAILING_STOP_MARKET` 订单返回此字段
+ 	"updateTime": 1571110484038, // 更新时间
+ 	"workingType": "CONTRACT_PRICE", // 条件价格触发类型
+ 	"priceProtect": false            // 是否开启条件单触发保护
+}
+```
+
+``
+DELETE /fapi/v3/guardedCancelOrder ``
+
+撤销一个有效订单。是 `DELETE /fapi/v3/order` 的带保护版本，适用于链上下单/授权的订单：使用订单关联的链上 nonce 防止重复或乱序撤单。`signer`、`nonce`、`signature` 为必填参数，其余请求参数与响应内容与 `DELETE /fapi/v3/order` 完全一致。
+
+**权重:**
+1
+
+**Parameters:**
+
+名称               |  类型   | 是否必需  |        描述
+----------------- | ------ | -------- | ------------------
+symbol            | STRING | YES      | 交易对
+orderId           | LONG   | NO       | 系统订单号
+origClientOrderId | STRING | NO       | 用户自定义的订单号
+signer            | STRING | YES      | API钱包地址
+nonce             | LONG   | YES      | 下单该订单时使用的 `nonce`（即 `POST /fapi/v3/order` 请求中提交的 `nonce`），而非新的/当前时间戳
+signature         | STRING | YES      | 使用 `signer` 钱包私钥签名的 EIP-712 签名
+
+`orderId` 与 `origClientOrderId` 必须至少发送一个
+
+
 ## 撤销全部订单 (TRADE)
 
 > **响应:**
@@ -2909,6 +2964,65 @@ DELETE /fapi/v3/batchOrders ``
 symbol                | STRING         | YES      | 交易对
 orderIdList           | LIST\<LONG\>   | NO       | 系统订单号, 最多支持10个订单 <br/> 比如`[1234567,2345678]`
 origClientOrderIdList | LIST\<STRING\> | NO       | 用户自定义的订单号, 最多支持10个订单 <br/> 比如`["my_id_1","my_id_2"]` 需要encode双引号。逗号后面没有空格。
+
+`orderIdList` 与 `origClientOrderIdList` 必须至少发送一个，不可同时发送
+
+
+## 批量撤销订单(带保护) (TRADE)
+
+> **响应:**
+
+```javascript
+[
+	{
+	 	"clientOrderId": "myOrder1", // 用户自定义的订单号
+	 	"cumQty": "0",
+	 	"cumQuote": "0", // 成交金额
+	 	"executedQty": "0", // 成交量
+	 	"orderId": 283194212, // 系统订单号
+	 	"origQty": "11", // 原始委托数量
+	 	"price": "0", // 委托价格
+		"reduceOnly": false, // 仅减仓
+		"side": "BUY", // 买卖方向
+		"positionSide": "SHORT", // 持仓方向
+	 	"status": "CANCELED", // 订单状态
+	 	"stopPrice": "9300", // 触发价，对`TRAILING_STOP_MARKET`无效
+	 	"closePosition": false,   // 是否条件全平仓
+	 	"symbol": "BTCUSDT", // 交易对
+	 	"timeInForce": "GTC", // 有效方法
+	 	"origType": "TRAILING_STOP_MARKET", // 触发前订单类型
+ 		"type": "TRAILING_STOP_MARKET", // 订单类型
+	 	"activatePrice": "9020", // 跟踪止损激活价格, 仅`TRAILING_STOP_MARKET` 订单返回此字段
+  		"priceRate": "0.3",	// 跟踪止损回调比例, 仅`TRAILING_STOP_MARKET` 订单返回此字段
+	 	"updateTime": 1571110484038, // 更新时间
+	 	"workingType": "CONTRACT_PRICE", // 条件价格触发类型
+	 	"priceProtect": false            // 是否开启条件单触发保护
+	},
+	{
+		"code": -2011,
+		"msg": "Unknown order sent."
+	}
+]
+```
+
+``
+DELETE /fapi/v3/guardedBatchOrders ``
+
+批量撤销有效订单。是 `DELETE /fapi/v3/batchOrders` 的带保护版本，适用于链上下单/授权的订单：使用每个订单关联的链上 nonce 防止重复或乱序撤单。`signer`、`nonce`、`signature` 为必填参数，其余请求参数与响应内容与 `DELETE /fapi/v3/batchOrders` 完全一致。
+
+**权重:**
+1
+
+**Parameters:**
+
+  名称          |      类型      | 是否必需 |       描述
+--------------------- | -------------- | -------- | ----------------
+symbol                | STRING         | YES      | 交易对
+orderIdList           | LIST\<LONG\>   | NO       | 系统订单号, 最多支持10个订单 <br/> 比如`[1234567,2345678]`
+origClientOrderIdList | LIST\<STRING\> | NO       | 用户自定义的订单号, 最多支持10个订单 <br/> 比如`["my_id_1","my_id_2"]` 需要encode双引号。逗号后面没有空格。
+signer                | STRING         | YES      | API钱包地址
+nonce                 | LONG           | YES      | 下单这些订单时使用的 `nonce`（即 `POST /fapi/v3/batchOrders` 请求中提交的 `nonce`），而非新的/当前时间戳
+signature             | STRING         | YES      | 使用 `signer` 钱包私钥签名的 EIP-712 签名
 
 `orderIdList` 与 `origClientOrderIdList` 必须至少发送一个，不可同时发送
 
