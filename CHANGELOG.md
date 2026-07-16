@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-07-16
+
+### Changed
+
+#### `GET /fapi/v3/builder/approvedUserList` — Get Builder Approved User List: added pagination
+
+Added `endTime`, `page`, and `limit` parameters (limit defaults to `100`, max `1000`). The response is now a paginated object (`rows`, `total`, `currentPage`, `totalPages`, `pageSize`, `hasMore`) instead of a bare array; the per-record fields (`userAddress`, `builderAddress`, `maxFeeRate`, `builderName`, `approveTime`) are unchanged, now nested under `rows[]`.
+
+Documented in EN and CN futures API references.
+
+---
+
 ## 2026-07-07
 
 ### Added
