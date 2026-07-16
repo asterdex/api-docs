@@ -192,9 +192,9 @@
   1. If the nonce **has already been used** → rejected as a **duplicate request**
   2. Otherwise, the system checks whether it is **too old**
 
-* Nonce state (the recent-nonce list and the checks above) is maintained at the **signer level**, not the account/user level — each signer under an account is tracked independently.
+* Nonce state (the recent-nonce list and the checks above) is maintained at the **agent address level**, not the account/user level — each agent address under an account is tracked independently.
 
-* To improve performance, each signer maintains only the **most recent 100 nonces**:
+* To improve performance, each agent address maintains only the **most recent 100 nonces**:
 
   * If the list is full and the new nonce is **smaller than the current minimum** → rejected as **expired**
   * Otherwise, the **oldest nonce is removed** and the new one is added
