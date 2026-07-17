@@ -185,14 +185,16 @@
 
 ### V3 Nonce Mechanism
 
-* **Nonce** is used to validate the **validity, uniqueness, and replay-protection** of requests. Clients should use the **current timestamp (microsecond precision)** as the nonce, and the difference from server time must not exceed **10 seconds**.
+* **Nonce** is used to validate the **validity, uniqueness, and replay-protection** of requests. Clients should use the **current timestamp (microsecond precision)** as the nonce, and it is valid only within a window of **60 seconds before and after** server time.
 
 * Request processing flow:
 
   1. If the nonce **has already been used** → rejected as a **duplicate request**
   2. Otherwise, the system checks whether it is **too old**
 
-* To improve performance, each user maintains only the **most recent 100 nonces**:
+* Nonce state (the recent-nonce list and the checks above) is maintained at the **agent address level**, not the account/user level — each agent address under an account is tracked independently.
+
+* To improve performance, each agent address maintains only the **most recent 100 nonces**:
 
   * If the list is full and the new nonce is **smaller than the current minimum** → rejected as **expired**
   * Otherwise, the **oldest nonce is removed** and the new one is added
@@ -4938,15 +4940,22 @@ Query the paginated trade history of users trading under the caller's builder co
 > **Response:**
 
 ```javascript
-[
-  {
-    "userAddress": "0x1234...abcd",
-    "builderAddress": "0x5678...efgh",
-    "maxFeeRate": 0.0001,
-    "builderName": "MyBuilder",
-    "approveTime": 1768903037082
-  }
-]
+{
+  "rows": [
+    {
+      "userAddress": "0x1234...abcd",
+      "builderAddress": "0x5678...efgh",
+      "maxFeeRate": 0.0001,
+      "builderName": "MyBuilder",
+      "approveTime": 1768903037082
+    }
+  ],
+  "total": 1,
+  "currentPage": 1,
+  "totalPages": 1,
+  "pageSize": 100,
+  "hasMore": false
+}
 ```
 
 `GET /fapi/v3/builder/approvedUserList`
@@ -4960,22 +4969,31 @@ Query the list of users who have approved the caller's address as their builder.
 | Name | Type | Required | Description |
 |------|------|----------|-------------|
 | startTime | LONG | NO | Only return users approved after this timestamp (ms). If omitted, defaults to `0`, meaning no time filter is applied and all approved users are returned. |
+| endTime | LONG | NO | Only return users approved on or before this timestamp (ms). If omitted, defaults to the current server time. |
+| page | INT | NO | Page number, starting from `1`. Defaults to `1`. |
+| limit | INT | NO | Page size. Defaults to `100`, maximum `1000`. |
 | nonce | LONG | YES | Microsecond-level timestamp, used for replay attack prevention |
 | signer | STRING | YES | Signer address associated with the authenticated account |
 | signature | STRING | YES | Signature over the request body |
 
 * The authenticated account is used as the builder identity — there is no separate `builder` address parameter.
-* Returns at most 1000 records.
+* Results are paginated; use `page` and `limit` to page through the full result set.
 
 **Response Fields:**
 
 | Field | Type | Description |
 |-------|------|-------------|
-| userAddress | STRING | Wallet address of the approved user |
-| builderAddress | STRING | Builder's wallet address |
-| maxFeeRate | DECIMAL | Maximum fee rate the user granted this builder |
-| builderName | STRING | Builder name set by the user when approving |
-| approveTime | LONG | Timestamp (ms) when the user approved the builder |
+| rows | ARRAY | List of approved-user records for the current page |
+| rows[].userAddress | STRING | Wallet address of the approved user |
+| rows[].builderAddress | STRING | Builder's wallet address |
+| rows[].maxFeeRate | DECIMAL | Maximum fee rate the user granted this builder |
+| rows[].builderName | STRING | Builder name set by the user when approving |
+| rows[].approveTime | LONG | Timestamp (ms) when the user approved the builder |
+| total | LONG | Total number of matching records across all pages |
+| currentPage | INT | Current page number |
+| totalPages | INT | Total number of pages |
+| pageSize | INT | Effective page size used |
+| hasMore | BOOLEAN | Whether more pages exist after this one |
 
 ---
 

@@ -8,14 +8,16 @@
 
 ### V3 Nonce Mechanism
 
-* **Nonce** is used to validate the **validity, uniqueness, and replay-protection** of requests. Clients should use the **current timestamp (microsecond precision)** as the nonce, and the difference from server time must not exceed **10 seconds**.
+* **Nonce** is used to validate the **validity, uniqueness, and replay-protection** of requests. Clients should use the **current timestamp (microsecond precision)** as the nonce, and it is valid only within a window of **60 seconds before and after** server time.
 
 * Request processing flow:
 
   1. If the nonce **has already been used** → rejected as a **duplicate request**
   2. Otherwise, the system checks whether it is **too old**
 
-* To improve performance, each user maintains only the **most recent 100 nonces**:
+* Nonce state (the recent-nonce list and the checks above) is maintained at the **agent address level**, not the account/user level — each agent address under an account is tracked independently.
+
+* To improve performance, each agent address maintains only the **most recent 100 nonces**:
 
   * If the list is full and the new nonce is **smaller than the current minimum** → rejected as **expired**
   * Otherwise, the **oldest nonce is removed** and the new one is added
