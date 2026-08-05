@@ -18,6 +18,11 @@
   - [Update Lock Period (TRADE)](#update-lock-period-trade)
   - [Claim Rewards (TRADE)](#claim-rewards-trade)
   - [Get Locked Aster (NONE)](#get-locked-aster-none)
+- [Aster-Chain Deposit](#aster-chain-deposit)
+  - [EVM](#evm)
+  - [Solana](#solana)
+  - [SUI](#sui)
+  - [Get User Deposit Address (USER_DATA)](#get-user-deposit-address-user_data)
 - [Aster-Chain Perp Withdraw & Transfer Endpoints](#aster-chain-perp-withdraw--transfer-endpoints)
   - [User Withdraw (WITHDRAW)](#user-withdraw-withdraw)
   - [User Solana Withdraw (WITHDRAW)](#user-solana-withdraw-withdraw)
@@ -338,6 +343,110 @@ None
 
 ---
 
+# Aster-Chain Deposit
+
+Deposits are made on the source chain. The deposit method differs by network:
+
+## EVM
+
+Deposits on EVM chains are made by interacting directly with the vault contract on the source chain. There are two ways to deposit:
+
+1. Call the `depositFor` method of the vault contract. Once the transaction is confirmed on-chain, the deposited asset is credited to the `forAddress` account.
+2. Transfer the token directly to the vault contract address. The deposited asset is credited to the sending address.
+
+**Mainnet contract addresses:**
+
+| Chain | Chain ID | Contract Address |
+|-------|----------|------------------|
+| ETH | 1 | `0x604DD02d620633Ae427888d41bfd15e38483736E` |
+| BSC | 56 | `0x128463A60784c4D3f46c23Af3f65Ed859Ba87974` |
+| Arbitrum | 42161 | `0x9E36CB86a159d479cEd94Fa05036f235Ac40E1d5` |
+
+**depositFor:**
+
+```solidity
+function depositFor(address currency, address forAddress, uint256 amount, uint256 broker) external payable
+```
+
+| Name | Type | Description |
+|------|------|-------------|
+| currency | ADDRESS | Token contract address. For the native token, pass the fixed placeholder address `0xfdAE1bA7C826aBDc4c99903c8056f82a1A04a615` |
+| forAddress | ADDRESS | The user's address that receives the deposited asset |
+| amount | UINT256 | Deposit amount in the token's smallest unit (wei). For the native token, it must equal `msg.value` |
+| broker | UINT256 | Target account flag: pass `1000` to deposit to the **spot** account; any other value deposits to the **futures** account |
+
+* For ERC20 deposits, `approve` the vault contract to spend the token before calling `depositFor`, and `msg.value` must be `0`.
+* For native token deposits, send the amount via `msg.value`; it must equal the `amount` parameter.
+
+## Solana
+
+On Solana, deposits can **only** be made by calling the program methods below. Transferring SOL or tokens directly to the vault address will **not** be credited.
+
+**Mainnet program address:** `EhUtRgu9iEbZXXRpEvDj6n1wnQRjMi2SERDo3c6bmN2c`
+
+There are two deposit methods; both take a single argument `amount` (u64, in the token's smallest unit):
+
+1. `depositSol`: deposit the native token (SOL).
+2. `depositToken`: deposit an SPL token (e.g. USDT).
+
+**depositSol accounts:**
+
+| Account | isSigner | isMut | Description |
+|---------|----------|-------|-------------|
+| signer | true | true | The depositor's wallet address; the deposited asset is credited to this address |
+| admin | false | false | Admin account |
+| solVault | false | true | SOL vault account |
+| systemProgram | false | false | Fixed: `11111111111111111111111111111111` |
+
+**depositToken accounts:**
+
+| Account | isSigner | isMut | Description |
+|---------|----------|-------|-------------|
+| signer | true | false | The depositor's wallet address; the deposited asset is credited to this address |
+| admin | false | false | Admin account |
+| bank | false | false | Bank account of the token |
+| tokenVaultAuthority | false | false | Token vault authority |
+| tokenVault | false | true | Token vault account |
+| depositor | false | true | The depositor's associated token account of `tokenMint` |
+| tokenMint | false | false | Token mint address |
+| tokenProgram | false | false | Fixed: `TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA` |
+| associatedTokenProgram | false | false | Fixed: `ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL` |
+| systemProgram | false | false | Fixed: `11111111111111111111111111111111` |
+
+* Target account: for both methods, append the `programId` account (the program address) as the **last** account of the instruction to deposit to the **spot** account; omit it to deposit to the **futures** account.
+
+## SUI
+
+On SUI, only the **spot** account is supported. Deposits are made by transferring the asset directly to your dedicated deposit address — no contract call is required:
+
+1. Call [Get User Deposit Address (USER_DATA)](#get-user-deposit-address-user_data) to get your deposit address on SUI.
+2. Transfer the asset directly to that address; once the transaction is confirmed on-chain, it is credited to your spot account.
+
+## Get User Deposit Address (USER_DATA)
+
+> **Response:**
+
+```javascript
+{
+    "network": "SUI",
+    "address": "0x9a40f0119b670fb6b155744b51981f91c4c4c8a20c333441a63853fe7d055c90"
+}
+```
+
+`GET /aster-chain/v3/spot/user-deposit-address`
+
+Query the current user's dedicated deposit address on the specified network. Only the spot account is supported.
+
+**Weight:** 1
+
+**Parameters:**
+
+| Name | Type | Mandatory | Description |
+|------|------|-----------|-------------|
+| network | STRING | NO | Network type. Default: `"SUI"` |
+
+---
+
 # Aster-Chain Perp Withdraw & Transfer Endpoints
 
 ## User Withdraw (WITHDRAW)
@@ -367,7 +476,8 @@ Submit a withdrawal request from the perp account to an on-chain address.
 | fee | STRING | YES | Withdrawal fee |
 | receiver | STRING | YES | Recipient on-chain address |
 | userNonce | STRING | YES | User-side nonce included in the signature |
-| userSignature | STRING | YES | User signature over the withdrawal parameters |
+| signatureType | STRING | NO | Signature type: `"EOA"` or `"SafeWallet"`. Default: `"EOA"`. Pass `"SafeWallet"` if the account is a Safe wallet |
+| userSignature | STRING | YES | User signature over the withdrawal parameters. When `signatureType=SafeWallet`, multiple signatures are supported, separated by commas |
 
 ---
 
@@ -533,12 +643,14 @@ Submit a withdrawal request from the spot account to an on-chain address.
 | Name | Type | Mandatory | Description |
 |------|------|-----------|-------------|
 | asset | STRING | YES | Asset name (e.g. `"USDT"`) |
-| chainId | INTEGER | YES | Target chain ID |
+| chainId | INTEGER | YES | Chain ID of the chain the asset belongs to |
+| signatureChainId | INTEGER | NO | Chain ID of the chain used for signing (the `chainId` field of the EIP-712 domain). Defaults to `chainId` |
 | amount | STRING | YES | Withdrawal amount |
 | fee | STRING | YES | Withdrawal fee |
 | receiver | STRING | YES | Recipient on-chain address |
 | userNonce | STRING | YES | User-side nonce included in the signature |
-| userSignature | STRING | YES | User signature over the withdrawal parameters |
+| signatureType | STRING | NO | Signature type: `"EOA"` or `"SafeWallet"`. Default: `"EOA"`. Pass `"SafeWallet"` if the account is a Safe wallet |
+| userSignature | STRING | YES | User signature over the withdrawal parameters. When `signatureType=SafeWallet`, multiple signatures are supported, separated by commas |
 
 ---
 
