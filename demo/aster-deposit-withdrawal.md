@@ -14,6 +14,16 @@
   - [Pro API-KEY Signature (V3)](#pro-api-key-signature-v3)
   - [EVM Withdraw Signature](#evm-withdraw-signature)
   - [Solana Withdraw Signature (optional)](#solana-withdraw-signature-optional)
+- [Deposit](#deposit)
+  - [EVM](#evm)
+    - [Mainnet contract addresses](#mainnet-contract-addresses)
+    - [depositFor](#depositfor)
+  - [Solana](#solana)
+    - [Mainnet program address](#mainnet-program-address)
+    - [depositSol](#depositsol)
+    - [depositToken](#deposittoken)
+  - [SUI](#sui)
+    - [get user deposit address \[v3\]](#get-user-deposit-address-v3)
 - [Withdrawal APIs](#withdrawal-apis)
   - [withdraw by fapi \[evm\] \[futures\]](#withdraw-by-fapi-evm-futures)
   - [withdraw by fapi \[solana\] \[futures\]](#withdraw-by-fapi-solana-futures)
@@ -568,6 +578,7 @@ const finalUrl = `${baseUrl}?${queryString}&signature=${signature}`;
 | 1       | ETH       |
 | 56      | BSC       |
 | 42161   | Arbitrum  |
+| 131     | SUI       |
 
 ## Solana Withdraw Signature (optional)
 
@@ -623,6 +634,209 @@ const userSignature = bs58.encode(signatureBytes);
 ```
 
 > Trailing zeros in `Amount` and `Fee` must be stripped (e.g., `1.20` → `1.2`). A mismatch will cause signature verification to fail.
+
+# Deposit
+
+## EVM
+
+Deposits are made by interacting directly with the vault contract on the source chain. There are two ways to deposit:
+
+1. Call the `depositFor` method of the vault contract. Once the transaction is confirmed on-chain, the deposited asset is credited to the `forAddress` account.
+2. Transfer the token directly to the vault contract address. The deposited asset is credited to the sending address.
+
+* Use the [get all deposit assets](#get-all-deposit-assets) API to query the supported tokens and their contract addresses on each chain.
+
+### Mainnet contract addresses
+
+| chain    | chainId | contract address                             |
+|----------|---------|----------------------------------------------|
+| ETH      | 1       | `0x604DD02d620633Ae427888d41bfd15e38483736E` |
+| BSC      | 56      | `0x128463A60784c4D3f46c23Af3f65Ed859Ba87974` |
+| Arbitrum | 42161   | `0x9E36CB86a159d479cEd94Fa05036f235Ac40E1d5` |
+
+### depositFor
+
+```solidity
+function depositFor(address currency, address forAddress, uint256 amount, uint256 broker) external payable
+```
+
+| param      | type    | description                                                                                                                                              |
+|------------|---------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| currency   | address | Token contract address. For the native token (e.g., BNB, ETH), pass the fixed placeholder address `0xfdAE1bA7C826aBDc4c99903c8056f82a1A04a615`             |
+| forAddress | address | The user's address that receives the deposited asset                                                                                                       |
+| amount     | uint256 | Deposit amount in the token's smallest unit (wei). For the native token, it must equal `msg.value`                                                         |
+| broker     | uint256 | Target account flag: pass `1000` to deposit to the **spot** account; any other value deposits to the **futures** account                                   |
+
+> Notes:
+> * For ERC20 deposits, `approve` the vault contract to spend the token before calling `depositFor`, and `msg.value` must be `0`.
+> * For native token deposits, send the amount via `msg.value`; it must equal the `amount` parameter.
+> * The token must be in the supported deposit asset list, otherwise the transaction reverts with `CurrencyNotSupport`.
+
+**Example (ethers.js)**
+
+```javascript
+const vaultAbi = [
+    'function depositFor(address currency, address forAddress, uint256 amount, uint256 broker) external payable',
+];
+const erc20Abi = [
+    'function approve(address spender, uint256 amount) external returns (bool)',
+    'function decimals() external view returns (uint8)',
+];
+
+const vaultAddress = '0x128463A60784c4D3f46c23Af3f65Ed859Ba87974'; // BSC mainnet
+const usdtAddress = '0x55d398326f99059fF775485246999027B3197955'; // USDT on BSC
+
+const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
+const vault = new ethers.Contract(vaultAddress, vaultAbi, wallet);
+const usdt = new ethers.Contract(usdtAddress, erc20Abi, wallet);
+
+// deposit 100 USDT to the user's futures account (pass broker = 1000 for the spot account)
+const amount = ethers.parseUnits('100', await usdt.decimals());
+await (await usdt.approve(vaultAddress, amount)).wait();
+await (await vault.depositFor(usdtAddress, wallet.address, amount, 0)).wait();
+```
+
+## Solana
+
+On Solana, deposits can **only** be made by calling the program methods below. Transferring SOL or tokens directly to the vault address will **not** be credited.
+
+There are two deposit methods:
+
+1. `depositSol`: deposit the native token (SOL).
+2. `depositToken`: deposit an SPL token, e.g., USDT.
+
+* Use the [get all deposit assets](#get-all-deposit-assets) API with `networks=SOLANA` to query the supported tokens and the account addresses (`admin`, `solVault`, `bank`, `tokenVaultAuthority`, `tokenVault`, `tokenMint`, etc.) required by the methods.
+* Target account: for both methods, append the `programId` account (the program address) as the **last** account of the instruction to deposit to the **spot** account; omit it to deposit to the **futures** account.
+
+### Mainnet program address
+
+| network | program address                                |
+|---------|------------------------------------------------|
+| Solana  | `EhUtRgu9iEbZXXRpEvDj6n1wnQRjMi2SERDo3c6bmN2c` |
+
+### depositSol
+
+Deposit native SOL. The deposited asset is credited to the `signer` address.
+
+**args:**
+
+| arg    | type | description                |
+|--------|------|-----------------------------|
+| amount | u64  | Deposit amount in lamports |
+
+**accounts:**
+
+| account       | isSigner | isMut | description                                                        |
+|---------------|----------|-------|---------------------------------------------------------------------|
+| signer        | true     | true  | The depositor's wallet address                                     |
+| admin         | false    | false | Admin account; from the get all deposit assets API (`admin`)       |
+| solVault      | false    | true  | SOL vault account; from the get all deposit assets API (`solVault`) |
+| systemProgram | false    | false | Fixed: `11111111111111111111111111111111`                          |
+| programId     | false    | false | Optional; must be the **last** account. The program address `EhUtRgu9iEbZXXRpEvDj6n1wnQRjMi2SERDo3c6bmN2c`. Provide it to deposit to the **spot** account; omit it to deposit to the **futures** account |
+
+**Example (Node.js / Anchor)**
+
+```javascript
+const tx = await program.methods.depositSol(amount)
+    .accounts({
+        signer: walletKeypair.publicKey,
+        admin: admin,
+        solVault: solVault,
+        systemProgram: anchor.web3.SystemProgram.programId,
+    })
+    // deposit to the spot account; remove the following line to deposit to the futures account
+    .remainingAccounts([{ pubkey: program.programId, isSigner: false, isWritable: false }])
+    .signers([walletKeypair])
+    .rpc();
+```
+
+### depositToken
+
+Deposit an SPL token. The deposited asset is credited to the `signer` address.
+
+**args:**
+
+| arg    | type | description                                  |
+|--------|------|-----------------------------------------------|
+| amount | u64  | Deposit amount in the token's smallest unit |
+
+**accounts:**
+
+| account                | isSigner | isMut | description                                                                          |
+|------------------------|----------|-------|---------------------------------------------------------------------------------------|
+| signer                 | true     | false | The depositor's wallet address                                                       |
+| admin                  | false    | false | Admin account; from the get all deposit assets API (`admin`)                         |
+| bank                   | false    | false | Bank account of the token; from the get all deposit assets API (`bank`)              |
+| tokenVaultAuthority    | false    | false | Token vault authority; from the get all deposit assets API (`tokenVaultAuthority`)   |
+| tokenVault             | false    | true  | Token vault account; from the get all deposit assets API (`tokenVault`)              |
+| depositor              | false    | true  | The depositor's associated token account of `tokenMint`                              |
+| tokenMint              | false    | false | Token mint address; from the get all deposit assets API (`tokenMint`)                |
+| tokenProgram           | false    | false | Fixed: `TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA`                                 |
+| associatedTokenProgram | false    | false | Fixed: `ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL`                                |
+| systemProgram          | false    | false | Fixed: `11111111111111111111111111111111`                                            |
+| programId              | false    | false | Optional; must be the **last** account. The program address `EhUtRgu9iEbZXXRpEvDj6n1wnQRjMi2SERDo3c6bmN2c`. Provide it to deposit to the **spot** account; omit it to deposit to the **futures** account |
+
+**Example (Node.js / Anchor)**
+
+```javascript
+const tx = await program.methods.depositToken(amount)
+    .accounts({
+        signer: walletKeypair.publicKey,
+        admin: admin,
+        bank: bank,
+        tokenVaultAuthority: tokenVaultAuthority,
+        tokenVault: tokenVault,
+        depositor: userTokenAccount,
+        tokenMint: tokenMint,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+        systemProgram: anchor.web3.SystemProgram.programId,
+    })
+    // deposit to the spot account; remove the following line to deposit to the futures account
+    .remainingAccounts([{ pubkey: program.programId, isSigner: false, isWritable: false }])
+    .signers([walletKeypair])
+    .rpc();
+```
+
+## SUI
+
+> **Note:** On SUI, only the **spot** account is supported.
+
+Deposits on SUI are made by transferring the asset directly to your dedicated deposit address — no contract call is required:
+
+1. Call the [get user deposit address \[v3\]](#get-user-deposit-address-v3) API to get your deposit address on SUI.
+2. Transfer the asset directly to that address; once the transaction is confirmed on-chain, it is credited to your spot account.
+
+### get user deposit address \[v3\]
+
+* Note: Follow the [Pro API-KEY Signature (V3)](#pro-api-key-signature-v3) instructions to generate the required request signature. The example below includes only the parameters specific to this endpoint.
+
+#### request:
+
+```shell
+curl --location --request GET 'https://sapi.asterdex.com/api/v3/aster/user-deposit-address?network=SUI' \
+  --header 'Content-Type: application/json'
+```
+
+#### params:
+
+| param   | type   | required | description                   |
+|---------|--------|----------|--------------------------------|
+| network | string | false    | Network type. Default: `SUI` |
+
+#### response:
+
+```json
+{
+    "network": "SUI",
+    "address": "0x9a40f0119b670fb6b155744b51981f91c4c4c8a20c333441a63853fe7d055c90"
+}
+```
+
+| field   | desc                                              |
+|---------|----------------------------------------------------|
+| network | Network type                                      |
+| address | The user's dedicated deposit address on the chain |
 
 # Withdrawal APIs
 
@@ -795,7 +1009,8 @@ curl --location --request POST 'https://fapi.asterdex.com/fapi/v3/aster/user-wit
 | fee           | string | true     | Withdraw fee in token units                                                                                        |
 | userNonce     | string | true     | Nanosecond timestamp for the EVM withdraw signature; separate from V3 API `nonce`, may differ by up to 1 hour     |
 | receiver      | string | true     | Withdraw receipt address; should be the same as in signature                                                       |
-| userSignature | string | true     | EIP712 withdraw signature                                                                                          |
+| signatureType | string | false    | Signature type: `EOA` or `SafeWallet`. Default: `EOA`. Pass `SafeWallet` if the account is a Safe wallet           |
+| userSignature | string | true     | EIP712 withdraw signature. When `signatureType=SafeWallet`, multiple signatures are supported, separated by commas |
 
 ### response:
 
@@ -858,15 +1073,17 @@ curl --location --request POST 'https://sapi.asterdex.com/api/v3/aster/user-with
 
 ### params:
 
-| param         | type   | required | description                                                                                                        |
-|---------------|--------|----------|--------------------------------------------------------------------------------------------------------------------|
-| amount        | string | true     | Withdraw amount in token units                                                                                     |
-| chainId       | int    | true     | Chain ID                                                                                                           |
-| asset         | string | true     | Currency name, e.g., ASTER                                                                                         |
-| fee           | string | true     | Withdraw fee in token units                                                                                        |
-| userNonce     | string | true     | Nanosecond timestamp for the EVM withdraw signature; separate from V3 API `nonce`, may differ by up to 1 hour     |
-| receiver      | string | true     | Withdraw receipt address; should be the same as in signature                                                       |
-| userSignature | string | true     | EIP712 withdraw signature                                                                                          |
+| param            | type   | required | description                                                                                                        |
+|------------------|--------|----------|--------------------------------------------------------------------------------------------------------------------|
+| amount           | string | true     | Withdraw amount in token units                                                                                     |
+| chainId          | int    | true     | Chain ID of the chain the asset belongs to                                                                        |
+| signatureChainId | int    | false    | Chain ID of the chain used for signing (the `chainId` field of the EIP712 domain). Defaults to `chainId`           |
+| asset            | string | true     | Currency name, e.g., ASTER                                                                                         |
+| fee              | string | true     | Withdraw fee in token units                                                                                        |
+| userNonce        | string | true     | Nanosecond timestamp for the EVM withdraw signature; separate from V3 API `nonce`, may differ by up to 1 hour      |
+| receiver         | string | true     | Withdraw receipt address; should be the same as in signature                                                       |
+| signatureType    | string | false    | Signature type: `EOA` or `SafeWallet`. Default: `EOA`. Pass `SafeWallet` if the account is a Safe wallet           |
+| userSignature    | string | true     | EIP712 withdraw signature. When `signatureType=SafeWallet`, multiple signatures are supported, separated by commas |
 
 ### response:
 
