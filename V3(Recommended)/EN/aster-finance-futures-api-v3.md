@@ -4472,13 +4472,15 @@ subSourceAddr={subSourceAddr}&nonce={nonce}&user={user}&signer={signer}[&subAcco
 
 **`Parameter Values`:**
 
-| Transfer | user | fromAccountAddress | toAccountAddress | signature |
-|------|------|------|------|------
-| Master → Sub | Master account address | Master account address | Sub-account address | Signed with master account private key
-| Sub → Master | Master account address | Sub-account address | Master account address | Signed with master account private key
-| Sub → Sub | Master account address | Sub A address | Sub B address | Signed with master account private key
-| Sub → Master | Sub-account address | Sub-account address | Master account address | Signed with sub-account private key
-| Sub → Sub | Sub A address | Sub A address | Sub B address | Signed with sub-account private key
+| Transfer | user | signer | fromAccountAddress | toAccountAddress | signature |
+|------|------|------|------|------|------
+| Master → Sub | Master account address | *(optional)* | Master account address | Sub-account address | Signed with master account private key
+| Sub → Master | Master account address | *(optional)* | Sub-account address | Master account address | Signed with master account private key
+| Sub → Sub | Master account address | *(optional)* | Sub A address | Sub B address | Signed with master account private key
+| Sub → Master | Sub-account address | *(optional)* | Sub-account address | Master account address | Signed with sub-account private key
+| Sub → Sub | Sub A address | *(optional)* | Sub A address | Sub B address | Signed with sub-account private key
+
+> Only one of `user` or `signer` needs to be passed — either is sufficient to identify the signing account. If both are passed and differ, the request is treated as agent-signed: `signer` must be an approved agent wallet, and the signature must be signed with the agent's private key.
 
 **`kindType` values:**
 
