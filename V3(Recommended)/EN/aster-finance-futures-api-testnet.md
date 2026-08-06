@@ -3945,9 +3945,9 @@ subSourceAddr={subSourceAddr}&nonce={nonce}&user={user}&signer={signer}[&subAcco
 | kindType | ENUM | YES | Transfer direction (see table below) |
 | nonce | LONG | YES | Microsecond-level timestamp, used for replay attack prevention |
 | user | STRING | YES | Signing account wallet address (master account address in most cases; sub-account address when the sub-account initiates a transfer to the master account) |
-| signer | STRING | YES | Signer address associated with `user` |
+| signer | STRING | NO | Approved agent wallet address (registered via `registerAndApproveAgent`/`approveAgent`). If provided and different from `user`, the transfer must be signed with the agent's private key instead of `user`'s; if omitted or equal to `user`, it is signed directly with `user`'s private key |
 | fromAccountAddress | STRING | NO | Source wallet address. Required when the source account differs from `user` (e.g., sub→sub transfers or master→sub transfers initiated by a third party) |
-| signature | STRING | YES | Signature over the message body, **must be signed using the `user` account's wallet private key** (see Signature Instructions below) |
+| signature | STRING | YES | Signature over the message body, signed with `user`'s wallet private key, or with the agent's private key when signing via an approved `signer` (see Signature Instructions below) |
 
 **`kindType` values:**
 
@@ -3962,7 +3962,7 @@ subSourceAddr={subSourceAddr}&nonce={nonce}&user={user}&signer={signer}[&subAcco
 
 ### Signature Instructions
 
-Sign the following message body using the **`user` account's wallet private key** (not the signer private key):
+Sign the following message body using the **`user` account's wallet private key**. If signing via an approved agent wallet (i.e. `signer` is provided and differs from `user`), use the **agent's wallet private key** instead:
 
 **Without `fromAccountAddress`:**
 ```
@@ -3996,8 +3996,9 @@ toAccountAddress={toAccountAddress}&asset={asset}&amount={amount}&kindType={kind
 
 ### Important Notes
 
-* `signature` **must be signed using the `user` account's wallet private key** — the signer private key must not be used as a substitute.
-* The `user` field must match the address corresponding to the private key used for signing.
+* `signature` **must be signed using the `user` account's wallet private key**, unless signing via an approved agent (`signer` provided and different from `user`), in which case it **must be signed using the agent's wallet private key**.
+* `subAccountTransfer` supports agent signing: pass an agent wallet address — registered and approved via `POST /fapi/v3/registerAndApproveAgent` or `approveAgent`, with `canSpotTrade` or `canPerpTrade` permission — as `signer` to sign the request with the agent's private key instead of `user`'s.
+* The `user` field must match the account on whose behalf the transfer is made; if signing via an approved agent, the address corresponding to the signing private key is `signer`, not `user`.
 * When signing with a **sub-account's private key**, transfers **to the master account** are supported. Sub→Sub transfers are also supported, with the source address being the signing **sub-account**.
 * Transfers to or from a **frozen sub-account** will fail.
 * Transfers to **external addresses** (addresses not within the sub-account relationship) are not supported.
