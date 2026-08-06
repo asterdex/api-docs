@@ -76,6 +76,7 @@
   - [Modify Order (TRADE)](#modify-order-trade)
   - [Place Chase Order (TRADE)](#place-chase-order-trade)
   - [Place Multiple Orders  (TRADE)](#place-multiple-orders--trade)
+  - [Batch Modify Orders (TRADE)](#batch-modify-orders-trade)
   - [Transfer Between Futures And Spot (USER_DATA)](#transfer-between-futures-and-spot-user_data)
   - [Query Order (USER_DATA)](#query-order-user_data)
   - [Cancel Order (TRADE)](#cancel-order-trade)

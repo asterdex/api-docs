@@ -75,6 +75,7 @@
 	- [修改订单 (TRADE)](#修改订单-trade)
 	- [追单 (TRADE)](#追单-trade)
 	- [批量下单 (TRADE)](#批量下单-trade)
+	- [批量修改订单 (TRADE)](#批量修改订单-trade)
 	- [查询订单 (USER_DATA)](#查询订单-user_data)
 	- [撤销订单 (TRADE)](#撤销订单-trade)
 	- [撤销订单(带保护) (TRADE)](#撤销订单带保护-trade)
