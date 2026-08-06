@@ -4624,23 +4624,23 @@ subSourceAddr={subSourceAddr}&nonce={nonce}&user={user}&signer={signer}[&subAcco
 | amount | STRING | YES | 划转金额 |
 | kindType | ENUM | YES | 划转方向（见下表） |
 | nonce | LONG | YES | 微秒级时间戳，用于防重放攻击 |
-| user | STRING | YES | 签名账户的钱包地址（通常为母账户地址；子账户向母账户划转时为子账户地址） |
-| signer | STRING | NO | 已授权的代理钱包地址（通过 `registerAndApproveAgent`/`approveAgent` 注册）。若填写且与 `user` 不同，则划转必须使用该代理的私钥签名，而非 `user` 的私钥；若留空或与 `user` 相同，则直接使用 `user` 的私钥签名 |
+| user | STRING | NO | 签名账户的钱包地址（通常为母账户地址；子账户向母账户划转时为子账户地址）。可选——`user` 与 `signer` 二选一传入即可 |
+| signer | STRING | NO | `user` 对应的代理钱包地址，通过 `registerAndApproveAgent`/`approveAgent` 注册并授权。可选——`user` 与 `signer` 二选一传入即可 |
 | fromAccountAddress | STRING | NO | 转出钱包地址。当转出账户与 `user` 不一致时必传（如子→子划转，或以第三方身份发起的母→子划转） |
-| signature | STRING | YES | 对消息体的签名，使用 `user` 账户的钱包私钥签名；若通过已授权的 `signer`（代理）签名，则使用该代理的私钥签名（见下方签名说明） |
+| signature | STRING | YES | 对消息体的签名，使用实际传入账户的私钥签名：传 `user` 则使用 `user` 的私钥签名，传 `signer` 则使用该代理的私钥签名（见下方签名说明） |
 
 
 **`参数取值` :**
 
 | 转账  | user | signer | fromAccountAddress | toAccountAddress | signature |
 |------|------|------|------|------|------
-| 母账户转子账户 | 母账户地址 | *(可不传)* | 母账户地址| 子账户地址 | 使用母账户地址私钥
-| 子账户转母账户 | 母账户地址 | *(可不传)* | 子账户地址| 母账户地址 | 使用母账户地址私钥
-| 子账户转子账户 | 母账户地址 | *(可不传)* | 子账户地址A| 子账户地址B | 使用母账户地址私钥
-| 子账户转母账户 | 子账户地址 | *(可不传)* | 子账户地址| 母账户地址 | 使用子账户地址私钥
-| 子账户转子账户 | 子账户地址A | *(可不传)* | 子账户地址A| 子账户地址B | 使用子账户地址私钥
+| 母账户转子账户 | *(可不传——母账户地址)* | *(可不传——母账户的代理)* | 母账户地址| 子账户地址 | 使用母账户（或其代理）私钥
+| 子账户转母账户 | *(可不传——母账户地址)* | *(可不传——母账户的代理)* | 子账户地址| 母账户地址 | 使用母账户（或其代理）私钥
+| 子账户转子账户 | *(可不传——母账户地址)* | *(可不传——母账户的代理)* | 子账户地址A| 子账户地址B | 使用母账户（或其代理）私钥
+| 子账户转母账户 | *(可不传——子账户地址)* | *(可不传——子账户的代理)* | 子账户地址| 母账户地址 | 使用子账户（或其代理）私钥
+| 子账户转子账户 | *(可不传——子账户A地址)* | *(可不传——子账户A的代理)* | 子账户地址A| 子账户地址B | 使用子账户（或其代理）私钥
 
-> `user` 与 `signer` 二选一传入即可，任一字段都足以识别签名账户。若两者同时传入且不一致，则视为代理签名：`signer` 必须是已授权的代理钱包地址，且签名必须使用该代理的私钥签名。
+> `user` 与 `signer` 均为可选参数，二选一传入即可（`signer` 必须是该 `user` 已授权的代理钱包地址）。签名必须使用实际传入账户的私钥：传 `user` 则用 `user` 的私钥签名，传 `signer` 则用该代理的私钥签名。
 
 **`kindType` 取值:**
 
@@ -4655,7 +4655,7 @@ subSourceAddr={subSourceAddr}&nonce={nonce}&user={user}&signer={signer}[&subAcco
 
 ### 签名说明
 
-使用 **`user` 账户的钱包私钥**对以下消息体签名。若通过已授权的代理钱包签名（即填写的 `signer` 与 `user` 不同），则改用**该代理的钱包私钥**签名：
+使用实际传入账户的私钥对以下消息体签名：传 `user` 则使用 **`user` 账户的钱包私钥**签名；传 `signer` 则使用**该代理的钱包私钥**签名：
 
 **不含 `fromAccountAddress`：**
 ```
@@ -4689,9 +4689,9 @@ toAccountAddress={toAccountAddress}&asset={asset}&amount={amount}&kindType={kind
 
 ### 注意事项
 
-* `signature` **必须使用 `user` 账户的钱包私钥签名**；但通过已授权代理签名时（`signer` 已填写且与 `user` 不同），**必须使用该代理的钱包私钥签名**。
-* `子账户划转` 支持代理签名：将已通过 `POST /fapi/v3/registerAndApproveAgent` 或 `approveAgent` 注册并获得 `canSpotTrade` 或 `canPerpTrade` 权限的代理钱包地址填入 `signer`，即可使用该代理的私钥签名该请求，而非 `user` 的私钥。
-* `user` 字段必须与本次划转所代表的账户一致；若通过已授权代理签名，签名私钥对应的地址是 `signer`，而非 `user`。
+* `user` 与 `signer` 均为可选参数，二选一传入即可，只需其中一个字段即可识别签名账户。
+* `signature` **必须使用实际传入账户的私钥签名**：传 `user` 则使用 `user` 的钱包私钥签名，传 `signer` 则使用该代理的钱包私钥签名。
+* `signer` 必须是 `user` 已通过 `POST /fapi/v3/registerAndApproveAgent` 或 `approveAgent` 注册并获得 `canSpotTrade` 或 `canPerpTrade` 权限的代理钱包地址。
 * 使用**子账户私钥**签名时，支持向**母账户**划转；也支持子→子划转,此时转账的来源地址为签名的**子账户**
 * 向**已冻结的子账户**划转或从**已冻结的子账户**划出均会失败。
 * 不支持向**非子账户关系内的外部地址**划转。
