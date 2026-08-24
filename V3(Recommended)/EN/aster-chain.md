@@ -58,7 +58,11 @@ Get the current account's privacy status.
 
 **Parameters:**
 
-None
+| Name | Type | Mandatory | Description |
+|------|------|-----------|-------------|
+| nonce | LONG | YES | Microsecond timestamp |
+| signer | STRING | YES | Agent wallet address (sub-wallet authorized to sign on behalf of the account) |
+| signature | STRING | YES | EIP-712 signature, signed with the `signer` wallet private key |
 
 ---
 
@@ -83,6 +87,9 @@ Modify the account's privacy status. After a successful update, the change is br
 | Name | Type | Mandatory | Description |
 |------|------|-----------|-------------|
 | status | STRING | YES | Account privacy mode: `"PUBLIC"` or `"PRIVATE"` |
+| nonce | LONG | YES | Microsecond timestamp |
+| signer | STRING | YES | Agent wallet address (sub-wallet authorized to sign on behalf of the account) |
+| signature | STRING | YES | EIP-712 signature, signed with the `signer` wallet private key |
 
 ---
 
