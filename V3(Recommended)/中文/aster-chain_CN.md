@@ -56,7 +56,11 @@
 
 **权重:** 1
 
-**参数:**
+| 名称 | 类型 | 是否必需 | 描述 |
+|------|------|---------|------|
+| nonce | LONG | YES | 微秒时间戳 |
+| signer | STRING | YES | 代理钱包地址（被授权代表账户签名的子钱包） |
+| signature | STRING | YES | EIP-712 签名，使用 `signer` 钱包私钥签名 |
 
 无
 
@@ -83,7 +87,9 @@
 | 名称 | 类型 | 是否必需 | 描述 |
 |------|------|---------|------|
 | status | STRING | YES | 账户隐私模式：`"PUBLIC"` 或 `"PRIVATE"` |
-
+| nonce | LONG | YES | 微秒时间戳 |
+| signer | STRING | YES | 代理钱包地址（被授权代表账户签名的子钱包） |
+| signature | STRING | YES | EIP-712 签名，使用 `signer` 钱包私钥签名 |
 ---
 
 ## 转账至地址 (WITHDRAW)
