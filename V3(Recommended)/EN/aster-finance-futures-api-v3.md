@@ -138,6 +138,7 @@
   - [11xx - Request issues](#11xx---request-issues)
   - [20xx - Processing Issues](#20xx---processing-issues)
   - [40xx - Filters and other Issues](#40xx---filters-and-other-issues)
+  - [50xx - Deposit and Withdrawal Issues](#50xx---deposit-and-withdrawal-issues)
 
 # General Info
 
@@ -6247,4 +6248,10 @@ Codes are universal,but messages can vary.
 
 * Price is lower than stop price multiplier floor.
 * Limit price can't be lower than %s.
+
+## 50xx - Deposit and Withdrawal Issues
+
+> -5050 DEPOSIT_REQUIRED
+
+* This function can only be used after deposit.
 

@@ -2642,3 +2642,9 @@ Errors consist of two parts: an error code and a message. The code is standardiz
 * Take-Profit/Stop-Loss price must be above the trigger price × multiplier floor.  
 * Order price (limit or TP/SL) can’t be below %s.
 
+## 50xx \- Deposit and Withdrawal Issues
+
+### \-5050 DEPOSIT\_REQUIRED
+
+* This function can only be used after deposit.
+

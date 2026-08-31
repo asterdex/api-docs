@@ -1,5 +1,27 @@
 # Changelog
 
+## 2026-08-31
+
+### Changed
+
+#### Spot V3 / Futures V3 authentication requirement: main wallet deposit required
+
+Starting **2026-09-01 00:00 UTC**, all authenticated V3 API endpoints will only be accessible once the main wallet linked to the Aster account has completed a deposit. This applies to endpoints requiring identity authentication, including account, order, trade, and other USER_DATA / TRADE endpoints.
+
+Not affected by this change:
+- Agent Wallet create / query / update / delete endpoints
+- Builder create / authorize / query / update / delete endpoints
+- Public market data endpoints requiring no authentication
+
+Until the main wallet has completed a deposit, affected authenticated V3 requests may fail with:
+```json
+{"code":-5050,"msg":"This function can only be used after deposit"}
+```
+
+Added the new `-5050 DEPOSIT_REQUIRED` error code to the Spot V3 and Futures V3 API references (EN and CN, mainnet and testnet).
+
+---
+
 ## 2026-07-16
 
 ### Changed
