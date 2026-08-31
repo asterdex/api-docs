@@ -6,6 +6,7 @@ Official API documentation for Aster.
 
 - Use **V3 (Recommended)** for all new integrations
 - Starting from **March 25, 2026**, V1 new API Key creation is no longer supported. Existing API Keys will continue to work.
+- Starting from **September 1, 2026, 00:00 UTC**, all authenticated Spot V3 / Futures V3 endpoints (account, order, trade, and other USER_DATA / TRADE endpoints) are only accessible after the main wallet linked to the Aster account has completed a deposit. Agent Wallet and Builder endpoints, and public market data endpoints, are unaffected. Until the deposit is completed, affected requests return `{"code":-5050,"msg":"This function can only be used after deposit"}`. See [CHANGELOG](./CHANGELOG.md).
 - Choose **EN** / **中文** based on your preference
 
 ## 📖 Docs

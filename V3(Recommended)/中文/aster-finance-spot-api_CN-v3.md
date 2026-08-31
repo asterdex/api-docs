@@ -2765,4 +2765,10 @@ listenKey | STRING | YES
  * Price is lower than stop price multiplier floor.
  * 止盈止损订单价格不应低于触发价与报价乘数下限的乘积
  * Limit price can't be lower than %s.
- * 止盈止损订单价格不应低于 `%s`f
+ * 止盈止损订单价格不应低于 `%s`
+
+## 50xx - Deposit and Withdrawal Issues
+
+### -5050 DEPOSIT_REQUIRED
+ * This function can only be used after deposit.
+ * 该功能需要先完成充值后才能使用f
