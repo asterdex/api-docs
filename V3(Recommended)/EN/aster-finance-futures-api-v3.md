@@ -5246,6 +5246,7 @@ Query current position information for the users trading under the caller's buil
 * The caller's own account must already have a generated on-chain address (i.e. have completed at least one deposit), or the request is rejected.
 * For a user in One-way Mode, only the `BOTH`-side position is returned; for a user in Hedge Mode, the `LONG`/`SHORT`-side positions are returned.
 * `liquidationPrice` is reported as `0` whenever the underlying value would be negative.
+* This batch endpoint only returns positions with a non-zero `positionAmt`. This differs from the single-account `GET /fapi/v3/positionRisk`, which returns every symbol's position including ones with `positionAmt = 0`.
 
 **Response Fields:**
 
@@ -5371,7 +5372,7 @@ Query commission rates on a symbol for the users trading under the caller's buil
       "activeBuy": false,
       "feeAsset": "USDT",
       "totalQuota": "15.63802",
-      "fee": "0.07819010",
+      "fee": "-0.07819010",
       "orderId": 25851813,
       "realizedProfit": "-0.91539999",
       "marginAsset": "USDT",
@@ -5432,7 +5433,7 @@ Query the paginated trade history of users trading under the caller's builder co
 | rows[].activeBuy | BOOLEAN | Whether the trade was an active buy |
 | rows[].feeAsset | STRING | Commission asset |
 | rows[].totalQuota | STRING | Notional value of the trade (price × qty) |
-| rows[].fee | STRING | Commission paid |
+| rows[].fee | STRING | Fee for the trade, from the trading user's perspective: negative when a fee is charged, positive when a rebate is applied. Unlike most other decimal fields in this response, `fee` is not stripped of trailing zeros |
 | rows[].orderId | LONG | Order ID |
 | rows[].realizedProfit | STRING | Realized profit |
 | rows[].marginAsset | STRING | Margin (settlement) asset |

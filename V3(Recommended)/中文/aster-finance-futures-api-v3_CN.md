@@ -5412,6 +5412,7 @@ typed_data = {
 * 调用者自身账户必须已生成链上地址（即已完成过至少一次充值），否则请求会被拒绝。
 * 单向持仓模式的用户仅返回 `BOTH` 方向持仓；双向持仓模式的用户返回 `LONG`/`SHORT` 方向持仓。
 * 当 `liquidationPrice` 计算结果为负数时，统一返回 `0`。
+* 本批量接口仅返回 `positionAmt` 不为零的持仓；这与单账户接口 `GET /fapi/v3/positionRisk` 不同，后者会返回包括 `positionAmt = 0` 在内的所有交易对持仓。
 
 **响应字段:**
 
@@ -5537,7 +5538,7 @@ typed_data = {
       "activeBuy": false,
       "feeAsset": "USDT",
       "totalQuota": "15.63802",
-      "fee": "0.07819010",
+      "fee": "-0.07819010",
       "orderId": 25851813,
       "realizedProfit": "-0.91539999",
       "marginAsset": "USDT",
@@ -5598,7 +5599,7 @@ typed_data = {
 | rows[].activeBuy | BOOLEAN | 是否为主动买入 |
 | rows[].feeAsset | STRING | 手续费资产 |
 | rows[].totalQuota | STRING | 成交名义价值（价格 × 数量） |
-| rows[].fee | STRING | 手续费 |
+| rows[].fee | STRING | 该笔成交的手续费，以交易用户视角为准：收取手续费时为负数，收到返佣时为正数。与本响应中大多数其他小数字段不同，`fee` 不会去除末尾的零 |
 | rows[].orderId | LONG | 订单ID |
 | rows[].realizedProfit | STRING | 已实现盈亏 |
 | rows[].marginAsset | STRING | 保证金（结算）资产 |
