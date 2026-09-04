@@ -5029,7 +5029,7 @@ Query account information for the users trading under the caller's builder code,
 | rows[].symbolConfig[].notionalLimitCoef | STRING | Notional limit coefficient |
 | errors | ARRAY | Present only when one or more requested addresses could not be returned |
 | errors[].address | STRING | The address that was left out of `rows` |
-| errors[].errorMsg | STRING | Reason the address was left out (e.g. not bound to this builder, account not found, privacy mode enabled) |
+| errors[].errorMsg | STRING | Reason the address was left out of `rows`: `This function can only be used after deposit` (address has no generated account), `User privacy mode is enabled, this operation is not allowed.`, `Failed to check privacy switch status for this address.`, or `This user address is not bound to this builder.` (only possible when `userAddresses` is explicitly supplied) |
 
 ---
 
@@ -5118,7 +5118,7 @@ Query current open orders for the users trading under the caller's builder code,
 | rows[].workingType | STRING | Working type |
 | errors | ARRAY | Present only when one or more requested addresses could not be returned |
 | errors[].address | STRING | The address that was left out of `rows` |
-| errors[].errorMsg | STRING | Reason the address was left out (e.g. not bound to this builder, account not found, privacy mode enabled) |
+| errors[].errorMsg | STRING | Reason the address was left out of `rows`: `This function can only be used after deposit` (address has no generated account), `User privacy mode is enabled, this operation is not allowed.`, `Failed to check privacy switch status for this address.`, or `This user address is not bound to this builder.` (only possible when `userAddresses` is explicitly supplied) |
 
 ---
 
@@ -5184,7 +5184,7 @@ Query wallet balances for the users trading under the caller's builder code, wit
 | rows[].balanceInUsd | STRING | Wallet balance converted to USD |
 | errors | ARRAY | Present only when one or more requested addresses could not be returned |
 | errors[].address | STRING | The address that was left out of `rows` |
-| errors[].errorMsg | STRING | Reason the address was left out (e.g. not bound to this builder, account not found, privacy mode enabled) |
+| errors[].errorMsg | STRING | Reason the address was left out of `rows`: `This function can only be used after deposit` (address has no generated account), `User privacy mode is enabled, this operation is not allowed.`, `Failed to check privacy switch status for this address.`, or `This user address is not bound to this builder.` (only possible when `userAddresses` is explicitly supplied) |
 
 ---
 
@@ -5275,7 +5275,7 @@ Query current position information for the users trading under the caller's buil
 | rows[].updateTime | LONG | Last update time (milliseconds) |
 | errors | ARRAY | Present only when one or more requested addresses could not be returned |
 | errors[].address | STRING | The address that was left out of `rows` |
-| errors[].errorMsg | STRING | Reason the address was left out (e.g. not bound to this builder, account not found, privacy mode enabled) |
+| errors[].errorMsg | STRING | Reason the address was left out of `rows`: `This function can only be used after deposit` (address has no generated account), `User privacy mode is enabled, this operation is not allowed.`, `Failed to check privacy switch status for this address.`, or `This user address is not bound to this builder.` (only possible when `userAddresses` is explicitly supplied) |
 
 ---
 
@@ -5341,7 +5341,7 @@ Query commission rates on a symbol for the users trading under the caller's buil
 | rows[].takerCommissionRate | STRING | Taker commission rate |
 | errors | ARRAY | Present only when one or more requested addresses could not be returned |
 | errors[].address | STRING | The address that was left out of `rows` |
-| errors[].errorMsg | STRING | Reason the address was left out (e.g. not bound to this builder, account not found, privacy mode enabled) |
+| errors[].errorMsg | STRING | Reason the address was left out of `rows`: `This function can only be used after deposit` (address has no generated account), `User privacy mode is enabled, this operation is not allowed.`, `Failed to check privacy switch status for this address.`, or `This user address is not bound to this builder.` (only possible when `userAddresses` is explicitly supplied) |
 
 ---
 
@@ -5440,7 +5440,7 @@ Query the paginated trade history of users trading under the caller's builder co
 | rows[].builderFee | STRING | Builder fee charged on the trade |
 | errors | ARRAY | Present only when one or more requested addresses could not be returned |
 | errors[].address | STRING | The address that was left out of `rows` |
-| errors[].errorMsg | STRING | Reason the address was left out (e.g. not bound to this builder, privacy mode enabled) |
+| errors[].errorMsg | STRING | Reason the address was left out of `rows`: `This function can only be used after deposit` (address has no generated account), `User privacy mode is enabled, this operation is not allowed.`, `Failed to check privacy switch status for this address.`, or `This user address is not bound to this builder.` (only possible when `userAddresses` is explicitly supplied) |
 
 ---
 
@@ -5549,7 +5549,7 @@ Query the paginated historical order records (active, canceled, or filled) of us
 | rows[].address | STRING | Wallet address of the order owner |
 | errors | ARRAY | Present only when one or more requested addresses could not be returned |
 | errors[].address | STRING | The address that was left out of `rows` |
-| errors[].errorMsg | STRING | Reason the address was left out (e.g. not bound to this builder, account not found, privacy mode enabled) |
+| errors[].errorMsg | STRING | Reason the address was left out of `rows`: `This function can only be used after deposit` (address has no generated account), `User privacy mode is enabled, this operation is not allowed.`, `Failed to check privacy switch status for this address.`, or `This user address is not bound to this builder.` (only possible when `userAddresses` is explicitly supplied) |
 
 ---
 

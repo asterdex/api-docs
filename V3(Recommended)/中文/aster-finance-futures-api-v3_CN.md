@@ -5195,7 +5195,7 @@ typed_data = {
 | rows[].symbolConfig[].notionalLimitCoef | STRING | 名义价值限制系数 |
 | errors | ARRAY | 仅当部分请求地址无法返回时才出现 |
 | errors[].address | STRING | 未出现在 `rows` 中的地址 |
-| errors[].errorMsg | STRING | 该地址被排除的原因（例如未绑定该Builder、账户不存在、开启隐私模式） |
+| errors[].errorMsg | STRING | 该地址被排除的原因：`This function can only be used after deposit`（该地址尚未生成账户/未充值）、`User privacy mode is enabled, this operation is not allowed.`（已开启隐私模式）、`Failed to check privacy switch status for this address.`（隐私状态校验失败）或 `This user address is not bound to this builder.`（仅在显式传入 `userAddresses` 时可能出现，表示该地址未绑定该Builder） |
 
 ---
 
@@ -5284,7 +5284,7 @@ typed_data = {
 | rows[].workingType | STRING | 触发价格类型 |
 | errors | ARRAY | 仅当部分请求地址无法返回时才出现 |
 | errors[].address | STRING | 未出现在 `rows` 中的地址 |
-| errors[].errorMsg | STRING | 该地址被排除的原因（例如未绑定该Builder、账户不存在、开启隐私模式） |
+| errors[].errorMsg | STRING | 该地址被排除的原因：`This function can only be used after deposit`（该地址尚未生成账户/未充值）、`User privacy mode is enabled, this operation is not allowed.`（已开启隐私模式）、`Failed to check privacy switch status for this address.`（隐私状态校验失败）或 `This user address is not bound to this builder.`（仅在显式传入 `userAddresses` 时可能出现，表示该地址未绑定该Builder） |
 
 ---
 
@@ -5350,7 +5350,7 @@ typed_data = {
 | rows[].balanceInUsd | STRING | 折合美元的钱包余额 |
 | errors | ARRAY | 仅当部分请求地址无法返回时才出现 |
 | errors[].address | STRING | 未出现在 `rows` 中的地址 |
-| errors[].errorMsg | STRING | 该地址被排除的原因（例如未绑定该Builder、账户不存在、开启隐私模式） |
+| errors[].errorMsg | STRING | 该地址被排除的原因：`This function can only be used after deposit`（该地址尚未生成账户/未充值）、`User privacy mode is enabled, this operation is not allowed.`（已开启隐私模式）、`Failed to check privacy switch status for this address.`（隐私状态校验失败）或 `This user address is not bound to this builder.`（仅在显式传入 `userAddresses` 时可能出现，表示该地址未绑定该Builder） |
 
 ---
 
@@ -5441,7 +5441,7 @@ typed_data = {
 | rows[].updateTime | LONG | 最后更新时间（毫秒） |
 | errors | ARRAY | 仅当部分请求地址无法返回时才出现 |
 | errors[].address | STRING | 未出现在 `rows` 中的地址 |
-| errors[].errorMsg | STRING | 该地址被排除的原因（例如未绑定该Builder、账户不存在、开启隐私模式） |
+| errors[].errorMsg | STRING | 该地址被排除的原因：`This function can only be used after deposit`（该地址尚未生成账户/未充值）、`User privacy mode is enabled, this operation is not allowed.`（已开启隐私模式）、`Failed to check privacy switch status for this address.`（隐私状态校验失败）或 `This user address is not bound to this builder.`（仅在显式传入 `userAddresses` 时可能出现，表示该地址未绑定该Builder） |
 
 ---
 
@@ -5507,7 +5507,7 @@ typed_data = {
 | rows[].takerCommissionRate | STRING | 吃单手续费率 |
 | errors | ARRAY | 仅当部分请求地址无法返回时才出现 |
 | errors[].address | STRING | 未出现在 `rows` 中的地址 |
-| errors[].errorMsg | STRING | 该地址被排除的原因（例如未绑定该Builder、账户不存在、开启隐私模式） |
+| errors[].errorMsg | STRING | 该地址被排除的原因：`This function can only be used after deposit`（该地址尚未生成账户/未充值）、`User privacy mode is enabled, this operation is not allowed.`（已开启隐私模式）、`Failed to check privacy switch status for this address.`（隐私状态校验失败）或 `This user address is not bound to this builder.`（仅在显式传入 `userAddresses` 时可能出现，表示该地址未绑定该Builder） |
 
 ---
 
@@ -5606,7 +5606,7 @@ typed_data = {
 | rows[].builderFee | STRING | 该笔成交收取的Builder手续费 |
 | errors | ARRAY | 仅当部分请求地址无法返回时才出现 |
 | errors[].address | STRING | 未出现在 `rows` 中的地址 |
-| errors[].errorMsg | STRING | 该地址被排除的原因（例如未绑定该Builder、开启隐私模式） |
+| errors[].errorMsg | STRING | 该地址被排除的原因：`This function can only be used after deposit`（该地址尚未生成账户/未充值）、`User privacy mode is enabled, this operation is not allowed.`（已开启隐私模式）、`Failed to check privacy switch status for this address.`（隐私状态校验失败）或 `This user address is not bound to this builder.`（仅在显式传入 `userAddresses` 时可能出现，表示该地址未绑定该Builder） |
 
 ---
 
@@ -5715,7 +5715,7 @@ typed_data = {
 | rows[].address | STRING | 订单所属用户的钱包地址 |
 | errors | ARRAY | 仅当部分请求地址无法返回时才出现 |
 | errors[].address | STRING | 未出现在 `rows` 中的地址 |
-| errors[].errorMsg | STRING | 该地址被排除的原因（例如未绑定该Builder、账户不存在、开启隐私模式） |
+| errors[].errorMsg | STRING | 该地址被排除的原因：`This function can only be used after deposit`（该地址尚未生成账户/未充值）、`User privacy mode is enabled, this operation is not allowed.`（已开启隐私模式）、`Failed to check privacy switch status for this address.`（隐私状态校验失败）或 `This user address is not bound to this builder.`（仅在显式传入 `userAddresses` 时可能出现，表示该地址未绑定该Builder） |
 
 ---
 
