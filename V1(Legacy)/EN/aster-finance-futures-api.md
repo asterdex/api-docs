@@ -2326,7 +2326,7 @@ symbol | STRING | YES |
 side | ENUM | YES |
 positionSide | ENUM	| NO | Default `BOTH` for One-way Mode ; `LONG` or `SHORT` for Hedge Mode. It must be sent in Hedge Mode.
 type | ENUM | YES |
-timeInForce | ENUM | NO |
+timeInForce | ENUM | NO | See [ENUM definitions: Time in force](#enum-definitions)
 quantity | DECIMAL | NO | Cannot be sent with `closePosition`=`true`(Close-All)
 reduceOnly | STRING | NO | "true" or "false". default "false". Cannot be sent in Hedge Mode; cannot be sent with `closePosition`=`true`
 price | DECIMAL | NO |
@@ -2448,7 +2448,7 @@ symbol | STRING | YES |
 side | ENUM | YES |
 positionSide | ENUM	| NO | Default `BOTH` for One-way Mode ; `LONG` or `SHORT` for Hedge Mode. It must be sent with Hedge Mode.
 type | ENUM | YES |
-timeInForce | ENUM | NO |
+timeInForce | ENUM | NO | See [ENUM definitions: Time in force](#enum-definitions)
 quantity | DECIMAL | YES |
 reduceOnly | STRING | NO | "true" or "false". default "false".
 price | DECIMAL | NO |

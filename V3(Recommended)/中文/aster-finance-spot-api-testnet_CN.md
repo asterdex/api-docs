@@ -1025,7 +1025,7 @@ POST /api/v3/order ``
 symbol | STRING | YES |
 side | ENUM | YES | 详见枚举定义：订单方向
 type | ENUM | YES | 详见枚举定义：订单类型 
-timeInForce | ENUM | NO | 详见枚举定义：有效方式 
+timeInForce | ENUM | NO | 详见[枚举定义：有效方式](#枚举定义) 
 quantity | DECIMAL | NO |
 quoteOrderQty|DECIMAL|NO|
 price | DECIMAL | NO |
