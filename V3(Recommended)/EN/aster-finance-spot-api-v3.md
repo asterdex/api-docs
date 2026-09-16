@@ -1026,7 +1026,7 @@ Send order
 | symbol | STRING | YES |  |
 | side | ENUM | YES | See enum definition: Order direction |
 | type | ENUM | YES | See enumeration definition: Order type |
-| timeInForce | ENUM | NO | See enum definition: Time in force |
+| timeInForce | ENUM | NO | See enum definition: [Time in force](#enumeration-definition) |
 | quantity | DECIMAL | NO |  |
 | quoteOrderQty | DECIMAL | NO |  |
 | price | DECIMAL | NO |  |

@@ -2245,7 +2245,7 @@ Send in a new order.
 | side             | ENUM    | YES       |                                                                                                                                        |
 | positionSide     | ENUM    | NO        | Default`BOTH` for One-way Mode ; `LONG` or `SHORT` for Hedge Mode. It must be sent in Hedge Mode.                                      |
 | type             | ENUM    | YES       |                                                                                                                                        |
-| timeInForce      | ENUM    | NO        |                                                                                                                                        |
+| timeInForce      | ENUM    | NO        | See [ENUM definitions: Time in force](#enum-definitions)                                                                             |
 | quantity         | DECIMAL | NO        | Cannot be sent with`closePosition`=`true`(Close-All)                                                                                   |
 | reduceOnly       | STRING  | NO        | "true" or "false". default "false". Cannot be sent in Hedge Mode; cannot be sent with`closePosition`=`true`                            |
 | price            | DECIMAL | NO        |                                                                                                                                        |
@@ -2407,7 +2407,7 @@ Place a **Chase strategy order** — a BBO-pegged GTX limit order that automatic
 | chaseOffsetType    | STRING  | NO        | `ABSOLUTE` (default) . only supports `ABSOLUTE` for now. Will support or `PERCENTAGE` latter                                                                                                                         |
 | maxChaseOffset     | DECIMAL | NO        | Maximum tolerated distance from the original BBO before the chase auto-cancels. Must be `> 0`. If omitted, no distance-based auto-cancel is applied and any `maxChaseOffsetType` sent is ignored.        |
 | maxChaseOffsetType | STRING  | NO        | `ABSOLUTE` or `PERCENTAGE` (default `ABSOLUTE` when `maxChaseOffset` is sent). `ABSOLUTE`: same unit as price, must be a multiple of `tickSize`. `PERCENTAGE`: ≤ 2 decimal places.          |
-| timeInForce        | ENUM    | NO        | Default `GTX` (post-only).                                                                                                |
+| timeInForce        | ENUM    | NO        | Default `GTX` (post-only). See [ENUM definitions: Time in force](#enum-definitions).                                     |
 | clientStrategyId   | STRING  | NO        | User-defined strategy id. Auto-generated if not sent. **Length ≤ 28 characters** (DB column is `varchar(28)`). Must match `^[\.A-Z\:/a-z0-9_-]{1,28}$`.                                    |
 | recvWindow         | LONG    | NO        |                                                                                                                                                                                            |
 | timestamp          | LONG    | YES       |                                                                                                                                                                                            |
@@ -2490,7 +2490,7 @@ Place a **Chase strategy order** — a BBO-pegged GTX limit order that automatic
 | side             | ENUM    | YES       |                                                                                                                                        |
 | positionSide     | ENUM    | NO        | Default`BOTH` for One-way Mode ; `LONG` or `SHORT` for Hedge Mode. It must be sent with Hedge Mode.                                    |
 | type             | ENUM    | YES       |                                                                                                                                        |
-| timeInForce      | ENUM    | NO        |                                                                                                                                        |
+| timeInForce      | ENUM    | NO        | See [ENUM definitions: Time in force](#enum-definitions)                                                                             |
 | quantity         | DECIMAL | YES       |                                                                                                                                        |
 | reduceOnly       | STRING  | NO        | "true" or "false". default "false".                                                                                                    |
 | price            | DECIMAL | NO        |                                                                                                                                        |

@@ -2526,7 +2526,7 @@ stopPrice        | DECIMAL | NO       | 触发价, 仅 `STOP`, `STOP_MARKET`, `T
 closePosition    | STRING  | NO       | `true`, `false`；触发后全部平仓，仅支持`STOP_MARKET`和`TAKE_PROFIT_MARKET`；不与`quantity`合用；自带只平仓效果，不与`reduceOnly` 合用
 activationPrice  | DECIMAL | NO       | 追踪止损激活价格，仅`TRAILING_STOP_MARKET` 需要此参数, 默认为下单当前市场价格(支持不同`workingType`)
 callbackRate     | DECIMAL | NO       | 追踪止损回调比例，可取值范围[0.1, 5],其中 1代表1% ,仅`TRAILING_STOP_MARKET` 需要此参数
-timeInForce      | ENUM    | NO       | 有效方法
+timeInForce      | ENUM    | NO       | [有效方法](#枚举定义)
 workingType      | ENUM    | NO       | stopPrice 触发类型: `MARK_PRICE`(标记价格), `CONTRACT_PRICE`(合约最新价). 默认 `CONTRACT_PRICE`
 priceProtect | STRING | NO | 条件单触发保护："TRUE","FALSE", 默认"FALSE". 仅 `STOP`, `STOP_MARKET`, `TAKE_PROFIT`, `TAKE_PROFIT_MARKET` 需要此参数
 newOrderRespType | ENUM    | NO       | "ACK", "RESULT", 默认 "ACK"
@@ -2701,7 +2701,7 @@ price  |  DECIMAL | NO | 委托价格
 | chaseOffsetType    | STRING  | NO         | `ABSOLUTE`（默认）。v1 仅支持 `ABSOLUTE`。`PERCENTAGE` 后续支持。                                                                                                          |
 | maxChaseOffset     | DECIMAL | NO         | 相对原始 BBO 允许偏移的最大距离，超出后追单自动撤销。必须 > 0。若不传，则不应用基于距离的自动撤销，且所传的 `maxChaseOffsetType` 将被忽略。                          |
 | maxChaseOffsetType | STRING  | NO         | `ABSOLUTE` 或 `PERCENTAGE`（默认 `ABSOLUTE`）。`ABSOLUTE`：同价格单位，必须为 `tickSize` 倍数；`PERCENTAGE`：≤ 2 位小数。                                            |
-| timeInForce        | ENUM    | NO         | 默认 `GTX`（post-only）。                                                                                            |
+| timeInForce        | ENUM    | NO         | 默认 `GTX`（post-only）。详见[枚举定义：有效方式](#枚举定义)。                                                                                            |
 | clientStrategyId   | STRING  | NO         | 用户自定义策略 id。未传则自动生成。**长度 ≤ 28 字符**（DB 字段为 `varchar(28)`）。须满足 `^[\.A-Z\:/a-z0-9_-]{1,28}$`。                                              |
 
 **校验规则:**
@@ -2791,7 +2791,7 @@ newClientOrderId | STRING  | NO       | 用户自定义的订单号，不可以�
 stopPrice        | DECIMAL | NO       | 触发价, 仅 `STOP`, `STOP_MARKET`, `TAKE_PROFIT`, `TAKE_PROFIT_MARKET` 需要此参数
 activationPrice  | DECIMAL | NO       | 追踪止损激活价格，仅`TRAILING_STOP_MARKET` 需要此参数, 默认为下单当前市场价格(支持不同`workingType`)
 callbackRate     | DECIMAL | NO       | 追踪止损回调比例，可取值范围[0.1, 4],其中 1代表1% ,仅`TRAILING_STOP_MARKET` 需要此参数
-timeInForce      | ENUM    | NO       | 有效方法
+timeInForce      | ENUM    | NO       | [有效方法](#枚举定义)
 workingType      | ENUM    | NO       | stopPrice 触发类型: `MARK_PRICE`(标记价格), `CONTRACT_PRICE`(合约最新价). 默认 `CONTRACT_PRICE`
 priceProtect | STRING | NO | 条件单触发保护："TRUE","FALSE", 默认"FALSE". 仅 `STOP`, `STOP_MARKET`, `TAKE_PROFIT`, `TAKE_PROFIT_MARKET` 需要此参数
 newOrderRespType | ENUM    | NO       | "ACK", "RESULT", 默认 "ACK"
@@ -4230,7 +4230,7 @@ symbol | STRING | YES
 | quantity | STRING | YES* | 委托数量。`closePosition=true` 时可不填 |
 | price | STRING | YES* | `LIMIT`、`STOP`、`TAKE_PROFIT` 时必填 |
 | stopPrice | STRING | YES* | `STOP`、`STOP_MARKET`、`TAKE_PROFIT`、`TAKE_PROFIT_MARKET` 时必填 |
-| timeInForce | STRING | YES* | `LIMIT` 时必填；止损类订单可选（默认 `GTC`）。不支持 `IOC` 和 `FOK` |
+| timeInForce | STRING | YES* | `LIMIT` 时必填；止损类订单可选（默认 `GTC`）。不支持 `IOC` 和 `FOK`。详见[枚举定义：有效方式](#枚举定义) |
 | workingType | STRING | NO | `CONTRACT_PRICE` 或 `MARK_PRICE`，默认 `CONTRACT_PRICE` |
 | reduceOnly | STRING | NO | 是否仅减仓 |
 | closePosition | STRING | NO | 是否全部平仓 |
@@ -4294,7 +4294,7 @@ symbol | STRING | YES
 | quantity | STRING | NO | 新委托数量 |
 | price | STRING | NO | 新价格（适用于 `LIMIT`、`STOP`、`TAKE_PROFIT`） |
 | stopPrice | STRING | NO | 新止损价 |
-| timeInForce | STRING | NO | 新的有效方式 |
+| timeInForce | STRING | NO | 新的[有效方式](#枚举定义) |
 | workingType | STRING | NO | 新的触发价格类型 |
 | reduceOnly | STRING | NO | |
 | closePosition | STRING | NO | |
@@ -5279,7 +5279,7 @@ typed_data = {
 | rows[].side | STRING | 买卖方向 |
 | rows[].positionSide | STRING | 持仓方向：`BOTH`、`LONG`、`SHORT` |
 | rows[].type | STRING | 订单类型 |
-| rows[].timeInForce | STRING | 有效方式 |
+| rows[].timeInForce | STRING | [有效方式](#枚举定义) |
 | rows[].time | LONG | 下单时间（毫秒） |
 | rows[].workingType | STRING | 触发价格类型 |
 | errors | ARRAY | 仅当部分请求地址无法返回时才出现 |
@@ -5699,7 +5699,7 @@ typed_data = {
 | rows[].origQty | STRING | 原始委托数量 |
 | rows[].executedQty | STRING | 已成交数量 |
 | rows[].cumQuote | STRING | 成交金额 |
-| rows[].timeInForce | STRING | 有效方式 |
+| rows[].timeInForce | STRING | [有效方式](#枚举定义) |
 | rows[].type | STRING | 订单类型 |
 | rows[].reduceOnly | BOOLEAN | 是否只减仓 |
 | rows[].side | STRING | 买卖方向 |
