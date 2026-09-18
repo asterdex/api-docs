@@ -2033,7 +2033,6 @@ m -> 分钟; h -> 小时; d -> 天; w -> 周; M -> 月
 * 在具有有效`listenKey`的帐户上执行`POST`将返回当前有效的`listenKey`并将其有效期延长60分钟
 * websocket接口的baseurl: **wss://sstream.asterdex-testnet.com**
 * U订阅账户数据流的stream名称为 **/ws/\<listenKey\>**
-* 每个链接有效期不超过24小时，请妥善处理断线重连。
 
 
 ## Listen Key(现货账户)
