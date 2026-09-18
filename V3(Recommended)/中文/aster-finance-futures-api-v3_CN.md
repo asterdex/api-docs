@@ -4202,6 +4202,8 @@ symbol | STRING | YES
 
 `POST /fapi/v3/placeStrategyOrder`
 
+> ⚠️ **BBO 腿的触发价校验通过响应体返回，而非 HTTP 状态码**：当入场腿使用 `pegPriceType` 时，止盈/止损腿的合理性校验（是否会立即触发）由策略服务执行，而非网关，因此被拒时返回 **HTTP 200** 且 `failureCode` 为 `-4142`，而不是 HTTP 400。客户端必须读取 `failureCode`，不能仅依据 HTTP 状态码判断。入场腿为 `MARKET` 的策略订单本就如此。
+
 下策略订单。支持 OTO（一单触发另一单）、OCO（一单取消另一单）、OTOCO（一单触发并取消另外两单）三种策略类型。
 
 **权重:** 50
@@ -4227,7 +4229,8 @@ symbol | STRING | YES
 | positionSide | STRING | NO | `BOTH`、`LONG`、`SHORT`，单向持仓模式下默认 `BOTH` |
 | type | STRING | YES | `LIMIT`、`MARKET`、`STOP`、`STOP_MARKET`、`TAKE_PROFIT`、`TAKE_PROFIT_MARKET`、`TRAILING_STOP_MARKET` |
 | quantity | STRING | YES* | 委托数量。`closePosition=true` 时可不填 |
-| price | STRING | YES* | `LIMIT`、`STOP`、`TAKE_PROFIT` 时必填 |
+| price | STRING | YES* | `LIMIT`、`STOP`、`TAKE_PROFIT` 时必填。传入 `pegPriceType` 时不可同时传入 |
+| pegPriceType | ENUM | NO | 该腿的 BBO 定价策略：`COUNTERPARTY_1` / `_3` / `_5` / `_10` / `_20`，或 `QUEUE_1` / `_3` / `_5` / `_10` / `_20`。仅支持 `LIMIT`、`STOP`、`TAKE_PROFIT` 类型的腿，其他 `type` 传入将返回错误。与 `price` 互斥——实际价格由撮合引擎依据订单簿计算：`LIMIT` 腿在下单时计算，`STOP` / `TAKE_PROFIT` 腿在触发时计算。不支持 `MID_PRICE`。默认不使用 peg |
 | stopPrice | STRING | YES* | `STOP`、`STOP_MARKET`、`TAKE_PROFIT`、`TAKE_PROFIT_MARKET` 时必填 |
 | timeInForce | STRING | YES* | `LIMIT` 时必填；止损类订单可选（默认 `GTC`）。不支持 `IOC` 和 `FOK`。详见[枚举定义：有效方式](#枚举定义) |
 | workingType | STRING | NO | `CONTRACT_PRICE` 或 `MARK_PRICE`，默认 `CONTRACT_PRICE` |
@@ -4353,6 +4356,8 @@ symbol | STRING | YES
 `GET /fapi/v3/strategyOpenOrder`
 
 查询当前挂单中的策略订单。`strategyId` 与 `clientStrategyId` 必须且只能提供其中一个。
+
+> **BBO 腿**：使用 `pegPriceType` 下单的腿返回 `"price": "0"`，并附带 `pegPriceType` 字段（如 `"QUEUE_1"`）；真实成交价由撮合引擎依据订单簿计算。展示时应显示 peg 标签而非该 0 值。非 peg 腿不会返回该字段。
 
 **权重:** 5
 

@@ -4045,6 +4045,12 @@ true
 
 `POST /fapi/v3/placeStrategyOrder`
 
+> ⚠️ **A BBO leg's bracket check is reported in the response body, not the HTTP status.** When the
+> entry leg uses `pegPriceType`, the take-profit/stop-loss sanity check (an exit that would trigger
+> immediately) runs in the strategy service rather than at the gateway, so a rejection returns
+> **HTTP 200** with `failureCode` set (`-4142`), not an HTTP 400. Clients must read `failureCode`
+> rather than branching on HTTP status. This already applies to orders whose entry leg is `MARKET`.
+
 Place a new strategy order. Supports OTO (One-Triggers-the-Other), OCO (One-Cancels-the-Other), and OTOCO (One-Triggers-One-Cancels-the-Other) strategy types.
 
 **Weight:** 50
@@ -4070,7 +4076,8 @@ Place a new strategy order. Supports OTO (One-Triggers-the-Other), OCO (One-Canc
 | positionSide | STRING | NO | `BOTH`, `LONG`, `SHORT`. Default `BOTH` in one-way mode |
 | type | STRING | YES | `LIMIT`, `MARKET`, `STOP`, `STOP_MARKET`, `TAKE_PROFIT`, `TAKE_PROFIT_MARKET`, `TRAILING_STOP_MARKET` |
 | quantity | STRING | YES* | Order quantity. Not required when `closePosition=true` |
-| price | STRING | YES* | Required for `LIMIT`, `STOP`, `TAKE_PROFIT` |
+| price | STRING | YES* | Required for `LIMIT`, `STOP`, `TAKE_PROFIT`. Must be omitted when `pegPriceType` is set |
+| pegPriceType | ENUM | NO | BBO peg mode for this leg: `COUNTERPARTY_1` / `_3` / `_5` / `_10` / `_20`, or `QUEUE_1` / `_3` / `_5` / `_10` / `_20`. Only for `LIMIT`, `STOP`, `TAKE_PROFIT` legs; any other `type` is rejected. Mutually exclusive with `price` — the engine resolves the real price from the order book, at placement for a `LIMIT` leg and at trigger for a `STOP` / `TAKE_PROFIT` leg. `MID_PRICE` is not supported. Defaults to no peg |
 | stopPrice | STRING | YES* | Required for `STOP`, `STOP_MARKET`, `TAKE_PROFIT`, `TAKE_PROFIT_MARKET` |
 | timeInForce | STRING | YES* | Required for `LIMIT`; optional for stop orders (default `GTC`). `IOC` and `FOK` are not supported. See [ENUM definitions: Time in force](#enum-definitions) |
 | workingType | STRING | NO | `CONTRACT_PRICE` or `MARK_PRICE`. Default `CONTRACT_PRICE` |
@@ -4196,6 +4203,10 @@ Update one or more sub-orders of an existing strategy order. Returns an array wi
 `GET /fapi/v3/strategyOpenOrder`
 
 Query a current open strategy order. Either `strategyId` or `clientStrategyId` must be provided, but not both.
+
+> **BBO legs.** A leg placed with `pegPriceType` returns `"price": "0"` and carries a
+> `pegPriceType` field (e.g. `"QUEUE_1"`); the engine resolved the real execution price from the
+> order book. Render the peg label rather than the zero. The field is absent on non-peg legs.
 
 **Weight:** 5
 
