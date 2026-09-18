@@ -2427,8 +2427,7 @@ timeInForce      | ENUM    | NO       | [有效方法](#枚举定义)
 workingType      | ENUM    | NO       | stopPrice 触发类型: `MARK_PRICE`(标记价格), `CONTRACT_PRICE`(合约最新价). 默认 `CONTRACT_PRICE`
 priceProtect | STRING | NO | 条件单触发保护："TRUE","FALSE", 默认"FALSE". 仅 `STOP`, `STOP_MARKET`, `TAKE_PROFIT`, `TAKE_PROFIT_MARKET` 需要此参数
 newOrderRespType | ENUM    | NO       | "ACK", "RESULT", 默认 "ACK"
-pegPriceType     | ENUM    | NO       | BBO peg 模式: `COUNTERPARTY_1` 或 `QUEUE_1`。在 `LIMIT` 订单上设置此参数后，撮合引擎在触发时基于订单簿的 BBO 加 `pegOffset` 解析实际价格。默认不使用 peg。
-pegOffset        | DECIMAL | NO       | 当 `pegPriceType` 已设置时，相对 BBO 的有符号偏移量。买单应为非正值（如 `-0.5`），卖单为非负值。单位与 `price` 相同，必须是 `tickSize` 的倍数。
+pegPriceType     | ENUM    | NO       | BBO peg 模式: `COUNTERPARTY_1` 或 `QUEUE_1`。撮合引擎基于订单簿的 BBO 解析实际价格：`LIMIT` 订单在下单时解析，`STOP` / `TAKE_PROFIT` 订单在触发时解析。默认不使用 peg。
 stpMode          | ENUM    | NO       | 本订单的自成交防止（STP）模式，覆盖账户级默认设置。`EXPIRE_TAKER`：撤销taker订单；`EXPIRE_MAKER`：撤销maker订单；`EXPIRE_BOTH`：同时撤销双方订单。
 
 根据 order `type`的不同，某些参数强制要求，具体如下:
@@ -2551,7 +2550,7 @@ price  |  DECIMAL | NO | 委托价格
 * 当新订单的quantity 或 price不满足PRICE_FILTER / PERCENT_FILTER / LOT_SIZE限制，修改会被拒绝，原订单依旧被保留
 订单只支持limit类型
 * 同一订单修改次数最多10000次
-* **BBO peg 订单**（使用 `pegPriceType` = `COUNTERPARTY_1` / `QUEUE_1` 下的订单）：撮合引擎在触发时从订单簿解析实际价格。普通 modify 无法改变 peg 解析后的价格。若需要持续追踪 BBO，请使用追单接口 `POST /fapi/v3/chase`。
+* **BBO peg 订单**（使用 `pegPriceType` = `COUNTERPARTY_1` / `QUEUE_1` 下的订单）：撮合引擎依据订单簿解析实际价格（`LIMIT` 订单在下单时解析，`STOP` / `TAKE_PROFIT` 订单在触发时解析）。普通 modify 无法改变 peg 解析后的价格。若需要持续追踪 BBO，请使用追单接口 `POST /fapi/v3/chase`。
 
 ## 追单 (TRADE)
 
