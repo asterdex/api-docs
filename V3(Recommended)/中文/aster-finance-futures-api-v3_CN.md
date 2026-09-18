@@ -2529,8 +2529,7 @@ timeInForce      | ENUM    | NO       | [有效方法](#枚举定义)
 workingType      | ENUM    | NO       | stopPrice 触发类型: `MARK_PRICE`(标记价格), `CONTRACT_PRICE`(合约最新价). 默认 `CONTRACT_PRICE`
 priceProtect | STRING | NO | 条件单触发保护："TRUE","FALSE", 默认"FALSE". 仅 `STOP`, `STOP_MARKET`, `TAKE_PROFIT`, `TAKE_PROFIT_MARKET` 需要此参数
 newOrderRespType | ENUM    | NO       | "ACK", "RESULT", 默认 "ACK"
-pegPriceType     | ENUM    | NO       | BBO peg 模式: `COUNTERPARTY_1` 或 `QUEUE_1`。在 `LIMIT` 订单上设置此参数后，撮合引擎在触发时基于订单簿的 BBO 加 `pegOffset` 解析实际价格。默认不使用 peg。
-pegOffset        | DECIMAL | NO       | 当 `pegPriceType` 已设置时，相对 BBO 的有符号偏移量。买单应为非正值（如 `-0.5`），卖单为非负值。单位与 `price` 相同，必须是 `tickSize` 的倍数。
+pegPriceType     | ENUM    | NO       | BBO peg 模式: `COUNTERPARTY_1` 或 `QUEUE_1`。撮合引擎基于订单簿的 BBO 解析实际价格：`LIMIT` 订单在下单时解析，`STOP` / `TAKE_PROFIT` 订单在触发时解析。默认不使用 peg。
 stpMode          | ENUM    | NO       | 本订单的自成交防止（STP）模式，覆盖账户级默认设置。`EXPIRE_TAKER`：撤销taker订单；`EXPIRE_MAKER`：撤销maker订单；`EXPIRE_BOTH`：同时撤销双方订单。
 
 根据 order `type`的不同，某些参数强制要求，具体如下:
@@ -2653,7 +2652,7 @@ price  |  DECIMAL | NO | 委托价格
 * 当新订单的quantity 或 price不满足PRICE_FILTER / PERCENT_FILTER / LOT_SIZE限制，修改会被拒绝，原订单依旧被保留
 订单只支持limit类型
 * 同一订单修改次数最多10000次
-* **BBO peg 订单**（使用 `pegPriceType` = `COUNTERPARTY_1` / `QUEUE_1` 下的订单）：撮合引擎在触发时从订单簿解析实际价格。普通 modify 无法改变 peg 解析后的价格。若需要持续追踪 BBO，请使用追单接口 `POST /fapi/v3/chase`。
+* **BBO peg 订单**（使用 `pegPriceType` = `COUNTERPARTY_1` / `QUEUE_1` 下的订单）：撮合引擎依据订单簿解析实际价格（`LIMIT` 订单在下单时解析，`STOP` / `TAKE_PROFIT` 订单在触发时解析）。普通 modify 无法改变 peg 解析后的价格。若需要持续追踪 BBO，请使用追单接口 `POST /fapi/v3/chase`。
 
 ## 追单 (TRADE)
 
@@ -4202,6 +4201,8 @@ symbol | STRING | YES
 
 `POST /fapi/v3/placeStrategyOrder`
 
+> ⚠️ **BBO 腿的触发价校验通过响应体返回，而非 HTTP 状态码**：当入场腿使用 `pegPriceType` 时，止盈/止损腿的合理性校验（是否会立即触发）由策略服务执行，而非网关，因此被拒时返回 **HTTP 200** 且 `failureCode` 为 `-4142`，而不是 HTTP 400。客户端必须读取 `failureCode`，不能仅依据 HTTP 状态码判断。入场腿为 `MARKET` 的策略订单本就如此。
+
 下策略订单。支持 OTO（一单触发另一单）、OCO（一单取消另一单）、OTOCO（一单触发并取消另外两单）三种策略类型。
 
 **权重:** 50
@@ -4227,7 +4228,8 @@ symbol | STRING | YES
 | positionSide | STRING | NO | `BOTH`、`LONG`、`SHORT`，单向持仓模式下默认 `BOTH` |
 | type | STRING | YES | `LIMIT`、`MARKET`、`STOP`、`STOP_MARKET`、`TAKE_PROFIT`、`TAKE_PROFIT_MARKET`、`TRAILING_STOP_MARKET` |
 | quantity | STRING | YES* | 委托数量。`closePosition=true` 时可不填 |
-| price | STRING | YES* | `LIMIT`、`STOP`、`TAKE_PROFIT` 时必填 |
+| price | STRING | YES* | `LIMIT`、`STOP`、`TAKE_PROFIT` 时必填。传入 `pegPriceType` 时须传 `"0"`——价格由撮合引擎解析，传其他值会被拒绝 |
+| pegPriceType | ENUM | NO | 该腿的 BBO 定价策略：`COUNTERPARTY_1` / `_3` / `_5` / `_10` / `_20`，或 `QUEUE_1` / `_3` / `_5` / `_10` / `_20`。仅支持 `LIMIT`、`STOP`、`TAKE_PROFIT` 类型的腿，其他 `type` 传入将返回错误。需同时传 `price` 为 `"0"`——实际价格由撮合引擎依据订单簿计算：`LIMIT` 腿在下单时计算，`STOP` / `TAKE_PROFIT` 腿在触发时计算。不支持 `MID_PRICE`。默认不使用 peg |
 | stopPrice | STRING | YES* | `STOP`、`STOP_MARKET`、`TAKE_PROFIT`、`TAKE_PROFIT_MARKET` 时必填 |
 | timeInForce | STRING | YES* | `LIMIT` 时必填；止损类订单可选（默认 `GTC`）。不支持 `IOC` 和 `FOK`。详见[枚举定义：有效方式](#枚举定义) |
 | workingType | STRING | NO | `CONTRACT_PRICE` 或 `MARK_PRICE`，默认 `CONTRACT_PRICE` |
@@ -4353,6 +4355,8 @@ symbol | STRING | YES
 `GET /fapi/v3/strategyOpenOrder`
 
 查询当前挂单中的策略订单。`strategyId` 与 `clientStrategyId` 必须且只能提供其中一个。
+
+> **BBO 腿**：使用 `pegPriceType` 下单的腿返回 `"price": "0"`，并附带 `pegPriceType` 字段（如 `"QUEUE_1"`）；真实成交价由撮合引擎依据订单簿计算。展示时应显示 peg 标签而非该 0 值。非 peg 腿不会返回该字段。
 
 **权重:** 5
 
@@ -6995,6 +6999,14 @@ None
  * 止盈止损订单价格不应低于 `%s`
 
 ## 50xx - Deposit and Withdrawal Issues
+
+> -5035 INVALID_PEG_PRICE
+ * BBO peg price order requires price to be 0.
+ * BBO peg 订单的 price 必须传 0
+
+> -5036 PEG_PRICE_NOT_SUPPORTED
+ * BBO peg price order is not supported for this order type.
+ * 该订单类型不支持 BBO peg 订单
 
 > -5047 INVALID_START_TIME
  * StartTime must be within the last %s days.
