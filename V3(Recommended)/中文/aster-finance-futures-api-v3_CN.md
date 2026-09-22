@@ -243,6 +243,8 @@ TRADE | 需要有效的signer和签名
 USER_DATA | 需要有效的signer和签名
 USER_STREAM | 需要有效的signer和签名
 MARKET_DATA | 不需要鉴权的接口
+TRANSFER | 需要有效的signer和签名
+WITHDRAW | 需要有效的signer和签名
 
 ## 鉴权签名体
 参数 | 描述
@@ -264,7 +266,7 @@ user | 0x63DD5aCC6b1aa0f563956C0e534DD30B6dcF7C4e  | 登陆钱包地址
 signer | 0x21cF8Ae13Bb72632562c6Fff438652Ba1a151bb0 | [点击这里获取](https://www.asterdex.com/zh-CN/api-wallet)
 privateKey | 0x4fd0a42218f3eae43a6ce26d22544e986139a01e5b34a62db53757ffca81bae1 | [点击这里获取](https://www.asterdex.com/zh-CN/api-wallet)
 
-#### 示例 : nonce参数为当前系统微秒值,超过系统时间,或者落后系统时间超过10s为非法请求
+#### 示例 : nonce参数为当前系统微秒值,超过系统时间,或者落后系统时间超过60s为非法请求
 ```python
 #python
 nonce = math.trunc(time.time()*1000000)
@@ -467,7 +469,6 @@ if __name__ == '__main__':
 
 * GTC - Good Till Cancel 成交为止
 * IOC - Immediate or Cancel 无法立即成交(吃单)的部分就撤销
-* FOK - Fill or Kill 无法全部立即成交就撤销
 * GTX - Good Till Crossing 无法成为挂单方就撤销
 * HIDDEN - HIDDEN 该类型订单在订单薄里不可见
 
@@ -538,7 +539,10 @@ m -> 分钟; h -> 小时; d -> 天; w -> 周; M -> 月
 
 **限制间隔**
 
+* SECOND
+* TEN_SECONDS
 * MINUTE
+* DAY
 
 
 
@@ -683,7 +687,7 @@ MIN_NOTIONAL过滤器定义了交易对订单所允许的最小名义价值(成�
 
 # 行情接口
 
-## Noop
+## Noop (TRADE)
 
 > **Response:**
 
@@ -852,6 +856,7 @@ NONE
 
 ```javascript
 {
+	"futuresType": "U_MARGINED",
 	"exchangeFilters": [],
  	"rateLimits": [ // API访问的限制
  		{
@@ -944,7 +949,7 @@ NONE
     				"multiplierDecimal": 4
     			}
    			],
- 			"OrderType": [ // 订单类型
+ 			"orderTypes": [ // 订单类型
    				"LIMIT",  // 限价单
    				"MARKET",  // 市价单
    				"STOP", // 止损单
@@ -956,7 +961,6 @@ NONE
    			"timeInForce": [ // 有效方式
    				"GTC", // 成交为止, 一直有效
    				"IOC", // 无法立即成交(吃单)的部分就撤销
-   				"FOK", // 无法全部立即成交就撤销
    				"GTX", // 无法成为挂单方就撤销
 				"HIDDEN"
  			],
@@ -1064,7 +1068,7 @@ limit  | INT    | NO       | 默认:500，最大1000
 
 * 仅返回订单簿成交，即不会返回保险基金和自动减仓(ADL)成交
 
-## 查询历史成交(MARKET_DATA)
+## 查询历史成交
 
 > **响应:**
 
@@ -1137,7 +1141,6 @@ startTime | LONG   | NO       | 从该时刻之后的成交记录开始返回结
 endTime   | LONG   | NO       | 返回该时刻为止的成交记录
 limit     | INT    | NO       | 默认 500; 最大 1000.
 
-* 如果同时发送`startTime`和`endTime`，间隔必须小于一小时
 * 如果没有发送任何筛选参数(`fromId`, `startTime`, `endTime`)，默认返回最近的成交记录
 * 保险基金和自动减仓(ADL)成交不属于订单簿成交，故不会被归并聚合
 
@@ -1196,6 +1199,8 @@ limit     | INT    | NO       | 默认值:500 最大值:1500.
 
 ## 价格指数K线数据
 
+**注意：此接口未能通过当前服务端实现验证——线上服务端目前只暴露了 `GET /fapi/v3/marketKlines`（以 `symbol` 为键）。在依赖本节内容前，请与API团队确认正确的路径。**
+
 > **响应:**
 
 ```javascript
@@ -1246,6 +1251,8 @@ limit     | INT    | NO       | 默认值:500 最大值:1500
 
 
 ## 标记价格K线数据
+
+**注意：此接口未能通过当前服务端实现验证——线上服务端目前只暴露了 `GET /fapi/v3/marketKlines`（以 `symbol` 为键）。在依赖本节内容前，请与API团队确认正确的路径。**
 
 > **响应:**
 
@@ -2499,7 +2506,9 @@ GET /fapi/v3/multiAssetsMargin``
   	"priceRate": "0.3",	// 跟踪止损回调比例, 仅`TRAILING_STOP_MARKET` 订单返回此字段
  	"updateTime": 1566818724722, // 更新时间
  	"workingType": "CONTRACT_PRICE", // 条件价格触发类型
- 	"priceProtect": false            // 是否开启条件单触发保护
+ 	"priceProtect": false,           // 是否开启条件单触发保护
+ 	"pegPriceType": "",              // BBO peg 模式，仅 peg 订单返回
+ 	"stpMode": ""                    // 自成交防止（STP）模式，仅设置了该字段的订单返回
 }
 ```
 
@@ -2507,7 +2516,7 @@ GET /fapi/v3/multiAssetsMargin``
 POST /fapi/v3/order ``
 
 **权重:**
-1
+0
 
 **参数:**
 
@@ -2545,6 +2554,10 @@ Type                 |           强制要求的参数
 
 
 
+* 订单类型为 `STOP`, 参数 `timeInForce` 可以传（默认 `GTC`）。
+* 订单类型为 `TAKE_PROFIT`, 参数 `timeInForce` 可以传（默认 `GTC`）。
+* 对于 `STOP_MARKET`, `TAKE_PROFIT_MARKET`, `TRAILING_STOP_MARKET`：若传入 `timeInForce`，只接受 `GTC`，传入其他值将被拒绝。
+* 传入与所选 `type` 不匹配的参数（如 `LIMIT` 携带 `stopPrice`；`MARKET` 携带 `timeInForce`、`price` 或 `stopPrice`；`STOP_MARKET`/`TAKE_PROFIT_MARKET` 携带 `price`）会返回错误 (`PARAM_NOT_REQUIRED`)，而不是被静默忽略。
 * 条件单的触发必须:
 	
 	* 如果订单参数`priceProtect`为true:
@@ -2627,7 +2640,9 @@ POST /fapi/v3/order/test``
 	'workingType': 'CONTRACT_PRICE',  // 条件价格触发类型
 	'priceProtect': False,  // 是否开启条件单触发保护
 	'origType': 'LIMIT',  // 触发前订单类型
-	'updateTime': 1776311274450 //更新时间
+	'updateTime': 1776311274450, //更新时间
+	'pegPriceType': '',  // BBO peg 模式，仅 peg 订单返回
+	'stpMode': ''  // 自成交防止（STP）模式，仅设置了该字段的订单返回
 }
 ```
 
@@ -2644,8 +2659,9 @@ PUT /fapi/v3/order  ``
 orderId | LONG  |  NO  |系统订单号
 origClientOrderId  |  STRING |  NO |  用户自定义的订单号
 symbol |  STRING |  YES|  交易对
-quantity  |   DECIMAL|  NO | 下单数量
-price  |  DECIMAL | NO | 委托价格
+side | ENUM | NO | 可选的订单方向；若传入，会与订单实际方向进行校验。
+quantity  |   DECIMAL|  YES | 下单数量
+price  |  DECIMAL | YES | 委托价格
 
 
 * orderId 与 origClientOrderId 必须至少发送一个，同时发送则以 order id为准
@@ -2753,7 +2769,9 @@ price  |  DECIMAL | NO | 委托价格
 	  	"priceRate": "0.3",	// 跟踪止损回调比例, 仅`TRAILING_STOP_MARKET` 订单返回此字段
 	 	"updateTime": 1566818724722, // 更新时间
 	 	"workingType": "CONTRACT_PRICE", // 条件价格触发类型
-	 	"priceProtect": false            // 是否开启条件单触发保护
+	 	"priceProtect": false,           // 是否开启条件单触发保护
+	 	"pegPriceType": "",              // BBO peg 模式，仅 peg 订单返回
+	 	"stpMode": ""                    // 自成交防止（STP）模式，仅设置了该字段的订单返回
 	},
 	{
 		"code": -2022, 
@@ -2827,7 +2845,9 @@ newOrderRespType | ENUM    | NO       | "ACK", "RESULT", 默认 "ACK"
 		"workingType": "CONTRACT_PRICE", // 条件价格触发类型
 		"priceProtect": false, // 是否开启条件单触发保护
 		"origType": "LIMIT", // 触发前订单类型
-		"updateTime": 1700000001100 // 更新时间
+		"updateTime": 1700000001100, // 更新时间
+		"pegPriceType": "", // BBO peg 模式，仅 peg 订单返回
+		"stpMode": "" // 自成交防止（STP）模式，仅设置了该字段的订单返回
 	},
 	{
 		"code": -2013,
@@ -2854,7 +2874,9 @@ newOrderRespType | ENUM    | NO       | "ACK", "RESULT", 默认 "ACK"
 		"workingType": "CONTRACT_PRICE",
 		"priceProtect": false,
 		"origType": "LIMIT",
-		"updateTime": 1700000001234
+		"updateTime": 1700000001234,
+		"pegPriceType": "",
+		"stpMode": ""
 	}
 ]
 ```
@@ -2879,6 +2901,7 @@ batchOrders |	LIST | 	YES |	订单列表，最多支持5个订单（做市商白
 symbol             | STRING  | YES      | 交易对
 orderId            | STRING  | NO       | 系统订单号
 origClientOrderId  | STRING  | NO       | 用户自定义的订单号
+side               | ENUM    | NO       | 可选的订单方向；若传入，会与订单实际方向进行校验。
 quantity           | STRING  | YES      | 下单数量
 price              | STRING  | YES      | 委托价格
 
@@ -2907,7 +2930,7 @@ POST /fapi/v3/asset/wallet/transfer  (TRANSFER)
 ``
 
 **权重:**
-5
+50
 
 **参数:**
 
@@ -2951,7 +2974,9 @@ kindType |	STRING | 	YES |	交易类型
   	"priceRate": "0.3",					// 跟踪止损回调比例, 仅`TRAILING_STOP_MARKET` 订单返回此字段
   	"updateTime": 1579276756075,		// 更新时间
   	"workingType": "CONTRACT_PRICE", // 条件价格触发类型
- 	"priceProtect": false            // 是否开启条件单触发保护
+ 	"priceProtect": false,           // 是否开启条件单触发保护
+ 	"pegPriceType": "",              // BBO peg 模式，仅 peg 订单返回
+ 	"stpMode": ""                    // 自成交防止（STP）模式，仅设置了该字段的订单返回
 }
 ```
 
@@ -3008,7 +3033,9 @@ origClientOrderId | STRING | NO       | 用户自定义的订单号
   	"priceRate": "0.3",	// 跟踪止损回调比例, 仅`TRAILING_STOP_MARKET` 订单返回此字段
  	"updateTime": 1571110484038, // 更新时间
  	"workingType": "CONTRACT_PRICE", // 条件价格触发类型
- 	"priceProtect": false            // 是否开启条件单触发保护
+ 	"priceProtect": false,           // 是否开启条件单触发保护
+ 	"pegPriceType": "",              // BBO peg 模式，仅 peg 订单返回
+ 	"stpMode": ""                    // 自成交防止（STP）模式，仅设置了该字段的订单返回
 }
 ```
 
@@ -3056,7 +3083,9 @@ origClientOrderId | STRING | NO       | 用户自定义的订单号
   	"priceRate": "0.3",	// 跟踪止损回调比例, 仅`TRAILING_STOP_MARKET` 订单返回此字段
  	"updateTime": 1571110484038, // 更新时间
  	"workingType": "CONTRACT_PRICE", // 条件价格触发类型
- 	"priceProtect": false            // 是否开启条件单触发保护
+ 	"priceProtect": false,           // 是否开启条件单触发保护
+ 	"pegPriceType": "",              // BBO peg 模式，仅 peg 订单返回
+ 	"stpMode": ""                    // 自成交防止（STP）模式，仅设置了该字段的订单返回
 }
 ```
 
@@ -3134,7 +3163,9 @@ symbol     | STRING | YES      | 交易对
   		"priceRate": "0.3",	// 跟踪止损回调比例, 仅`TRAILING_STOP_MARKET` 订单返回此字段
 	 	"updateTime": 1571110484038, // 更新时间
 	 	"workingType": "CONTRACT_PRICE", // 条件价格触发类型
-	 	"priceProtect": false            // 是否开启条件单触发保护
+	 	"priceProtect": false,           // 是否开启条件单触发保护
+	 	"pegPriceType": "",              // BBO peg 模式，仅 peg 订单返回
+	 	"stpMode": ""                    // 自成交防止（STP）模式，仅设置了该字段的订单返回
 	},
 	{
 		"code": -2011,
@@ -3414,7 +3445,7 @@ GET /fapi/v3/allOrders``
 
    名称    |  类型  | 是否必需 |                      描述
 ---------- | ------ | -------- | -----------------------------------------------
-symbol     | STRING | YES      | 交易对
+symbol     | STRING | NO       | 若省略，则返回所有交易对的订单
 orderId    | LONG   | NO       | 只返回此orderID及之后的订单，缺省返回最近的订单
 startTime  | LONG   | NO       | 起始时间
 endTime    | LONG   | NO       | 结束时间
@@ -3531,6 +3562,8 @@ GET /fapi/v3/balance``
 		   	"maxNotional": "250000",  // 当前杠杆下用户可用的最大名义价值
 		   	"positionSide": "BOTH",  // 持仓方向
 		   	"positionAmt": "0",		 // 持仓数量
+		   	"notional": "0",			// 持仓名义价值
+		   	"isolatedWallet": "0",		// 逐仓账户余额
 		   	"updateTime": 0         // 更新时间 
 		}
   	]
@@ -3540,6 +3573,8 @@ GET /fapi/v3/balance``
 
 ``
 GET /fapi/v3/accountWithJoinMargin``
+
+* 另有一个不含联合保证金的独立接口 `GET /fapi/v3/account`（响应结构和权重相同，joinMargin=false）；如需本节描述的联合保证金视图，请使用 `accountWithJoinMargin`。
 
 **权重:**
 5
@@ -3636,6 +3671,7 @@ symbol     | STRING  | YES      | 交易对
 positionSide| ENUM   | NO		  | 持仓方向，单向持仓模式下非必填，默认且仅可填`BOTH`;在双向持仓模式下必填,且仅可选择 `LONG` 或 `SHORT` 
 amount     | DECIMAL | YES      | 保证金资金
 type       | INT     | YES      | 调整方向 1: 增加逐仓保证金，2: 减少逐仓保证金
+clientTranId | STRING | NO      | 幂等键，最长64字符；同一账户/交易对在7天内使用相同 clientTranId 的请求会被视为重复请求并拒绝
 
 * 只针对逐仓symbol 与 positionSide(如有)
 
@@ -3652,7 +3688,9 @@ type       | INT     | YES      | 调整方向 1: 增加逐仓保证金，2: 减
 	  	"symbol": "BTCUSDT", // 交易对
 	  	"time": 1578047897183, // 时间
 	  	"type": 1，	// 调整方向
-	  	"positionSide": "BOTH"  // 持仓方向
+	  	"positionSide": "BOTH",  // 持仓方向
+	  	"deltaType": "TRADE",
+	  	"clientTranId": ""
 	},
 	{
 		"amount": "100",
@@ -3660,7 +3698,9 @@ type       | INT     | YES      | 调整方向 1: 增加逐仓保证金，2: 减
 	  	"symbol": "BTCUSDT",
 	  	"time": 1578047900425,
 	  	"type": 1，
-	  	"positionSide": "LONG" 
+	  	"positionSide": "LONG",
+	  	"deltaType": "USER_ADJUST",
+	  	"clientTranId": ""
 	}
 ]
 ```
@@ -3707,6 +3747,8 @@ limit      | INT    | NO       | 返回的结果集数量 默认值: 500
   		"symbol": "BTCUSDT", // 交易对
   		"unRealizedProfit": "0.00000000", // 持仓未实现盈亏
   		"positionSide": "BOTH", // 持仓方向
+  		"notional": "0.00000000", // 持仓名义价值
+  		"isolatedWallet": "0.00000000", // 逐仓账户余额
   		"updateTime": 1625474304765   // 更新时间
   	}
 ]
@@ -3729,6 +3771,8 @@ limit      | INT    | NO       | 返回的结果集数量 默认值: 500
   		"symbol": "BTCUSDT", // 交易对
   		"unRealizedProfit": "2316.83423560" // 持仓未实现盈亏
   		"positionSide": "LONG", // 持仓方向
+  		"notional": "133590.13423560",
+  		"isolatedWallet": "15517.54150468",
   		"updateTime": 1625474304765  // 更新时间
   	},
   	{
@@ -3744,6 +3788,8 @@ limit      | INT    | NO       | 返回的结果集数量 默认值: 500
   		"symbol": "BTCUSDT", // 交易对
   		"unRealizedProfit": "-1156.46711780" // 持仓未实现盈亏
   		"positionSide": "SHORT", // 持仓方向
+  		"notional": "-66795.0671178",
+  		"isolatedWallet": "5413.95799991",
   		"updateTime": 1625474304765  //更新时间
   	}  	
 ]
@@ -3807,6 +3853,7 @@ GET /fapi/v3/userTrades ``
    名称    |  类型  | 是否必需 |                     描述
 ---------- | ------ | -------- | --------------------------------------------
 symbol     | STRING | YES      | 交易对
+orderId    | LONG   | NO       | 筛选属于该订单号的成交记录
 startTime  | LONG   | NO       | 起始时间
 endTime    | LONG   | NO       | 结束时间
 fromId     | LONG   | NO       | 返回该fromId及之后的成交，缺省返回最近的成交
@@ -3814,6 +3861,7 @@ limit      | INT    | NO       | 返回的结果集数量 默认值:500 最大�
 
 * 如果`startTime` 和 `endTime` 均未发送, 只会返回最近7天的数据。
 * startTime 和 endTime 的最大间隔为7天
+* `orderId` 是额外的可选筛选条件，发送时优先于其他查询方式
 
 
 ## 获取账户损益资金流水(USER_DATA)
@@ -3856,7 +3904,7 @@ GET /fapi/v3/income``
    名称    |  类型  | 是否必需 |                                              描述
 ---------- | ------ | -------- | -----------------------------------------------------------------------------------------------
 symbol     | STRING | NO       | 交易对
-incomeType | STRING | NO       | 收益类型 "TRANSFER"，"WELCOME_BONUS", "REALIZED_PNL"，"FUNDING_FEE", "COMMISSION", "INSURANCE_CLEAR", and "MARKET_MERCHANT_RETURN_REWARD"
+incomeType | STRING | NO       | 收益类型 "TRANSFER"，"WELCOME_BONUS", "REALIZED_PNL"，"FUNDING_FEE", "COMMISSION", "INSURANCE_CLEAR", "MARKET_MERCHANT_RETURN_REWARD", "REFERRAL_KICKBACK", "COMMISSION_REBATE", "MARKET_MAKER_REBATE", "API_REBATE", "CONTEST_REWARD", "CROSS_COLLATERAL_TRANSFER", "INTERNAL_TRANSFER", and "AUTO_EXCHANGE"
 startTime  | LONG   | NO       | 起始时间
 endTime    | LONG   | NO       | 结束时间
 limit      | INT    | NO       | 返回的结果集数量 默认值:100 最大值:1000
@@ -3910,8 +3958,10 @@ limit      | INT    | NO       | 返回的结果集数量 默认值:100 最大�
 
 
 ``
-GET /fapi/v3/leverageBracket
+GET /fapi/v3/leverageBrackets
 ``
+
+*注意：`GET /fapi/v3/leverageBracket`（单数）已废弃，但仍可正常使用，功能相同；推荐使用当前维护的 `GET /fapi/v3/leverageBrackets`（复数）。*
 
 
 **权重:** 1
@@ -6140,7 +6190,6 @@ None
 
 * GTC 
 * IOC
-* FOK
 * GTX
 
 
@@ -6511,8 +6560,8 @@ None
  * 新订单被拒绝
 
 > -2011 CANCEL_REJECTED
- * CANCEL_REJECTED
- * 取消订单被拒绝
+ * Unknown order sent.
+ * 未知的订单。
 
 > -2013 NO_SUCH_ORDER
  * Order does not exist.
@@ -6999,6 +7048,14 @@ None
 > -5047 INVALID_START_TIME
  * StartTime must be within the last %s days.
  * 起始时间必须在最近 %s 天以内
+
+> -5048 VAULT_SYMBOL_NOT_ALLOWED
+ * This symbol is not allowed for this vault's asset restriction.
+ * 该交易对不符合此金库的资产限制，不被允许
+
+> -5049 BUILDER_QUERY_NOT_ENABLED
+ * Builder query API is not enabled for this account.
+ * 该账户未启用 Builder 查询接口
 
 > -5050 DEPOSIT_REQUIRED
  * This function can only be used after deposit.
