@@ -94,7 +94,7 @@ You are advised to use WebSocket messages to obtain the corresponding data as mu
   * PONG frame  
   * Messages in JSON format, such as subscribe and unsubscribe.  
 * If a user sends messages that exceed the limit, the connection will be terminated. IPs that are repeatedly disconnected may be blocked by the server.  
-* A single connection can subscribe to up to **1024** Streams.
+* A single connection can subscribe to up to **200** Streams.
 
 ---
 
@@ -110,6 +110,8 @@ You are advised to use WebSocket messages to obtain the corresponding data as mu
 | USER_DATA     | A valid signer and signature are required |
 | USER_STREAM   | A valid signer and signature are required |
 | MARKET_DATA   | API that does not require authentication |
+| TRANSFER      | A valid signer and signature are required |
+| WITHDRAW      | A valid signer and signature are required |
 
 ---
 
@@ -128,7 +130,7 @@ You are advised to use WebSocket messages to obtain the corresponding data as mu
 | signer     | 0x21cF8Ae13Bb72632562c6Fff438652Ba1a151bb0                         |[Click Here](https://www.asterdex.com/en/api-wallet)         | 
 | privateKey | 0x4fd0a42218f3eae43a6ce26d22544e986139a01e5b34a62db53757ffca81bae1 |[Click Here](https://www.asterdex.com/en/api-wallet)        | 
 
-#### The nonce parameter is the current system time in microseconds. If it exceeds the system time or lags behind it by more than 10 seconds, the request is considered invalid.
+#### The nonce parameter is the current system time in microseconds. If it exceeds the system time or lags behind it by more than 60 seconds, the request is considered invalid.
 ```python
 #python
 nonce = math.trunc(time.time()*1000000)
@@ -311,8 +313,9 @@ This defines how long an order can remain valid before expiring.
 | :---- | :---- |
 | GTC (Good ‘Til Canceled) | The order remains active until it is fully executed or manually canceled. |
 | IOC (Immediate or Cancel) | The order will execute immediately for any amount available. Any unfilled portion is automatically canceled. |
-| FOK (Fill or Kill) | The order must be fully executed immediately. If it cannot be filled in full, it is canceled right away. |
+| FOK (Fill or Kill) | The order must be fully executed immediately. If it cannot be filled in full, it is canceled right away. **Note:** FOK is not currently supported for spot order placement — sending `timeInForce=FOK` to `POST /api/v3/order` returns `-1115 INVALID_TIF` regardless of order type. |
 | GTX (Good till crossing, Post only) | The post-only limit order will only be placed if it can be added as a maker order and not as a taker order.  |
+| HIDDEN | Hidden/iceberg order — not shown in the public order book. |
 
 **K-line interval:**
 
@@ -470,6 +473,85 @@ In order to comply with the `market lot size`, the `quantity` must satisfy the f
 * `quantity` \>= `minQty`  
 * `quantity` \<= `maxQty`  
 * (`quantity`\-`minQty`) % `stepSize` \== 0
+
+#### MAX\_NUM\_ORDERS \- Maximum number of orders
+
+**Format in the /exchangeInfo response:**
+
+```javascript
+  {
+    "limit": 200,
+    "filterType": "MAX_NUM_ORDERS"
+  }
+```
+
+The `MAX_NUM_ORDERS` filter defines the maximum number of open orders an account is allowed to have on a trading pair. This count includes all current open orders (including OCO orders).
+
+#### MIN\_NOTIONAL \- Minimum order value
+
+**Format in the /exchangeInfo response:**
+
+```javascript
+  {
+    "minNotional": "5",
+    "filterType": "MIN_NOTIONAL"
+  }
+```
+
+The `MIN_NOTIONAL` filter defines the minimum notional value (`price` \* `quantity`) allowed for an order on a trading pair.
+
+#### MAX\_NOTIONAL \- Maximum order value
+
+**Format in the /exchangeInfo response:**
+
+```javascript
+  {
+    "maxNotional": "100",
+    "filterType": "MAX_NOTIONAL"
+  }
+```
+
+The `MAX_NOTIONAL` filter defines the maximum notional value (`price` \* `quantity`) allowed for an order on a trading pair.
+
+#### NOTIONAL \- Order notional filter
+
+**Format in the /exchangeInfo response:**
+
+```javascript
+  {
+    "maxNotional": "100",
+    "minNotional": "5",
+    "avgPriceMins": 5,
+    "applyMinToMarket": true,
+    "filterType": "NOTIONAL",
+    "applyMaxToMarket": true
+  }
+```
+
+The `NOTIONAL` filter defines the acceptable notional value (`price` \* `quantity`) range for an order on a trading pair. `avgPriceMins` is the number of minutes over which the average price is calculated for market-order notional checks; `applyMinToMarket`/`applyMaxToMarket` control whether the `minNotional`/`maxNotional` bounds are also enforced for `MARKET` orders.
+
+#### PERCENT\_PRICE\_BY\_SIDE \- Price amplitude filter by side
+
+**Format in the /exchangeInfo response:**
+
+```javascript
+  {
+    "bidMultiplierUp": "5",
+    "askMultiplierUp": "5",
+    "bidMultiplierDown": "0",
+    "avgPriceMins": 5,
+    "multiplierDecimal": "0",
+    "filterType": "PERCENT_PRICE_BY_SIDE",
+    "askMultiplierDown": "0"
+  }
+```
+
+The `PERCENT_PRICE_BY_SIDE` filter defines the valid price range based on the average price over the last `avgPriceMins` minutes, applying different multiplier bounds depending on order side:
+
+* For `BUY` orders: `price` \<= `avgPrice` \* `bidMultiplierUp` and `price` \>= `avgPrice` \* `bidMultiplierDown`  
+* For `SELL` orders: `price` \<= `avgPrice` \* `askMultiplierUp` and `price` \>= `avgPrice` \* `askMultiplierDown`
+
+If `avgPriceMins` is 0, the last price is used instead of an average price.
 
 # Market data API
 
@@ -636,7 +718,6 @@ Test if the REST API can be reached and retrieve the server time.
 		"timeInForce": [
 			"GTC",
 			"IOC",
-			"FOK",
 			"GTX",
       "HIDDEN"
 		],
@@ -663,6 +744,7 @@ Retrieve trading rules and trading pair information.
   "lastUpdateId": 1027024,
   "E":1589436922972, //  Message output time
   "T":1589436922959, //  Transaction time
+  "symbol": "BTCUSDT",
   "bids": [
     [
       "4.00000000", // PRICE
@@ -822,6 +904,8 @@ The difference between aggregated trades and individual trades is that trades wi
 
 Each K-line represents a trading pair. The open time of each K-line can be regarded as a unique ID.
 
+**Weight:** 1 (limit\<100), 2 (limit\<500), 5 (limit\<=1000 or omitted), 10 (limit\>1000)
+
 **Parameters:**
 
 | Name | Type | Is it required? | Description |
@@ -879,6 +963,8 @@ Each K-line represents a trading pair. The open time of each K-line can be regar
 | symbol | STRING | NO |  |
 
 * Please note that omitting the symbol parameter will return data for all trading pairs
+
+> Note: `GET /api/v3/ticker/opt/24hr` also exists as an alternate 24-hour ticker endpoint and is not further documented here.
 
 ## Latest price
 
@@ -1010,6 +1096,7 @@ Get symbol fees
   "origType": "LIMIT",  
   "type": "LIMIT", 
   "side": "SELL", 
+  "orderListId": -1
 }
 ```
 
@@ -1032,6 +1119,7 @@ Send order
 | price | DECIMAL | NO |  |
 | newClientOrderId | STRING | NO | Client-customized unique order ID. If not provided, one will be generated automatically. |
 | stopPrice | DECIMAL | NO | Only STOP, STOP\_MARKET, TAKE\_PROFIT, TAKE\_PROFIT\_MARKET require this parameter |
+| selfTradingProtectionMode | INT | NO | 1 (NONE), 2 (CANCEL\_TAKER), 4 (CANCEL\_MAKER), 8 (CANCEL\_BOTH); default depends on symbol config |
 
 Depending on the order `type`, certain parameters are mandatory:
 
@@ -1072,6 +1160,7 @@ Other information:
   "origType": "LIMIT",  
   "type": "LIMIT", 
   "side": "SELL",
+  "orderListId": -1
 }
 ```
 
@@ -1112,7 +1201,8 @@ At least one of `orderId` or `origClientOrderId` must be sent.
     "stopPrice": "0",
     "origType": "LIMIT",
     "time": 1649913186270,
-    "updateTime": 1649913186297
+    "updateTime": 1649913186297,
+    "orderListId": -1
 } 
 ```
 
@@ -1160,7 +1250,8 @@ Note:
     "stopPrice": "0",
     "origType": "LIMIT",
     "time": 1649913186270,
-    "updateTime": 1649913186297
+    "updateTime": 1649913186297,
+    "orderListId": -1
 }
 ```
 
@@ -1205,6 +1296,7 @@ Note:
         "origType": "LIMIT", 
         "time": 1756252940207, 
         "updateTime": 1756252940207, 
+        "orderListId": -1
     }
 ]
 ```
@@ -1238,7 +1330,7 @@ Retrieve all current open orders for trading pairs. Use calls without a trading 
 ```
 
 ``
-DEL /api/v3/allOpenOrders ``
+DELETE /api/v3/allOpenOrders ``
 
 **Weight:**
 - ***1***
@@ -1251,6 +1343,7 @@ symbol | STRING | YES |
 orderIdList | STRING | NO |  orderid array string
 origClientOrderIdList | STRING | NO | clientOrderId array string
 
+> Note: `POST /api/v3/batchOrders` and `DELETE /api/v3/batchOrders` (batch order placement/cancellation, TRADE) also exist and are not further documented here.
 
 ## Query all orders (USER\_DATA)
 
@@ -1275,6 +1368,7 @@ origClientOrderIdList | STRING | NO | clientOrderId array string
         "origType": "LIMIT", 
         "time": 1756252940207, 
         "updateTime": 1756252940207, 
+        "orderListId": -1
     }
 ]
 ```
@@ -1292,13 +1386,14 @@ Retrieve all account orders; active, canceled, or completed.
 
 | Name | Type | Is it required? | Description |
 | :---- | :---- | :---- | :---- |
-| symbol | STRING | YES |  |
+| symbol | STRING | NO | If omitted, returns orders for all trading pairs. |
 | orderId | LONG | NO |  |
 | startTime | LONG | NO |  |
 | endTime | LONG | NO |  |
 | limit | INT | NO | Default 500; maximum 1000 |
 
 * The maximum query time range must not exceed 7 days.  
+* `orderId` cannot be combined with `startTime`/`endTime`.
 * By default, query data is from the last 7 days.
 
 
@@ -1338,7 +1433,7 @@ limit | LONG | NO | default:100 max:1000
 
 **Note:** 
 
-*  `type`: `TRADE_TARGET`,`TRADE_SOURCE`,`TRANSFER_SPOT_TO_FUTURE`,`TRANSFER_FUTURE_TO_SPOT`,`TRANSFER_SPOT_TO_SPOT`,`AIRDROP`,`DIVIDEND`,`TRANSFER_REFUND`,`INTERNAL_TRANSFER`,`TRANSFER`,`SWAP`,`COMMISSION_REBATE`,`CASH_BACK`,`STAKING_WITHDRAW`, `STAKING_CLAIM`, `STAKING_DELEGATE`
+*  `type`: `TRADE_TARGET`,`TRADE_SOURCE`,`TRANSFER_SPOT_TO_FUTURE`,`TRANSFER_FUTURE_TO_SPOT`,`TRANSFER_SPOT_TO_SPOT`,`AIRDROP`,`DIVIDEND`,`TRANSFER_REFUND`,`INTERNAL_TRANSFER`,`TRANSFER`,`SWAP`,`COMMISSION_REBATE`,`CASH_BACK`,`STAKING_WITHDRAW`, `STAKING_CLAIM`, `STAKING_DELEGATE` (this list is not exhaustive; additional values such as `USD1_AIRDROP`, `DRIBBLET_EXCHANGE`, `USER_REBATE`, `INVITER_REBATE`, and several `PREDICTION_*` types are also accepted/returned)
 *  If startTime and endTime are not provided, only data from the most recent 7 days will be returned.
 
 ## Perp-spot transfer (TRADE)
@@ -1419,7 +1514,7 @@ asset | STRING | YES |
 amount | STRING | YES |
 fee | STRING | YES |
 receiver | STRING | YES |  The address of the current account
-nonce | STRING | YES |  The current time in microseconds 
+userNonce | STRING | YES |  The current time in microseconds 
 userSignature | STRING | YES | 
 
 
@@ -1465,6 +1560,8 @@ const types = {
 
 const signature = await signer.signTypedData(domain, types, value)
 ```
+
+> Note: `POST /api/v3/aster/user-solana-withdraw` also exists for Solana withdrawals and is not further documented here.
 
 ## Account information (USER\_DATA)
 
@@ -1540,7 +1637,7 @@ Retrieve the trade history for a specified trading pair of an account
 | Name | Type | Is it required? | Description |
 | :---- | :---- | :---- | :---- |
 | symbol | STRING | NO |  |
-| orderId | LONG | NO | Must be used together with the parameter symbol |
+| orderId | LONG | NO | Recommended to use together with the parameter symbol |
 | startTime | LONG | NO |  |
 | endTime | LONG | NO |  |
 | fromId | LONG | NO | Starting trade ID. Defaults to fetching the most recent trade. |
@@ -1560,7 +1657,8 @@ Retrieve the trade history for a specified trading pair of an account
 * The URL format for combined streams is \*\*/stream?streams=//\*\*  
 * When subscribing to combined streams, the event payload is wrapped in this format: \*\*{"stream":"","data":}\*\*  
 * All trading pairs in stream names are **lowercase**  
-* Every 3 minutes the server sends a ping frame; the client must reply with a pong frame within 10 minutes, otherwise the server will close the connection. The client is allowed to send unpaired pong frames (i.e., the client may send pong frames at a frequency higher than once every 10 minutes to keep the connection alive).
+* Every 5 minutes the server sends a ping frame; the client must reply with a pong frame within 15 minutes, otherwise the server will close the connection. The client is allowed to send unpaired pong frames (i.e., the client may send pong frames at a frequency higher than once every 15 minutes to keep the connection alive).
+* A client can also send an application-level `{"method": "PONG"}` JSON message as a keepalive, as an alternative to a WebSocket-protocol pong frame.
 
 ## Real-time subscribe/unsubscribe data streams
 
@@ -2016,7 +2114,7 @@ Validity extended to 60 minutes after this call. It is recommended to send a pin
 
 | Name | Type | Is it required? | Description |
 | :---- | :---- | :---- | :---- |
-| listenKey | STRING | YES |  |
+| listenKey | STRING | NO | Accepted but ignored — the server derives the listen key from the authenticated account, not from this parameter. |
 
 ### Close Listen Key (USER\_STREAM)
 
@@ -2036,7 +2134,7 @@ Close user data stream
 
 | Name | Type | Is it required? | Description |
 | :---- | :---- | :---- | :---- |
-| listenKey | STRING | YES |  |
+| listenKey | STRING | NO | Accepted but ignored — the server derives the listen key from the authenticated account, not from this parameter. |
 
 ## Payload: ACCOUNT\_UPDATE
 
@@ -2368,10 +2466,6 @@ Errors consist of two parts: an error code and a message. The code is standardiz
 
 * Order would immediately trigger.
 
-### \-2022 REDUCE\_ONLY\_REJECT
-
-* ReduceOnly Order is rejected.
-
 ### \-2024 POSITION\_NOT\_SUFFICIENT
 
 * Position is not sufficient.
@@ -2379,10 +2473,6 @@ Errors consist of two parts: an error code and a message. The code is standardiz
 ### \-2025 MAX\_OPEN\_ORDER\_EXCEEDED
 
 * Reached max open order limit.
-
-### \-2026 REDUCE\_ONLY\_ORDER\_TYPE\_NOT\_SUPPORTED
-
-* This OrderType is not supported when reduceOnly.
 
 ## 40xx \- Filters and other Issues
 

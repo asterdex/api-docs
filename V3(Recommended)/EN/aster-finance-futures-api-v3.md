@@ -251,6 +251,8 @@ It is strongly recommended to use websocket stream for getting data as much as p
 | USER_DATA     | A valid signer and signature are required |
 | USER_STREAM   | A valid signer and signature are required |
 | MARKET_DATA   | API that does not require authentication |
+| TRANSFER      | A valid signer and signature are required |
+| WITHDRAW      | A valid signer and signature are required |
 
 ## Authentication signature payload
 
@@ -276,7 +278,7 @@ It is strongly recommended to use websocket stream for getting data as much as p
 | signer     | 0x21cF8Ae13Bb72632562c6Fff438652Ba1a151bb0                         |[Click Here](https://www.asterdex.com/en/api-wallet)         | 
 | privateKey | 0x4fd0a42218f3eae43a6ce26d22544e986139a01e5b34a62db53757ffca81bae1 |[Click Here](https://www.asterdex.com/en/api-wallet)        | 
 
-#### The nonce parameter is the current system time in microseconds. If it exceeds the system time or lags behind it by more than 10 seconds, the request is considered invalid.
+#### The nonce parameter is the current system time in microseconds. If it exceeds the system time or lags behind it by more than 60 seconds, the request is considered invalid.
 ```python
 #python
 nonce = math.trunc(time.time()*1000000)
@@ -480,7 +482,6 @@ if __name__ == '__main__':
 
 * GTC - Good Till Cancel
 * IOC - Immediate or Cancel
-* FOK - Fill or Kill
 * GTX - Good Till Crossing	(Post Only)
 * HIDDEN - HIDDEN This type of order is not visible in the order book
 
@@ -549,7 +550,10 @@ m -> minutes; h -> hours; d -> days; w -> weeks; M -> months
 
 **Rate limit intervals (interval)**
 
+* SECOND
+* TEN_SECONDS
 * MINUTE
+* DAY
 
 ## Filters
 
@@ -701,7 +705,7 @@ Since `MARKET` orders have no price, the mark price is used.
 
 # Market Data Endpoints
 
-## Noop
+## Noop (TRADE)
 
 > **Response:**
 
@@ -865,6 +869,7 @@ NONE
 
 ```javascript
 {
+	"futuresType": "U_MARGINED",
 	"exchangeFilters": [],
  	"rateLimits": [
  		{
@@ -957,7 +962,7 @@ NONE
     				"multiplierDecimal": 4
     			}
    			],
- 			"OrderType": [
+ 			"orderTypes": [
    				"LIMIT",
    				"MARKET",
    				"STOP",
@@ -969,7 +974,6 @@ NONE
    			"timeInForce": [
    				"GTC", 
    				"IOC", 
-   				"FOK", 
    				"GTX",
           "HIDDEN" 
  			],
@@ -1068,7 +1072,7 @@ Get recent market trades
 
 * Market trades means trades filled in the order book. Only market trades will be returned, which means the insurance fund trades and ADL trades won't be returned.
 
-## Old Trades Lookup (MARKET_DATA)
+## Old Trades Lookup
 
 > **Response:**
 
@@ -1137,7 +1141,6 @@ Get compressed, aggregate market trades. Market trades that fill at the time, fr
 | endTime   | LONG   | NO        | Timestamp in ms to get aggregate trades until INCLUSIVE. |
 | limit     | INT    | NO        | Default 500; max 1000.                                   |
 
-* If both startTime and endTime are sent, time between startTime and endTime must be less than 1 hour.
 * If fromId, startTime, and endTime are not sent, the most recent aggregate trades will be returned.
 * Only market trades will be aggregated and returned, which means the insurance fund trades and ADL trades won't be aggregated.
 
@@ -1193,6 +1196,8 @@ Klines are uniquely identified by their open time.
 
 ## Index Price Kline/Candlestick Data
 
+**Note: this endpoint could not be verified against the current server implementation — the live server only exposes `GET /fapi/v3/marketKlines` (keyed by `symbol`). Please confirm the correct path with the API team before relying on this section.**
+
 > **Response:**
 
 ```javascript
@@ -1243,6 +1248,8 @@ Klines are uniquely identified by their open time.
 * If startTime and endTime are not sent, the most recent klines are returned.
 
 ## Mark Price Kline/Candlestick Data
+
+**Note: this endpoint could not be verified against the current server implementation — the live server only exposes `GET /fapi/v3/marketKlines` (keyed by `symbol`). Please confirm the correct path with the API team before relying on this section.**
 
 > **Response:**
 
@@ -2458,7 +2465,9 @@ Get user's Multi-Assets mode (Multi-Assets Mode or Single-Asset Mode) on ***Ever
   	"priceRate": "0.3",			// callback rate, only return with TRAILING_STOP_MARKET order
  	"updateTime": 1566818724722,
  	"workingType": "CONTRACT_PRICE",
- 	"priceProtect": false            // if conditional order trigger is protected
+ 	"priceProtect": false,           // if conditional order trigger is protected
+ 	"pegPriceType": "",              // BBO peg mode, only present for pegged orders
+ 	"stpMode": ""                    // Self-Trade Prevention mode, only present when set on the order
 }
 ```
 
@@ -2467,7 +2476,7 @@ Get user's Multi-Assets mode (Multi-Assets Mode or Single-Asset Mode) on ***Ever
 Send in a new order.
 
 **Weight:**
-1
+0
 
 **Parameters:**
 
@@ -2505,6 +2514,8 @@ Additional mandatory parameters based on `type`:
 
 * Order with type `STOP`,  parameter `timeInForce` can be sent ( default `GTC`).
 * Order with type `TAKE_PROFIT`,  parameter `timeInForce` can be sent ( default `GTC`).
+* For `STOP_MARKET`, `TAKE_PROFIT_MARKET`, `TRAILING_STOP_MARKET`: if `timeInForce` is sent, only `GTC` is accepted; any other value is rejected.
+* Sending a parameter that does not apply to the selected `type` (e.g. `stopPrice` with `LIMIT`; `timeInForce`, `price`, or `stopPrice` with `MARKET`; `price` with `STOP_MARKET`/`TAKE_PROFIT_MARKET`) returns an error (`PARAM_NOT_REQUIRED`) rather than being silently ignored.
 * Condition orders will be triggered when:
   
   * If parameter`priceProtect`is sent as true:
@@ -2565,7 +2576,9 @@ Additional mandatory parameters based on `type`:
 	'workingType': 'CONTRACT_PRICE',  // Condition price trigger type
 	'priceProtect': False,  // Conditional order trigger protection enabled
 	'origType': 'LIMIT',  // Original order type before trigger
-	'updateTime': 1776311274450 // Update time
+	'updateTime': 1776311274450, // Update time
+	'pegPriceType': '',  // BBO peg mode, only present for pegged orders
+	'stpMode': ''  // Self-Trade Prevention mode, only present when set on the order
 }
 ```
 
@@ -2582,8 +2595,9 @@ Name              |  Type   | Mandatory   | Description
 orderId | LONG  |  NO  | Order ID
 origClientOrderId  |  STRING |  NO |  User-defined order ID
 symbol |  STRING |  YES|  Trading pair
-quantity  |   DECIMAL|  NO | Order quantity
-price  |  DECIMAL | NO | Order price
+side | ENUM | NO | Optional order side; if provided it is validated against the order's actual side.
+quantity  |   DECIMAL|  YES | Order quantity
+price  |  DECIMAL | YES | Order price
 
 
 * Either `orderId` or `origClientOrderId` must be sent. If both are sent, `orderId` takes precedence.
@@ -2689,7 +2703,9 @@ Place a **Chase strategy order** — a BBO-pegged GTX limit order that automatic
 	  	"priceRate": "0.3",			// callback rate, only return with TRAILING_STOP_MARKET order
 	 	"updateTime": 1566818724722,
 	 	"workingType": "CONTRACT_PRICE",
-	 	"priceProtect": false            // if conditional order trigger is protected
+	 	"priceProtect": false,           // if conditional order trigger is protected
+	 	"pegPriceType": "",              // BBO peg mode, only present for pegged orders
+	 	"stpMode": ""                    // Self-Trade Prevention mode, only present when set on the order
 	},
 	{
 		"code": -2022, 
@@ -2760,7 +2776,9 @@ Place a **Chase strategy order** — a BBO-pegged GTX limit order that automatic
 		"workingType": "CONTRACT_PRICE",
 		"priceProtect": false,
 		"origType": "LIMIT",
-		"updateTime": 1700000001100
+		"updateTime": 1700000001100,
+		"pegPriceType": "",
+		"stpMode": ""
 	},
 	{
 		"code": -2013,
@@ -2787,7 +2805,9 @@ Place a **Chase strategy order** — a BBO-pegged GTX limit order that automatic
 		"workingType": "CONTRACT_PRICE",
 		"priceProtect": false,
 		"origType": "LIMIT",
-		"updateTime": 1700000001234
+		"updateTime": 1700000001234,
+		"pegPriceType": "",
+		"stpMode": ""
 	}
 ]
 ```
@@ -2810,6 +2830,7 @@ Place a **Chase strategy order** — a BBO-pegged GTX limit order that automatic
 | symbol            | STRING  | YES       | Trading pair |
 | orderId           | STRING  | NO        | Order ID |
 | origClientOrderId | STRING  | NO        | User-defined order ID |
+| side              | ENUM    | NO        | Optional order side; if provided it is validated against the order's actual side. |
 | quantity          | STRING  | YES       | Order quantity |
 | price             | STRING  | YES       | Order price |
 
@@ -2837,7 +2858,7 @@ POST /fapi/v3/asset/wallet/transfer  (TRANSFER)
 ``
 
 **Weight:**
-5
+50
 
 **Parameters:**
 
@@ -2938,7 +2959,9 @@ Notes:
   	"priceRate": "0.3",					// callback rate, only return with TRAILING_STOP_MARKET order
  	"updateTime": 1571110484038,
  	"workingType": "CONTRACT_PRICE",
- 	"priceProtect": false            // if conditional order trigger is protected
+ 	"priceProtect": false,           // if conditional order trigger is protected
+ 	"pegPriceType": "",              // BBO peg mode, only present for pegged orders
+ 	"stpMode": ""                    // Self-Trade Prevention mode, only present when set on the order
 }
 ```
 
@@ -2986,7 +3009,9 @@ Either `orderId` or `origClientOrderId` must be sent.
   	"priceRate": "0.3",					// callback rate, only return with TRAILING_STOP_MARKET order
  	"updateTime": 1571110484038,
  	"workingType": "CONTRACT_PRICE",
- 	"priceProtect": false            // if conditional order trigger is protected
+ 	"priceProtect": false,           // if conditional order trigger is protected
+ 	"pegPriceType": "",              // BBO peg mode, only present for pegged orders
+ 	"stpMode": ""                    // Self-Trade Prevention mode, only present when set on the order
 }
 ```
 
@@ -3060,7 +3085,9 @@ Either `orderId` or `origClientOrderId` must be sent.
   		"priceRate": "0.3",					// callback rate, only return with TRAILING_STOP_MARKET order
 	 	"updateTime": 1571110484038,
 	 	"workingType": "CONTRACT_PRICE",
-	 	"priceProtect": false            // if conditional order trigger is protected
+	 	"priceProtect": false,           // if conditional order trigger is protected
+	 	"pegPriceType": "",              // BBO peg mode, only present for pegged orders
+	 	"stpMode": ""                    // Self-Trade Prevention mode, only present when set on the order
 	},
 	{
 		"code": -2011,
@@ -3112,7 +3139,9 @@ Either `orderIdList` or `origClientOrderIdList ` must be sent.
   		"priceRate": "0.3",					// callback rate, only return with TRAILING_STOP_MARKET order
 	 	"updateTime": 1571110484038,
 	 	"workingType": "CONTRACT_PRICE",
-	 	"priceProtect": false            // if conditional order trigger is protected
+	 	"priceProtect": false,           // if conditional order trigger is protected
+	 	"pegPriceType": "",              // BBO peg mode, only present for pegged orders
+	 	"stpMode": ""                    // Self-Trade Prevention mode, only present when set on the order
 	},
 	{
 		"code": -2011,
@@ -3319,7 +3348,7 @@ Get all account orders; active, canceled, or filled.
 
 | Name       | Type   | Mandatory | Description            |
 | ---------- | ------ | --------- | ---------------------- |
-| symbol     | STRING | YES       |                        |
+| symbol     | STRING | NO        | If omitted, orders across all symbols are returned. |
 | orderId    | LONG   | NO        |                        |
 | startTime  | LONG   | NO        |                        |
 | endTime    | LONG   | NO        |                        |
@@ -3432,6 +3461,8 @@ Get all account orders; active, canceled, or filled.
 		   	"maxNotional": "250000",  	// maximum available notional with current leverage
 		   	"positionSide": "BOTH",  	// position side
 		   	"positionAmt": "0",			// position amount
+		   	"notional": "0",			// position notional value
+		   	"isolatedWallet": "0",		// isolated wallet balance
 		   	"updateTime": 0           // last update time
 		}
   	]
@@ -3441,6 +3472,8 @@ Get all account orders; active, canceled, or filled.
 ``GET /fapi/v3/accountWithJoinMargin``
 
 Get current account information.
+
+* A separate, non-join-margin endpoint `GET /fapi/v3/account` also exists (same response shape and weight, joinMargin=false); use `accountWithJoinMargin` for the join-margin view described here.
 
 **Weight:**
 5
@@ -3525,6 +3558,7 @@ Change user's initial leverage of specific symbol market.
 | positionSide | ENUM    | NO        | Default`BOTH` for One-way Mode ; `LONG` or `SHORT` for Hedge Mode. It must be sent with Hedge Mode. |
 | amount       | DECIMAL | YES       |                                                                                                     |
 | type         | INT     | YES       | 1: Add position margin，2: Reduce position margin                                                   |
+| clientTranId | STRING  | NO        | Idempotency key, max length 64 chars; requests with the same clientTranId within 7 days for the same account/symbol are rejected as duplicates |
 
 * Only for isolated symbol
 
@@ -3540,7 +3574,9 @@ Change user's initial leverage of specific symbol market.
 	  	"symbol": "BTCUSDT",
 	  	"time": 1578047897183,
 	  	"type": 1,
-	  	"positionSide": "BOTH"
+	  	"positionSide": "BOTH",
+	  	"deltaType": "TRADE",
+	  	"clientTranId": ""
 	},
 	{
 		"amount": "100",
@@ -3548,7 +3584,9 @@ Change user's initial leverage of specific symbol market.
 	  	"symbol": "BTCUSDT",
 	  	"time": 1578047900425,
 	  	"type": 1,
-	  	"positionSide": "LONG"
+	  	"positionSide": "LONG",
+	  	"deltaType": "USER_ADJUST",
+	  	"clientTranId": ""
 	}
 ]
 ```
@@ -3589,6 +3627,8 @@ Change user's initial leverage of specific symbol market.
   		"symbol": "BTCUSDT", 
   		"unRealizedProfit": "0.00000000", 
   		"positionSide": "BOTH",
+  		"notional": "0.00000000",
+  		"isolatedWallet": "0.00000000",
   		"updateTime": 0
   	}
 ]
@@ -3611,6 +3651,8 @@ Change user's initial leverage of specific symbol market.
   		"symbol": "BTCUSDT", 
   		"unRealizedProfit": "2316.83423560"
   		"positionSide": "LONG", 
+  		"notional": "133590.13423560",
+  		"isolatedWallet": "15517.54150468",
   		"updateTime": 1625474304765
   	},
   	{
@@ -3626,6 +3668,8 @@ Change user's initial leverage of specific symbol market.
   		"symbol": "BTCUSDT",
   		"unRealizedProfit": "-1156.46711780" 
   		"positionSide": "SHORT",
+  		"notional": "-66795.0671178",
+  		"isolatedWallet": "5413.95799991",
   		"updateTime": 0
   	}
 ]
@@ -3684,6 +3728,7 @@ Get trades for a specific account and symbol.
 | Name       | Type   | Mandatory | Description                                              |
 | ---------- | ------ | --------- | -------------------------------------------------------- |
 | symbol     | STRING | YES       |                                                          |
+| orderId    | LONG   | NO        | Filter trades belonging to this order id.                |
 | startTime  | LONG   | NO        |                                                          |
 | endTime    | LONG   | NO        |                                                          |
 | fromId     | LONG   | NO        | Trade id to fetch from. Default gets most recent trades. |
@@ -3692,6 +3737,7 @@ Get trades for a specific account and symbol.
 * If `startTime` and `endTime` are both not sent, then the last 7 days' data will be returned.
 * The time between `startTime` and `endTime` cannot be longer than 7 days.
 * The parameter `fromId` cannot be sent with `startTime` or `endTime`.
+* `orderId` is an additional optional filter and takes precedence over the other search modes when sent.
 
 ## Get Income History(USER_DATA)
 
@@ -3732,7 +3778,7 @@ Get trades for a specific account and symbol.
 | Name       | Type   | Mandatory | Description                                                                                                                      |
 | ---------- | ------ | --------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | symbol     | STRING | NO        |                                                                                                                                  |
-| incomeType | STRING | NO        | "TRANSFER"，"WELCOME_BONUS", "REALIZED_PNL"，"FUNDING_FEE", "COMMISSION", "INSURANCE_CLEAR", and "MARKET_MERCHANT_RETURN_REWARD" |
+| incomeType | STRING | NO        | "TRANSFER"，"WELCOME_BONUS", "REALIZED_PNL"，"FUNDING_FEE", "COMMISSION", "INSURANCE_CLEAR", "MARKET_MERCHANT_RETURN_REWARD", "REFERRAL_KICKBACK", "COMMISSION_REBATE", "MARKET_MAKER_REBATE", "API_REBATE", "CONTEST_REWARD", "CROSS_COLLATERAL_TRANSFER", "INTERNAL_TRANSFER", and "AUTO_EXCHANGE" |
 | startTime  | LONG   | NO        | Timestamp in ms to get funding from INCLUSIVE.                                                                                   |
 | endTime    | LONG   | NO        | Timestamp in ms to get funding until INCLUSIVE.                                                                                  |
 | limit      | INT    | NO        | Default 100; max 1000                                                                                                            |
@@ -3782,7 +3828,9 @@ Get trades for a specific account and symbol.
 }
 ```
 
-``GET /fapi/v3/leverageBracket``
+``GET /fapi/v3/leverageBrackets``
+
+*Note: `GET /fapi/v3/leverageBracket` (singular) is deprecated but still functions identically; `GET /fapi/v3/leverageBrackets` (plural) is the recommended, actively maintained path.*
 
 **Weight:** 1
 
@@ -5949,7 +5997,6 @@ event type is `ORDER_TRADE_UPDATE`.
 
 * GTC
 * IOC
-* FOK
 * GTX
 
 **Working Type**
@@ -6339,7 +6386,7 @@ Codes are universal,but messages can vary.
 
 > -2011 CANCEL_REJECTED
 
-* CANCEL_REJECTED
+* Unknown order sent.
 
 > -2013 NO_SUCH_ORDER
 
@@ -6820,6 +6867,14 @@ Codes are universal,but messages can vary.
 > -5047 INVALID_START_TIME
 
 * StartTime must be within the last %s days.
+
+> -5048 VAULT_SYMBOL_NOT_ALLOWED
+
+* This symbol is not allowed for this vault's asset restriction.
+
+> -5049 BUILDER_QUERY_NOT_ENABLED
+
+* Builder query API is not enabled for this account.
 
 > -5050 DEPOSIT_REQUIRED
 

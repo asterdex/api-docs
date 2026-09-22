@@ -37,7 +37,7 @@
 	* PONG帧
 	* JSON格式的消息, 比如订阅, 断开订阅.
 * 如果用户发送的消息超过限制，连接会被断开连接。反复被断开连接的IP有可能被服务器屏蔽。
-* 单个连接最多可以订阅 **1024** 个Streams。
+* 单个连接最多可以订阅 **200** 个Streams。
 
 
 ### V3 Nonce 机制
@@ -70,6 +70,8 @@ TRADE | 需要有效的signer和签名
 USER_DATA | 需要有效的signer和签名
 USER_STREAM | 需要有效的signer和签名
 MARKET_DATA | 不需要鉴权的接口
+TRANSFER | 需要有效的signer和签名
+WITHDRAW | 需要有效的signer和签名
 
 
 ### POST /api/v3/order 的示例
@@ -83,7 +85,7 @@ user | 0x63DD5aCC6b1aa0f563956C0e534DD30B6dcF7C4e  | 登陆钱包地址
 signer | 0x21cF8Ae13Bb72632562c6Fff438652Ba1a151bb0 | [点击这里获取](https://www.asterdex-testnet.com/zh-CN/api-wallet)
 privateKey | 0x4fd0a42218f3eae43a6ce26d22544e986139a01e5b34a62db53757ffca81bae1 | [点击这里获取](https://www.asterdex-testnet.com/zh-CN/api-wallet)
 
-#### 示例 : nonce参数为当前系统微秒值,超过系统时间,或者落后系统时间超过10s为非法请求
+#### 示例 : nonce参数为当前系统微秒值,超过系统时间,或者落后系统时间超过60s为非法请求
 ```python
 #python
 nonce = math.trunc(time.time()*1000000)
@@ -264,8 +266,9 @@ Status | Description
 -----------| --------------
 `GTC` | 成交为止 <br> 订单会一直有效，直到被成交或者取消。
 `IOC` | 无法立即成交的部分就撤销 <br> 订单在失效前会尽量多的成交。
-`FOK` | 无法全部立即成交就撤销 <br> 如果无法全部成交，订单会失效。
+`FOK` | 无法全部立即成交就撤销 <br> 如果无法全部成交，订单会失效。 **注意：** 现货下单暂不支持 FOK，向 `POST /api/v3/order` 发送 `timeInForce=FOK` 会返回 `-1115 INVALID_TIF`，与订单类型无关。
 `GTX` | 直到挂单成交 <br> 限价只挂单。
+`HIDDEN` | 隐藏单/冰山单，不会显示在公开的订单簿中。
 
 **K线间隔:**
 
@@ -424,6 +427,80 @@ Lots是拍卖术语，`LOT_SIZE` 过滤器对订单中的 `quantity` 也就是�
 * `quantity` >= `minQty`
 * `quantity` <= `maxQty`
 * (`quantity`-`minQty`) % `stepSize` == 0
+
+#### MAX_NUM_ORDERS - 最大订单数
+
+> **/exchangeInfo 响应中的格式:**
+```javascript
+  {
+    "limit": 200,
+    "filterType": "MAX_NUM_ORDERS"
+  }
+```
+
+`MAX_NUM_ORDERS` 过滤器定义了一个账户在某交易对上允许拥有的最大挂单数量。该计数包含所有当前挂单（含OCO订单）。
+
+#### MIN_NOTIONAL - 最小订单金额
+
+> **/exchangeInfo 响应中的格式:**
+```javascript
+  {
+    "minNotional": "5",
+    "filterType": "MIN_NOTIONAL"
+  }
+```
+
+`MIN_NOTIONAL` 过滤器定义了交易对上订单允许的最小名义价值(`price` \* `quantity`)。
+
+#### MAX_NOTIONAL - 最大订单金额
+
+> **/exchangeInfo 响应中的格式:**
+```javascript
+  {
+    "maxNotional": "100",
+    "filterType": "MAX_NOTIONAL"
+  }
+```
+
+`MAX_NOTIONAL` 过滤器定义了交易对上订单允许的最大名义价值(`price` \* `quantity`)。
+
+#### NOTIONAL - 订单名义价值过滤器
+
+> **/exchangeInfo 响应中的格式:**
+```javascript
+  {
+    "maxNotional": "100",
+    "minNotional": "5",
+    "avgPriceMins": 5,
+    "applyMinToMarket": true,
+    "filterType": "NOTIONAL",
+    "applyMaxToMarket": true
+  }
+```
+
+`NOTIONAL` 过滤器定义了交易对上订单可接受的名义价值(`price` \* `quantity`)范围。`avgPriceMins` 表示计算市价单名义价值检查所用平均价格的时间窗口(分钟)；`applyMinToMarket`/`applyMaxToMarket` 决定 `MARKET` 订单是否也需要遵守 `minNotional`/`maxNotional` 限制。
+
+#### PERCENT_PRICE_BY_SIDE - 按方向的价格振幅过滤器
+
+> **/exchangeInfo 响应中的格式:**
+```javascript
+  {
+    "bidMultiplierUp": "5",
+    "askMultiplierUp": "5",
+    "bidMultiplierDown": "0",
+    "avgPriceMins": 5,
+    "multiplierDecimal": "0",
+    "filterType": "PERCENT_PRICE_BY_SIDE",
+    "askMultiplierDown": "0"
+  }
+```
+
+`PERCENT_PRICE_BY_SIDE` 过滤器基于过去 `avgPriceMins` 分钟内的平均价格，按订单方向应用不同的乘数区间来定义有效价格范围：
+
+* `BUY` 订单: `price` <= `avgPrice` * `bidMultiplierUp` 且 `price` >= `avgPrice` * `bidMultiplierDown`
+* `SELL` 订单: `price` <= `avgPrice` * `askMultiplierUp` 且 `price` >= `avgPrice` * `askMultiplierDown`
+
+若 `avgPriceMins` 为 0，则使用最新成交价代替平均价格。
 
 
 
@@ -602,7 +679,6 @@ NONE
 		"timeInForce": [
 			"GTC",
 			"IOC",
-			"FOK",
 			"GTX",
       "HIDDEN"
 		],
@@ -634,6 +710,7 @@ GET /api/v3/exchangeInfo
   "lastUpdateId": 1027024,
   "E":1589436922972, // 消息时间
   "T":1589436922959, // 撮合引擎时间
+  "symbol": "BTCUSDT",
   "bids": [
     [
       "4.00000000", // 价位
@@ -804,6 +881,7 @@ GET /api/v3/klines
 每根K线代表一个交易对。 
 每根K线的开盘时间可视为唯一ID
 
+**权重:** 1 (limit<100), 2 (limit<500), 5 (limit<=1000或省略), 10 (limit>1000)
 
 **参数:**
 
@@ -866,6 +944,8 @@ GET /api/v3/ticker/24hr
 ------------ | ------------ | ------------ | ------------
 symbol | STRING | NO |
 * 请注意，不携带symbol参数会返回全部交易对数据
+
+> 注意：`GET /api/v3/ticker/opt/24hr` 也是一个可选的24小时行情接口，本文档暂不做进一步说明。
 
 ## 最新价格
 
@@ -1007,6 +1087,7 @@ symbol | STRING | YES |
   "origType": "LIMIT",  //触发前订单类型
   "type": "LIMIT", // 订单类型， 比如市价单，现价单等
   "side": "SELL", // 订单方向，买还是卖
+  "orderListId": -1
 }
 ```
 
@@ -1031,6 +1112,7 @@ quoteOrderQty|DECIMAL|NO|
 price | DECIMAL | NO |
 newClientOrderId | STRING | NO | 客户自定义的唯一订单ID。 如果未发送，则自动生成
 stopPrice | DECIMAL | NO | 仅 `STOP`, `STOP_MARKET` , `TAKE_PROFIT`,`TAKE_PROFIT_MARKET` 需要此参数。
+selfTradingProtectionMode | INT | NO | 1 (NONE), 2 (CANCEL_TAKER), 4 (CANCEL_MAKER), 8 (CANCEL_BOTH)；默认值取决于交易对配置
 
 基于订单 `type`不同，强制要求某些参数:
 
@@ -1074,6 +1156,7 @@ stopPrice | DECIMAL | NO | 仅 `STOP`, `STOP_MARKET` , `TAKE_PROFIT`,`TAKE_PROFI
   "origType": "LIMIT",  //触发前订单类型
   "type": "LIMIT", // 订单类型， 比如市价单，现价单等
   "side": "SELL", // 订单方向，买还是卖
+  "orderListId": -1
 }
 ```
 
@@ -1115,7 +1198,8 @@ origClientOrderId | STRING | NO |
     "stopPrice": "0",  // 触发价
     "origType": "LIMIT",  // 触发前订单类型
     "time": 1649913186270,  // 订单时间
-    "updateTime": 1649913186297  // 更新时间
+    "updateTime": 1649913186297, // 更新时间
+    "orderListId": -1
 }
 ```
 
@@ -1165,7 +1249,8 @@ origClientOrderId | STRING | NO |
     "stopPrice": "0",  // 触发价
     "origType": "LIMIT",  // 触发前订单类型
     "time": 1649913186270,  // 订单时间
-    "updateTime": 1649913186297  // 更新时间
+    "updateTime": 1649913186297, // 更新时间
+    "orderListId": -1
 }
 ```
 
@@ -1213,6 +1298,7 @@ origClientOrderId | STRING | NO |
         "origType": "LIMIT", // 触发前订单类型
         "time": 1756252940207, // 订单时间
         "updateTime": 1756252940207, // 更新时间
+        "orderListId": -1
     }
 ]
 ```
@@ -1248,7 +1334,7 @@ symbol | STRING | NO |
 ```
 
 ``
-DEL /api/v3/allOpenOrders ``
+DELETE /api/v3/allOpenOrders ``
 
 **权重:**
 - ***1***
@@ -1261,6 +1347,7 @@ symbol | STRING | YES |
 orderIdList | STRING | NO | id数组字符串
 origClientOrderIdList | STRING | NO | clientOrderId数组字符串
 
+> 注意：`POST /api/v3/batchOrders` 与 `DELETE /api/v3/batchOrders`（批量下单/撤单，TRADE）接口也存在，本文档暂不做进一步说明。
 
 ## 查询所有订单 (USER_DATA)
 > **响应**
@@ -1283,6 +1370,7 @@ origClientOrderIdList | STRING | NO | clientOrderId数组字符串
         "origType": "LIMIT", // 触发前订单类型
         "time": 1756252940207, // 订单时间
         "updateTime": 1756252940207, // 更新时间
+        "orderListId": -1
     }
 ]
 ```
@@ -1302,13 +1390,14 @@ GET /api/v3/allOrders``
 
 名称 | 类型 | 是否必需 | 描述
 ------------ | ------------ | ------------ | ------------
-symbol | STRING | YES |
+symbol | STRING | NO | 若不发送，则返回所有交易对的订单。
 orderId | LONG | NO |
 startTime | LONG | NO |
 endTime | LONG | NO |
 limit | INT | NO | 默认 500; 最大 1000.
 
 * 查询时间范围最大不得超过7天
+* `orderId` 不能与 `startTime`/`endTime` 同时使用
 * 默认查询最近7天内的数据 
 
 
@@ -1349,7 +1438,7 @@ limit | LONG | NO | 返回的结果集数量 默认值:100 最大值:1000
 
 注意:
 
-*  `type` 取值 `TRADE_TARGET`,`TRADE_SOURCE`,`TRANSFER_SPOT_TO_FUTURE`,`TRANSFER_FUTURE_TO_SPOT`,`TRANSFER_SPOT_TO_SPOT`,`AIRDROP`,`DIVIDEND`,`TRANSFER_REFUND`,`INTERNAL_TRANSFER`,`TRANSFER`,`SWAP`,`COMMISSION_REBATE`,`CASH_BACK`,`STAKING_WITHDRAW`, `STAKING_CLAIM`, `STAKING_DELEGATE`  中的一种
+*  `type` 取值 `TRADE_TARGET`,`TRADE_SOURCE`,`TRANSFER_SPOT_TO_FUTURE`,`TRANSFER_FUTURE_TO_SPOT`,`TRANSFER_SPOT_TO_SPOT`,`AIRDROP`,`DIVIDEND`,`TRANSFER_REFUND`,`INTERNAL_TRANSFER`,`TRANSFER`,`SWAP`,`COMMISSION_REBATE`,`CASH_BACK`,`STAKING_WITHDRAW`, `STAKING_CLAIM`, `STAKING_DELEGATE`  中的一种(此列表并非完整枚举，还包括 `USD1_AIRDROP`、`DRIBBLET_EXCHANGE`、`USER_REBATE`、`INVITER_REBATE`，以及若干 `PREDICTION_*` 类型)
 *  如果`startTime` 和 `endTime` 均未发送, 只会返回最近7天的数据。
 
 ## 期货现货互转 (TRADE)
@@ -1434,7 +1523,7 @@ asset | STRING | YES |
 amount | STRING | YES |
 fee | STRING | YES |
 receiver | STRING | YES | 
-nonce | STRING | YES |  当前时间的微秒值 
+userNonce | STRING | YES |  当前时间的微秒值 
 userSignature | STRING | YES | 
 
 注意:
@@ -1479,6 +1568,8 @@ const types = {
 
 const signature = await signer.signTypedData(domain, types, value)
 ```
+
+> 注意：`POST /api/v3/aster/user-solana-withdraw` 也存在，用于Solana提现，本文档不再另行说明。
 
 ## 账户信息 (USER_DATA)
 > **响应**
@@ -1555,7 +1646,7 @@ GET /api/v3/userTrades ``
 名称 | 类型 | 是否必需 | 描述
 ------------ | ------------ | ------------ | ------------
 symbol | STRING | NO |
-orderId|LONG|NO| 必须要和参数`symbol`一起使用.
+orderId|LONG|NO| 建议与参数`symbol`一起使用.
 startTime | LONG | NO |
 endTime | LONG | NO |
 fromId | LONG | NO | 起始Trade id。 默认获取最新交易。
@@ -1579,7 +1670,8 @@ limit | INT | NO | 默认 500; 最大 1000.
 * 订阅组合streams时，事件payload会以这样的格式封装: **{"stream":"\<streamName\>","data":\<rawPayload\>}**
 * stream名称中所有交易对均为 **小写**
 * 每个到 **sstream.asterdex-testnet.com** 的链接有效期不超过24小时，请妥善处理断线重连。
-* 每3分钟，服务端会发送ping帧，客户端应当在10分钟内回复pong帧，否则服务端会主动断开链接。允许客户端发送不成对的pong帧(即客户端可以以高于10分钟每次的频率发送pong帧保持链接)。
+* 每5分钟，服务端会发送ping帧，客户端应当在15分钟内回复pong帧，否则服务端会主动断开链接。允许客户端发送不成对的pong帧(即客户端可以以高于15分钟每次的频率发送pong帧保持链接)。
+* 客户端也可以发送应用层的`{"method": "PONG"}` JSON消息作为keepalive，作为WebSocket协议层pong帧的替代方式。
 
 ## 实时订阅/取消数据流
 
@@ -2078,7 +2170,7 @@ PUT /api/v3/listenKey
 
 名称 | 类型 | 是否必需 | 描述
 ------------ | ------------ | ------------ | ------------
-listenKey | STRING | YES
+listenKey | STRING | NO | 该参数会被接受但忽略——服务端根据已鉴权的账户推导listenKey，而非该参数。
 
 
 ### 关闭 Listen Key (USER_STREAM)
@@ -2101,7 +2193,7 @@ DELETE /api/v3/listenKey
 
 名称 | 类型 | 是否必需 | 描述
 ------------ | ------------ | ------------ | ------------
-listenKey | STRING | YES
+listenKey | STRING | NO | 该参数会被接受但忽略——服务端根据已鉴权的账户推导listenKey，而非该参数。
 
 
 ## Payload: 账户更新
@@ -2406,10 +2498,6 @@ listenKey | STRING | YES
  * Order would immediately trigger.
  * 订单可能被立刻触发
 
-### -2022 REDUCE_ONLY_REJECT
- * ReduceOnly Order is rejected.
- * `ReduceOnly`订单被拒绝
-
 ### -2024 POSITION_NOT_SUFFICIENT
  * Position is not sufficient.
  * 持仓不足
@@ -2417,10 +2505,6 @@ listenKey | STRING | YES
 ### -2025 MAX_OPEN_ORDER_EXCEEDED
  * Reach max open order limit.
  * 挂单量达到上限
-
-### -2026 REDUCE_ONLY_ORDER_TYPE_NOT_SUPPORTED
- * This OrderType is not supported when reduceOnly.
- * 当前订单类型不支持`reduceOnly`
 
 ## 40xx - Filters and other Issues
 ### -4000 INVALID_ORDER_STATUS
