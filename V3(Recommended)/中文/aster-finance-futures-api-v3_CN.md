@@ -2534,8 +2534,11 @@ POST /fapi/v3/assetExchange``
 
    名称    |  类型  | 是否必需 |       描述
 ---------- | ------ | -------- | -----------------
+signer     | STRING | YES      | API钱包地址
+nonce      | LONG   | YES      | 微秒级时间戳
+signature  | STRING | YES      | 签名
 
-* 无需业务参数，只需传入通用签名参数。
+* 无需业务参数，只需传入上述通用鉴权参数。
 * 仅在联合保证金模式下可用，否则返回 `-4212` "User can not asset exchange while not in joint margin mode"。
 * 若本次未发生兑换，响应体为空。
 

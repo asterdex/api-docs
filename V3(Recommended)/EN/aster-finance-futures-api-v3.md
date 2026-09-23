@@ -2490,10 +2490,13 @@ Manually trigger an asset exchange for the account in Multi-Assets Mode (equival
 
 **Parameters:**
 
-| Name | Type | Mandatory | Description |
-| ---- | ---- | --------- | ----------- |
+| Name      | Type   | Mandatory | Description                 |
+| --------- | ------ | --------- | --------------------------- |
+| signer    | STRING | YES       | API wallet address          |
+| nonce     | LONG   | YES       | Microsecond-level timestamp |
+| signature | STRING | YES       | Signature                   |
 
-* No business parameters are required; only the common signature parameters are needed.
+* No business parameters are required; only the common authentication parameters above are needed.
 * Only available in Multi-Assets Mode; otherwise `-4212` "User can not asset exchange while not in joint margin mode" is returned.
 * If no exchange takes place, the response body is empty.
 
