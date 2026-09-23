@@ -41,6 +41,7 @@
 	- [最新价格](#最新价格)
 	- [当前最优挂单](#当前最优挂单)
 	- [获取指数价格成分](#获取指数价格成分)
+	- [查询剩余可开仓名义价值](#查询剩余可开仓名义价值)
 - [Websocket 行情推送](#websocket-行情推送)
 	- [实时订阅/取消数据流](#实时订阅取消数据流)
 		- [订阅一个信息流](#订阅一个信息流)
@@ -70,6 +71,7 @@
 	- [查询STP模式(USER_DATA)](#查询stp模式user_data)
 	- [更改联合保证金模式(TRADE)](#更改联合保证金模式trade)
 	- [查询联合保证金模式(USER_DATA)](#查询联合保证金模式user_data)
+	- [资产兑换 (TRADE)](#资产兑换-trade)
 	- [下单 (TRADE)](#下单-trade)
 	- [测试下单接口 (TRADE)](#测试下单接口-trade)
 	- [修改订单 (TRADE)](#修改订单-trade)
@@ -1669,6 +1671,36 @@ GET /fapi/v3/indexreferences
 symbol | STRING | YES      | 交易对
 
 
+## 查询剩余可开仓名义价值
+
+> **响应:**
+
+```javascript
+{
+  "remainingOpenableNotionalValue": "200000" // 该交易对在指定杠杆下剩余可开仓的名义价值（USDT）；"-1" 表示不限制
+}
+```
+
+``
+GET /fapi/v3/remainingOpenableNotionalValue``
+
+查询某交易对在指定杠杆下剩余可开仓的名义价值。该值为交易对维度的持仓量上限，与具体账户无关。
+
+**权重:**
+50
+
+**参数:**
+
+   名称    |  类型  | 是否必需 |       描述
+---------- | ------ | -------- | -----------------
+symbol     | STRING | YES      | 交易对
+leverage   | INT    | YES      | 杠杆倍数，须为正整数
+
+* 返回值为 `leverage` 所在杠杆档位的剩余可开仓额度。
+* 若该交易对未配置持仓量上限，返回 `"-1"`。
+* 若 `leverage` 小于等于 0 或超过已配置的最高杠杆档位，返回 `-4028 INVALID_LEVERAGE`。
+
+
 # Websocket 行情推送
 
 * 本篇所列出的所有wss接口baseurl: **wss://fstream.asterdex.com**
@@ -2475,6 +2507,40 @@ GET /fapi/v3/multiAssetsMargin``
 
    名称    |  类型  | 是否必需 |       描述
 ---------- | ------ | -------- | -----------------
+
+
+## 资产兑换 (TRADE)
+
+> **响应:**
+
+```javascript
+{
+  "accountId": 123456,
+  "asset": "USDT",      // 兑换后余额发生变动的资产
+  "balance": "100.50",  // 兑换后该资产的钱包余额
+  "updateTime": 1774077572319
+}
+```
+
+``
+POST /fapi/v3/assetExchange``
+
+在联合保证金模式下手动触发账户的资产兑换（等同于阈值为 0 的自动资产兑换）。
+
+**权重:**
+1
+
+**参数:**
+
+   名称    |  类型  | 是否必需 |       描述
+---------- | ------ | -------- | -----------------
+signer     | STRING | YES      | API钱包地址
+nonce      | LONG   | YES      | 微秒级时间戳
+signature  | STRING | YES      | 签名
+
+* 无需业务参数，只需传入上述通用鉴权参数。
+* 仅在联合保证金模式下可用，否则返回 `-4212` "User can not asset exchange while not in joint margin mode"。
+* 若本次未发生兑换，响应体为空。
 
 
 ## 下单 (TRADE)

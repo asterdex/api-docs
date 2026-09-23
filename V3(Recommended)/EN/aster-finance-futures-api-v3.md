@@ -42,6 +42,7 @@
   - [Symbol Price Ticker](#symbol-price-ticker)
   - [Symbol Order Book Ticker](#symbol-order-book-ticker)
   - [Index Price References](#index-price-references)
+  - [Remaining Openable Notional Value](#remaining-openable-notional-value)
 - [Websocket Market Streams](#websocket-market-streams)
   - [Live Subscribing/Unsubscribing to streams](#live-subscribingunsubscribing-to-streams)
     - [Subscribe to a stream](#subscribe-to-a-stream)
@@ -72,6 +73,7 @@
   - [Get Current STP Mode (USER_DATA)](#get-current-stp-modeuser_data)
   - [Change Multi-Assets Mode (TRADE)](#change-multi-assets-mode-trade)
   - [Get Current Multi-Assets Mode (USER_DATA)](#get-current-multi-assets-mode-user_data)
+  - [Asset Exchange (TRADE)](#asset-exchange-trade)
   - [New Order  (TRADE)](#new-order--trade)
   - [Modify Order (TRADE)](#modify-order-trade)
   - [Place Chase Order (TRADE)](#place-chase-order-trade)
@@ -1657,6 +1659,35 @@ Get the component exchanges and their weights for the index price of a symbol.
 | symbol | STRING | YES       | Trading pair |
 
 
+## Remaining Openable Notional Value
+
+> **Response:**
+
+```javascript
+{
+  "remainingOpenableNotionalValue": "200000" // Remaining notional value (USDT) that can still be opened on this symbol at the given leverage; "-1" means no limit
+}
+```
+
+``GET /fapi/v3/remainingOpenableNotionalValue``
+
+Get the remaining openable notional value of a symbol at the specified leverage. This is a symbol-level open interest cap, not an account-specific value.
+
+**Weight:**
+50
+
+**Parameters:**
+
+| Name     | Type   | Mandatory | Description                          |
+| -------- | ------ | --------- | ------------------------------------ |
+| symbol   | STRING | YES       | Trading pair                         |
+| leverage | INT    | YES       | Leverage, must be a positive integer |
+
+* The value returned is the remaining cap of the leverage tier that `leverage` falls into.
+* `"-1"` is returned when the symbol has no open interest cap configured.
+* `-4028 INVALID_LEVERAGE` is returned if `leverage` is not greater than 0 or exceeds the highest configured leverage tier.
+
+
 # Websocket Market Streams
 
 * The baseurl for websocket is **wss://fstream.asterdex.com**
@@ -2436,6 +2467,38 @@ Get user's Multi-Assets mode (Multi-Assets Mode or Single-Asset Mode) on ***Ever
 
 | Name       | Type | Mandatory | Description |
 | ---------- | ---- | --------- | ----------- |
+
+## Asset Exchange (TRADE)
+
+> **Response:**
+
+```javascript
+{
+  "accountId": 123456,
+  "asset": "USDT",      // Asset whose balance was updated by the exchange
+  "balance": "100.50",  // Wallet balance of the asset after the exchange
+  "updateTime": 1774077572319
+}
+```
+
+``POST /fapi/v3/assetExchange``
+
+Manually trigger an asset exchange for the account in Multi-Assets Mode (equivalent to an auto asset exchange with a threshold of 0).
+
+**Weight:**
+1
+
+**Parameters:**
+
+| Name      | Type   | Mandatory | Description                 |
+| --------- | ------ | --------- | --------------------------- |
+| signer    | STRING | YES       | API wallet address          |
+| nonce     | LONG   | YES       | Microsecond-level timestamp |
+| signature | STRING | YES       | Signature                   |
+
+* No business parameters are required; only the common authentication parameters above are needed.
+* Only available in Multi-Assets Mode; otherwise `-4212` "User can not asset exchange while not in joint margin mode" is returned.
+* If no exchange takes place, the response body is empty.
 
 ## New Order  (TRADE)
 
