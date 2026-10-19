@@ -101,6 +101,7 @@
 	- [持仓ADL队列估算 (USER_DATA)](#持仓adl队列估算-user_data)
 	- [用户强平单历史 (USER_DATA)](#用户强平单历史-user_data)
 	- [用户手续费率 (USER_DATA)](#用户手续费率-user_data)
+	- [查询被邀请人信息 (USER_DATA)](#查询被邀请人信息-user_data)
 	- [更新用户MMP (USER_DATA)](#更新用户mmp-user_data)
 	- [获取用户MMP (USER_DATA)](#获取用户mmp-user_data)
 	- [删除用户MMP (USER_DATA)](#删除用户mmp-user_data)
@@ -4193,6 +4194,69 @@ GET /fapi/v3/commissionRate``
 名称  |  类型  | 是否必需 |  描述
 ------------ | ------------ | ------------ | ------------
 symbol | STRING | YES	
+
+
+## 查询被邀请人信息 (USER_DATA)
+
+> **响应（该地址是调用者邀请的用户）：**
+
+```javascript
+{
+  "isInvitee": true,
+  "walletAddress": "0x1234...abcd",
+  "dateJoined": 1759499712000,   // 毫秒
+  "feePaid": "4.82052705",
+  "yourRewards": "0.48205229",
+  "expiredStatus": false
+}
+```
+
+> **响应（该地址不是调用者邀请的用户）：**
+
+```javascript
+{
+  "isInvitee": false,
+  "walletAddress": "0x1234...abcd"
+}
+```
+
+``
+GET /fapi/v3/referral/inviteeInfo``
+
+查询某个钱包地址是否通过调用者的邀请加入；如果是，返回该用户累计支付的手续费，以及调用者从该用户处累计获得的返佣。邀请人身份取自签名鉴权的账户，没有单独的邀请人参数，因此只能查询自己邀请的用户。
+
+**权重:**
+1
+
+
+**参数:**
+
+名称  |  类型  | 是否必需 |  描述
+------------ | ------------ | ------------ | ------------
+address | STRING | YES | 要查询的钱包地址。支持 EVM 地址（`0x` 加 40 位十六进制）和 Solana 地址（base58，32~44 位）
+
+**响应字段:**
+
+名称  |  类型  |  描述
+------------ | ------------ | ------------
+isInvitee | BOOLEAN | 该地址是否通过调用者的邀请加入
+walletAddress | STRING | 查询的地址，去掉前后空格，大小写按传入原样返回
+dateJoined | LONG | 被邀请人加入时间，毫秒时间戳。仅 `isInvitee` 为 `true` 时返回
+feePaid | STRING | 被邀请人累计支付的手续费。仅 `isInvitee` 为 `true` 时返回
+yourRewards | STRING | 调用者从该被邀请人处累计获得的返佣。仅 `isInvitee` 为 `true` 时返回
+expiredStatus | BOOLEAN | 邀请关系是否已过期。仅 `isInvitee` 为 `true` 时返回
+
+* 地址比对不区分大小写：校验和格式（大小写混写）的地址和全小写地址，查询结果相同。
+* `isInvitee` 为 `false` 时只返回 `isInvitee` 和 `walletAddress` 两个字段。地址被其他账户邀请、没有邀请人、从未注册，都属于这种情况。
+* 邀请关系自建立起 365 天内有效。已过期的邀请关系仍返回 `isInvitee: true`，同时 `expiredStatus` 为 `true`。
+* `feePaid`、`yourRewards` 是定时任务汇总的累计值，不是实时数据；以字符串返回，使用普通小数写法并去掉末尾的 0（如 `"4"`、`"123456789012.12345678"`）；被邀请人还没有交易时返回 `"0"`。
+
+**错误:**
+
+HTTP | 错误码 | 触发条件
+------------ | ------------ | ------------
+400 | -1102 | `address` 缺失、为空或全是空格：`Mandatory parameter 'address' was not sent, was empty/null, or malformed.`
+400 | -1130 | `address` 不是合法的 EVM 或 Solana 地址：`Data sent for parameter 'address' is not valid.`
 
 
 ## 更新用户MMP (USER_DATA)

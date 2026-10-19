@@ -103,6 +103,7 @@
   - [Position ADL Quantile Estimation (USER_DATA)](#position-adl-quantile-estimation-user_data)
   - [User's Force Orders (USER_DATA)](#users-force-orders-user_data)
   - [User Commission Rate (USER_DATA)](#user-commission-rate-user_data)
+  - [Get Invitee Info (USER_DATA)](#get-invitee-info-user_data)
   - [Update User MMP (USER_DATA)](#update-user-mmp-user_data)
   - [Get User MMP (USER_DATA)](#get-user-mmp-user_data)
   - [Delete User MMP (USER_DATA)](#delete-user-mmp-user_data)
@@ -4042,6 +4043,67 @@ Get trades for a specific account and symbol.
 | Name       | Type   | Mandatory | Description |
 | ---------- | ------ | --------- | ----------- |
 | symbol     | STRING | YES       |             |
+
+
+## Get Invitee Info (USER_DATA)
+
+> **Response (the address is the caller's invitee):**
+
+```javascript
+{
+  "isInvitee": true,
+  "walletAddress": "0x1234...abcd",
+  "dateJoined": 1759499712000,   // ms
+  "feePaid": "4.82052705",
+  "yourRewards": "0.48205229",
+  "expiredStatus": false
+}
+```
+
+> **Response (the address is not the caller's invitee):**
+
+```javascript
+{
+  "isInvitee": false,
+  "walletAddress": "0x1234...abcd"
+}
+```
+
+``GET /fapi/v3/referral/inviteeInfo``
+
+Check whether a wallet address joined through the caller's referral, and if so, return the cumulative trading fee it has paid and the rewards the caller has earned from it. The authenticated account is used as the referrer — there is no separate referrer parameter, so an account can only query its own invitees.
+
+**Weight:**
+1
+
+**Parameters:**
+
+| Name    | Type   | Mandatory | Description |
+| ------- | ------ | --------- | ----------- |
+| address | STRING | YES       | Wallet address to check. EVM (`0x` + 40 hex characters) or Solana (base58, 32–44 characters) |
+
+**Response Fields:**
+
+| Name          | Type    | Description |
+| ------------- | ------- | ----------- |
+| isInvitee     | BOOLEAN | `true` if `address` joined through the caller's referral |
+| walletAddress | STRING  | The queried address with leading/trailing spaces removed; letter case is returned as sent |
+| dateJoined    | LONG    | Time the invitee joined, in milliseconds. Only returned when `isInvitee` is `true` |
+| feePaid       | STRING  | Cumulative trading fee paid by the invitee. Only returned when `isInvitee` is `true` |
+| yourRewards   | STRING  | Cumulative rewards the caller has earned from the invitee. Only returned when `isInvitee` is `true` |
+| expiredStatus | BOOLEAN | `true` if the referral relationship has expired. Only returned when `isInvitee` is `true` |
+
+* Address matching is case-insensitive: a checksummed (mixed-case) address and its all-lowercase form return the same result.
+* When `isInvitee` is `false`, only `isInvitee` and `walletAddress` are returned. This covers addresses invited by another account, addresses with no referrer, and addresses that have never registered.
+* A referral relationship is valid for 365 days from the time it is created. An expired relationship still returns `isInvitee: true`, with `expiredStatus: true`.
+* `feePaid` and `yourRewards` are cumulative values produced by a periodic aggregation job, so they are not real-time. They are returned as strings in plain decimal notation with trailing zeros removed (e.g. `"4"`, `"123456789012.12345678"`), and are `"0"` if the invitee has not traded yet.
+
+**Errors:**
+
+| HTTP | Code  | When |
+| ---- | ----- | ---- |
+| 400  | -1102 | `address` is missing, empty, or only spaces: `Mandatory parameter 'address' was not sent, was empty/null, or malformed.` |
+| 400  | -1130 | `address` is neither a valid EVM nor a valid Solana address: `Data sent for parameter 'address' is not valid.` |
 
 
 ## Update User MMP (USER_DATA)
