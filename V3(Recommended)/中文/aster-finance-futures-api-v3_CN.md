@@ -2735,6 +2735,7 @@ price  |  DECIMAL | YES | 委托价格
 * 当新订单的quantity 或 price不满足PRICE_FILTER / PERCENT_FILTER / LOT_SIZE限制，修改会被拒绝，原订单依旧被保留
 订单只支持limit类型
 * 同一订单修改次数最多10000次
+* 改单成功后，订单时间优先级重置，重新排至同价位队列末尾。注：该规则对仅调整数量、不调整价格的改单同样适用。
 * **BBO peg 订单**（使用 `pegPriceType` = `COUNTERPARTY_1` / `QUEUE_1` 下的订单）：撮合引擎依据订单簿解析实际价格（`LIMIT` 订单在下单时解析，`STOP` / `TAKE_PROFIT` 订单在触发时解析）。普通 modify 无法改变 peg 解析后的价格。若需要持续追踪 BBO，请使用追单接口 `POST /fapi/v3/chase`。
 
 ## 追单 (TRADE)
@@ -2974,6 +2975,7 @@ price              | STRING  | YES      | 委托价格
 * orderId 与 origClientOrderId 每个订单至少发送一个，同时发送则以 orderId 为准
 * quantity 与 price 每个订单均必须发送
 * 每个订单的参数规则与「修改订单」一致——仅支持 `LIMIT` 类型订单，受 `PRICE_FILTER` / `PERCENT_FILTER` / `LOT_SIZE` 限制，且同一订单修改次数最多10000次
+* 改单成功后，每个被修改订单的时间优先级重置，重新排至同价位队列末尾。注：该规则对仅调整数量、不调整价格的改单同样适用。
 * 批量修改采取并发处理，不保证撮合顺序，但返回结果顺序始终与请求订单列表顺序一致
 * 非原子操作——批量中的每个订单独立成功或失败，某个订单修改失败不会撤销该订单，也不影响批量中的其他订单
 * 超出批量数量限制时返回：`"Illegal characters found in parameter 'batchOrders'; legal range is '1 to 5'."`（做市商白名单账户为 `'1 to 10'`）

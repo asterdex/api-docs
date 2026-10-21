@@ -2668,6 +2668,7 @@ price  |  DECIMAL | YES | Order price
 * If the new `quantity` or `price` does not meet `PRICE_FILTER` / `PERCENT_FILTER` / `LOT_SIZE` restrictions, the modification will be rejected and the original order will remain.
 * Only `LIMIT` order type is supported.
 * Maximum 10000 modifications per order.
+* After a successful modification, the order's time priority is reset and it moves to the back of the queue at the same price level. Note: this rule also applies when only the quantity is adjusted and the price is unchanged.
 * **BBO-pegged orders** (those placed with `pegPriceType` = `COUNTERPARTY_1` / `QUEUE_1`): the engine resolves the actual price from the order book at placement for a `LIMIT` order and at trigger for a `STOP` / `TAKE_PROFIT` order. To auto-track the BBO with a continuously re-pegged limit order, use a **Chase order** (see `POST /fapi/v3/chase` below) which the strategy service amends in real time as the BBO moves.
 
 ## Place Chase Order (TRADE)
@@ -2900,6 +2901,7 @@ Place a **Chase strategy order** — a BBO-pegged GTX limit order that automatic
 * Either `orderId` or `origClientOrderId` must be sent for each order. If both are sent, `orderId` takes precedence.
 * Both `quantity` and `price` must be sent for each order.
 * Parameter rules for each element are the same as `Modify Order` above — `LIMIT` orders only, subject to `PRICE_FILTER` / `PERCENT_FILTER` / `LOT_SIZE` restrictions, and a maximum of 10000 modifications per order.
+* After a successful modification, each modified order's time priority is reset and it moves to the back of the queue at the same price level. Note: this rule also applies when only the quantity is adjusted and the price is unchanged.
 * Batch orders are processed concurrently; the processing order is not guaranteed, but the response order always matches the request order.
 * Not atomic — each order in the batch succeeds or fails independently. A failed modification leaves the original order untouched and does not affect the other orders in the batch.
 * Exceeding the batch size limit returns: `"Illegal characters found in parameter 'batchOrders'; legal range is '1 to 5'."` (or `'1 to 10'` for MM-whitelisted accounts).
