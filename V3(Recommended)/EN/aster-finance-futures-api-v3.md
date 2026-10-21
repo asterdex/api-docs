@@ -2562,8 +2562,7 @@ Send in a new order.
 | workingType      | ENUM    | NO        | stopPrice triggered by: "MARK_PRICE", "CONTRACT_PRICE". Default "CONTRACT_PRICE"                                                       |
 | priceProtect     | STRING  | NO        | "TRUE" or "FALSE", default "FALSE". Used with`STOP/STOP_MARKET` or `TAKE_PROFIT/TAKE_PROFIT_MARKET` orders.                            |
 | newOrderRespType | ENUM    | NO        | "ACK", "RESULT", default "ACK"                                                                                                         |
-| pegPriceType     | ENUM    | NO        | BBO peg mode: `COUNTERPARTY_1` or `QUEUE_1`. When set on a `LIMIT` order, the engine resolves the actual price from the order book at trigger time using the BBO + `pegOffset`. Defaults to no peg. |
-| pegOffset        | DECIMAL | NO        | Signed offset from BBO when `pegPriceType` is set. BUY orders should use a non-positive value (e.g. `-0.5`); SELL non-negative. Units: same scale as `price` (must be a `tickSize` multiple).        |
+| pegPriceType     | ENUM    | NO        | BBO peg mode: `COUNTERPARTY_1` or `QUEUE_1`. The engine resolves the actual price from the order book BBO: at placement for a `LIMIT` order, and at trigger for a `STOP` / `TAKE_PROFIT` order. Defaults to no peg. |
 | stpMode          | ENUM    | NO        | Self-Trade Prevention mode for this order. Overrides the account-level default. `EXPIRE_TAKER`: cancel the taker side; `EXPIRE_MAKER`: cancel the maker side; `EXPIRE_BOTH`: cancel both sides.      |
 
 Additional mandatory parameters based on `type`:
@@ -2669,7 +2668,7 @@ price  |  DECIMAL | YES | Order price
 * If the new `quantity` or `price` does not meet `PRICE_FILTER` / `PERCENT_FILTER` / `LOT_SIZE` restrictions, the modification will be rejected and the original order will remain.
 * Only `LIMIT` order type is supported.
 * Maximum 10000 modifications per order.
-* **BBO-pegged orders** (those placed with `pegPriceType` = `COUNTERPARTY_1` / `QUEUE_1`): the engine resolves the actual price from the order book at trigger time. To auto-track the BBO with a continuously re-pegged limit order, use a **Chase order** (see `POST /fapi/v3/chase` below) which the strategy service amends in real time as the BBO moves.
+* **BBO-pegged orders** (those placed with `pegPriceType` = `COUNTERPARTY_1` / `QUEUE_1`): the engine resolves the actual price from the order book at placement for a `LIMIT` order and at trigger for a `STOP` / `TAKE_PROFIT` order. To auto-track the BBO with a continuously re-pegged limit order, use a **Chase order** (see `POST /fapi/v3/chase` below) which the strategy service amends in real time as the BBO moves.
 
 ## Place Chase Order (TRADE)
 
@@ -4218,6 +4217,12 @@ true
 
 `POST /fapi/v3/placeStrategyOrder`
 
+> ⚠️ **A BBO leg's bracket check is reported in the response body, not the HTTP status.** When the
+> entry leg uses `pegPriceType`, the take-profit/stop-loss sanity check (an exit that would trigger
+> immediately) runs in the strategy service rather than at the gateway, so a rejection returns
+> **HTTP 200** with `failureCode` set (`-4142`), not an HTTP 400. Clients must read `failureCode`
+> rather than branching on HTTP status. This already applies to orders whose entry leg is `MARKET`.
+
 Place a new strategy order. Supports OTO (One-Triggers-the-Other), OCO (One-Cancels-the-Other), and OTOCO (One-Triggers-One-Cancels-the-Other) strategy types.
 
 **Weight:** 50
@@ -4243,7 +4248,8 @@ Place a new strategy order. Supports OTO (One-Triggers-the-Other), OCO (One-Canc
 | positionSide | STRING | NO | `BOTH`, `LONG`, `SHORT`. Default `BOTH` in one-way mode |
 | type | STRING | YES | `LIMIT`, `MARKET`, `STOP`, `STOP_MARKET`, `TAKE_PROFIT`, `TAKE_PROFIT_MARKET`, `TRAILING_STOP_MARKET` |
 | quantity | STRING | YES* | Order quantity. Not required when `closePosition=true` |
-| price | STRING | YES* | Required for `LIMIT`, `STOP`, `TAKE_PROFIT` |
+| price | STRING | YES* | Required for `LIMIT`, `STOP`, `TAKE_PROFIT`. When `pegPriceType` is set, send `"0"` — the price is resolved by the engine, and any other value is rejected |
+| pegPriceType | ENUM | NO | BBO peg mode for this leg: `COUNTERPARTY_1` / `_3` / `_5` / `_10` / `_20`, or `QUEUE_1` / `_3` / `_5` / `_10` / `_20`. Only for `LIMIT`, `STOP`, `TAKE_PROFIT` legs; any other `type` is rejected. Send `price` as `"0"` alongside it — the engine resolves the real price from the order book, at placement for a `LIMIT` leg and at trigger for a `STOP` / `TAKE_PROFIT` leg. `MID_PRICE` is not supported. Defaults to no peg |
 | stopPrice | STRING | YES* | Required for `STOP`, `STOP_MARKET`, `TAKE_PROFIT`, `TAKE_PROFIT_MARKET` |
 | timeInForce | STRING | YES* | Required for `LIMIT`; optional for stop orders (default `GTC`). `IOC` and `FOK` are not supported. See [ENUM definitions: Time in force](#enum-definitions) |
 | workingType | STRING | NO | `CONTRACT_PRICE` or `MARK_PRICE`. Default `CONTRACT_PRICE` |
@@ -4369,6 +4375,10 @@ Update one or more sub-orders of an existing strategy order. Returns an array wi
 `GET /fapi/v3/strategyOpenOrder`
 
 Query a current open strategy order. Either `strategyId` or `clientStrategyId` must be provided, but not both.
+
+> **BBO legs.** A leg placed with `pegPriceType` returns `"price": "0"` and carries a
+> `pegPriceType` field (e.g. `"QUEUE_1"`); the engine resolved the real execution price from the
+> order book. Render the peg label rather than the zero. The field is absent on non-peg legs.
 
 **Weight:** 5
 
@@ -6988,6 +6998,14 @@ Codes are universal,but messages can vary.
 * Limit price can't be lower than %s.
 
 ## 50xx - Deposit and Withdrawal Issues
+
+> -5035 INVALID_PEG_PRICE
+
+* BBO peg price order requires price to be 0.
+
+> -5036 PEG_PRICE_NOT_SUPPORTED
+
+* BBO peg price order is not supported for this order type.
 
 > -5047 INVALID_START_TIME
 
