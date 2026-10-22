@@ -97,6 +97,7 @@
   - [Position Information v3 (USER_DATA)](#position-information-v3-user_data)
   - [Account Trade List (USER_DATA)](#account-trade-list-user_data)
   - [Get Income History(USER_DATA)](#get-income-historyuser_data)
+  - [Get Income History With Pagination (USER_DATA)](#get-income-history-with-pagination-user_data)
   - [Notional and Leverage Brackets (USER_DATA)](#notional-and-leverage-brackets-user_data)
   - [Position ADL Quantile Estimation (USER_DATA)](#position-adl-quantile-estimation-user_data)
   - [User's Force Orders (USER_DATA)](#users-force-orders-user_data)
@@ -3583,6 +3584,59 @@ Get trades for a specific account and symbol.
 * If neither `startTime` nor `endTime` is sent, the recent 7-day data will be returned.
 * If `incomeType ` is not sent, all kinds of flow will be returned
 * "trandId" is unique in the same incomeType for a user
+
+## Get Income History With Pagination (USER_DATA)
+
+> **Response:**
+
+```javascript
+{
+	"total": 5823,		// number of records matching the filters in the time window, across all pages
+	"page": 2,			// current page
+	"limit": 1000,		// page size
+	"hasMore": true,	// true if page * limit < total
+	"rows": [
+		{
+			"symbol": "BTCUSDT",			// trade symbol, if existing
+			"incomeType": "FUNDING_FEE",	// income type
+			"income": "-0.01230000",		// income amount
+			"asset": "USDT",				// income asset
+			"info": "",						// extra information
+			"time": 1759996800000,
+			"tranId": 9689322392,			// transaction id
+			"tradeId": ""					// trade id, if existing
+		}
+	]
+}
+```
+
+``GET /fapi/v3/incomePage``
+
+**Weight:**
+30
+
+**Parameters:**
+
+| Name       | Type   | Mandatory | Description                                                                                           |
+| ---------- | ------ | --------- | ----------------------------------------------------------------------------------------------------- |
+| symbol     | STRING | NO        |                                                                                                       |
+| incomeType | STRING | NO        | Any value returned in the `incomeType` field, e.g. "FUNDING_FEE", "COMMISSION", "REALIZED_PNL". Exact, case-sensitive match |
+| startTime  | LONG   | NO        | Timestamp in ms, INCLUSIVE                                                                            |
+| endTime    | LONG   | NO        | Timestamp in ms, INCLUSIVE. Default: current time                                                     |
+| page       | INT    | NO        | Page number, starting from 1. Default 1                                                               |
+| limit      | INT    | NO        | Page size. Default 100; max 1000                                                                      |
+| recvWindow | LONG   | NO        |                                                                                                       |
+| timestamp  | LONG   | YES       |                                                                                                       |
+
+* Records are sorted by `time` in ascending order.
+* If neither `startTime` nor `endTime` is sent, the recent 7-day data will be returned. If only `endTime` is sent, data from the earliest record up to `endTime` will be returned.
+* There is no limit on the time span between `startTime` and `endTime`; use `page` and `limit` to fetch large result sets.
+* `page` × `limit` cannot exceed 100,000. To fetch more records, narrow the time window and page again.
+* `hasMore` is `true` when `page` × `limit` < `total`. The total number of pages is `ceil(total / limit)`. A page past the end returns an empty `rows` with the actual `total`.
+* Send a fixed `endTime` when paging through results. If `endTime` is omitted, it defaults to the time of each request, so new records can shift rows between pages.
+* If `incomeType` is not sent, all kinds of flow will be returned. An unsupported `incomeType` returns `-1130`; `TRANSFER` and `WELCOME_BONUS` cannot be sent together with `symbol` (`-1106`).
+* A non-numeric or negative `startTime` / `endTime`, or an invalid `page` / `limit`, returns `-1130`. `startTime` later than `endTime` returns `-1023`.
+* Each row has the same fields and format as a [Get Income History](#get-income-historyuser_data) record.
 
 ## Notional and Leverage Brackets (USER_DATA)
 
