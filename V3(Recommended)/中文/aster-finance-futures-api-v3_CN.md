@@ -4023,6 +4023,9 @@ startTime  | LONG   | NO       | 起始时间（毫秒，包含）
 endTime    | LONG   | NO       | 结束时间（毫秒，包含），默认为当前时间
 page       | INT    | NO       | 页码，从 1 开始，默认值:1
 limit      | INT    | NO       | 每页条数 默认值:100 最大值:1000
+nonce      | LONG   | YES      | 微秒级时间戳，用于防重放攻击
+signer     | STRING | YES      | 与当前认证账户关联的 signer 地址
+signature  | STRING | YES      | 对请求体的签名
 
 * 结果按 `time` 升序排列。
 * 如果`startTime` 和 `endTime` 均未发送, 只会返回最近7天的数据。如果只发送 `endTime`，返回从最早一条记录到 `endTime` 的数据。

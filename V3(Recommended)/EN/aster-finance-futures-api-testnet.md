@@ -3625,8 +3625,9 @@ Get trades for a specific account and symbol.
 | endTime    | LONG   | NO        | Timestamp in ms, INCLUSIVE. Default: current time                                                     |
 | page       | INT    | NO        | Page number, starting from 1. Default 1                                                               |
 | limit      | INT    | NO        | Page size. Default 100; max 1000                                                                      |
-| recvWindow | LONG   | NO        |                                                                                                       |
-| timestamp  | LONG   | YES       |                                                                                                       |
+| nonce      | LONG   | YES       | Microsecond-level timestamp, used for replay attack prevention                                        |
+| signer     | STRING | YES       | Signer address associated with the currently authenticated account                                    |
+| signature  | STRING | YES       | Signature of the request                                                                              |
 
 * Records are sorted by `time` in ascending order.
 * If neither `startTime` nor `endTime` is sent, the recent 7-day data will be returned. If only `endTime` is sent, data from the earliest record up to `endTime` will be returned.
