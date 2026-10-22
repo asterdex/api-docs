@@ -3888,7 +3888,7 @@ Get trades for a specific account and symbol.
 | Name       | Type   | Mandatory | Description                                                                                           |
 | ---------- | ------ | --------- | ----------------------------------------------------------------------------------------------------- |
 | symbol     | STRING | NO        |                                                                                                       |
-| incomeType | STRING | NO        | Any value returned in the `incomeType` field, e.g. "FUNDING_FEE", "COMMISSION", "REALIZED_PNL". Exact, case-sensitive match |
+| incomeType | STRING | NO        | "TRANSFER"，"WELCOME_BONUS", "REALIZED_PNL"，"FUNDING_FEE", "COMMISSION", "INSURANCE_CLEAR", "MARKET_MERCHANT_RETURN_REWARD", "REFERRAL_KICKBACK", "COMMISSION_REBATE", "MARKET_MAKER_REBATE", "API_REBATE", "CONTEST_REWARD", "CROSS_COLLATERAL_TRANSFER", "INTERNAL_TRANSFER", and "AUTO_EXCHANGE" |
 | startTime  | LONG   | NO        | Timestamp in ms, INCLUSIVE                                                                            |
 | endTime    | LONG   | NO        | Timestamp in ms, INCLUSIVE. Default: current time                                                     |
 | page       | INT    | NO        | Page number, starting from 1. Default 1                                                               |

@@ -6,7 +6,7 @@
 
 #### `GET /fapi/v3/incomePage` — Get Income History With Pagination
 
-New USER_DATA endpoint (weight 30) returning income history page by page, with `symbol`/`incomeType`/`startTime`/`endTime`/`page`/`limit` filters (`page` starts at 1; `limit` defaults to `100`, max `1000`; `page` × `limit` ≤ 100,000). The response is a paginated object (`total`, `page`, `limit`, `hasMore`, `rows`); each `rows[]` record has the same fields as a `GET /fapi/v3/income` record. Records are sorted by `time` ascending; there is no limit on the time span, and if neither `startTime` nor `endTime` is sent the recent 7-day data is returned. Requires the V3 authentication parameters `nonce`, `signer`, and `signature`.
+New USER_DATA endpoint (weight 30) returning income history page by page, with `symbol`/`incomeType`/`startTime`/`endTime`/`page`/`limit` filters (`page` starts at 1; `limit` defaults to `100`, max `1000`; `page` × `limit` ≤ 100,000). The response is a paginated object (`total`, `page`, `limit`, `hasMore`, `rows`); each `rows[]` record has the same fields as a `GET /fapi/v3/income` record. `incomeType` accepts the same values as `GET /fapi/v3/income`. Records are sorted by `time` ascending; there is no limit on the time span, and if neither `startTime` nor `endTime` is sent the recent 7-day data is returned. Requires the V3 authentication parameters `nonce`, `signer`, and `signature`.
 
 Documented in EN and CN, mainnet and testnet futures API references.
 
