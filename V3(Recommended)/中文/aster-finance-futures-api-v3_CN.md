@@ -97,6 +97,7 @@
 	- [用户持仓风险v3 (USER_DATA)](#用户持仓风险v3-user_data)
 	- [账户成交历史 (USER_DATA)](#账户成交历史-user_data)
 	- [获取账户损益资金流水(USER_DATA)](#获取账户损益资金流水user_data)
+	- [分页获取账户损益资金流水(USER_DATA)](#分页获取账户损益资金流水user_data)
 	- [杠杆分层标准 (USER_DATA)](#杠杆分层标准-user_data)
 	- [持仓ADL队列估算 (USER_DATA)](#持仓adl队列估算-user_data)
 	- [用户强平单历史 (USER_DATA)](#用户强平单历史-user_data)
@@ -3981,6 +3982,60 @@ limit      | INT    | NO       | 返回的结果集数量 默认值:100 最大�
 * 如果`incomeType`没有发送，返回所有类型账户损益资金流水。
 * "trandId" 在相同用户的同一种收益流水类型中是唯一的。
 
+
+## 分页获取账户损益资金流水(USER_DATA)
+
+> **响应:**
+
+```javascript
+{
+	"total": 5823,		// 时间范围内符合筛选条件的总条数（所有页合计）
+	"page": 2,			// 当前页码
+	"limit": 1000,		// 每页条数
+	"hasMore": true,	// page * limit < total 时为 true
+	"rows": [
+		{
+			"symbol": "BTCUSDT",			// 交易对，仅针对涉及交易对的资金流
+			"incomeType": "FUNDING_FEE",	// 资金流类型
+			"income": "-0.01230000",		// 资金流数量，正数代表流入，负数代表流出
+			"asset": "USDT",				// 资产内容
+			"info": "",						// 备注信息，取决于流水类型
+			"time": 1759996800000,			// 时间
+			"tranId": 9689322392,			// 划转ID
+			"tradeId": ""					// 引起流水产生的原始交易ID
+		}
+	]
+}
+```
+
+``GET /fapi/v3/incomePage``
+
+**权重:**
+30
+
+**参数:**
+
+   名称    |  类型  | 是否必需 |                                              描述
+---------- | ------ | -------- | -----------------------------------------------------------------------------------------------
+symbol     | STRING | NO       | 交易对
+incomeType | STRING | NO       | 收益类型 "TRANSFER"，"WELCOME_BONUS", "REALIZED_PNL"，"FUNDING_FEE", "COMMISSION", "INSURANCE_CLEAR", "MARKET_MERCHANT_RETURN_REWARD", "REFERRAL_KICKBACK", "COMMISSION_REBATE", "MARKET_MAKER_REBATE", "API_REBATE", "CONTEST_REWARD", "CROSS_COLLATERAL_TRANSFER", "INTERNAL_TRANSFER", and "AUTO_EXCHANGE"
+startTime  | LONG   | NO       | 起始时间（毫秒，包含）
+endTime    | LONG   | NO       | 结束时间（毫秒，包含），默认为当前时间
+page       | INT    | NO       | 页码，从 1 开始，默认值:1
+limit      | INT    | NO       | 每页条数 默认值:100 最大值:1000
+nonce      | LONG   | YES      | 微秒级时间戳，用于防重放攻击
+signer     | STRING | YES      | 与当前认证账户关联的 signer 地址
+signature  | STRING | YES      | 对请求体的签名
+
+* 结果按 `time` 升序排列。
+* 如果`startTime` 和 `endTime` 均未发送, 只会返回最近7天的数据。如果只发送 `endTime`，返回从最早一条记录到 `endTime` 的数据。
+* `startTime` 和 `endTime` 之间的时间跨度不受限制，数据量较大时请通过 `page` 和 `limit` 分页获取。
+* `page` × `limit` 不能超过 100,000。需要获取更多数据时，请缩小时间范围后再分页。
+* `page` × `limit` < `total` 时 `hasMore` 为 `true`，总页数为 `ceil(total / limit)`。请求超过最后一页时返回空的 `rows`，`total` 仍为实际总条数。
+* 分页时请固定传入 `endTime`。不传 `endTime` 时默认取每次请求的当前时间，新产生的流水可能导致相邻页之间的数据错位。
+* 如果`incomeType`没有发送，返回所有类型账户损益资金流水。不支持的 `incomeType` 返回 `-1130`；`TRANSFER` 和 `WELCOME_BONUS` 不能与 `symbol` 同时发送（`-1106`）。
+* `startTime` / `endTime` 不是数字或为负数，或 `page` / `limit` 不合法时返回 `-1130`；`startTime` 晚于 `endTime` 时返回 `-1023`。
+* `rows` 中每条记录的字段和格式与 [获取账户损益资金流水](#获取账户损益资金流水user_data) 相同。
 
 ## 杠杆分层标准 (USER_DATA)
 
