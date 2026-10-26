@@ -9,6 +9,8 @@
   - [Get Account Status (USER_DATA)](#get-account-status-user_data)
   - [Modify Account Status (TRADE)](#modify-account-status-trade)
   - [Transfer to Address (WITHDRAW)](#transfer-to-address-withdraw)
+  - [Batch Transfer to Addresses (WITHDRAW)](#batch-transfer-to-addresses-withdraw)
+  - [Batch Transfer History (USER_DATA)](#batch-transfer-history-user_data)
 - [Aster-Chain Staking Endpoints](#aster-chain-staking-endpoints)
   - [Get Staking Account Status (USER_DATA)](#get-staking-account-status-user_data)
   - [Get My Staking (USER_DATA)](#get-my-staking-user_data)
@@ -125,6 +127,178 @@ Transfer assets to another Aster Chain address. The recipient address must belon
 | nonce | LONG | YES | Microsecond timestamp |
 | user | STRING | YES | Source account wallet address |
 | signature | STRING | YES | EIP-712 signature, signed with the `user` account's wallet private key |
+
+---
+
+## Batch Transfer to Addresses (WITHDRAW)
+
+> **Response:**
+
+```javascript
+{
+    "clientTranId": "batch-20261026-000000001",
+    "status": "I",       // batch status, see notes
+    "totalCount": 2,
+    "items": [
+        {
+            "toAddress": "0xAbCd1234...",
+            "asset": "USDT",
+            "transferId": "100001"
+        },
+        {
+            "toAddress": "0xEf567890...",
+            "asset": "USDT",
+            "transferId": "100002"
+        }
+    ]
+}
+```
+
+`POST /aster-chain/v3/batch-transfer`
+
+Transfer assets from the current account to multiple Aster Chain addresses in one request. Each recipient address must belong to a registered Aster Chain user.
+
+The request is processed asynchronously: the response only confirms that the batch has been accepted. Use [Batch Transfer History (USER_DATA)](#batch-transfer-history-user_data) to get the final result of each item.
+
+**Weight:** 50
+
+**Parameters:**
+
+| Name | Type | Mandatory | Description |
+|------|------|-----------|-------------|
+| clientTranId | STRING | YES | Client-defined batch ID, 20 to 64 characters. Used for idempotency: submitting the same `clientTranId` again returns the existing batch instead of creating a new one |
+| items | STRING | YES | JSON array of transfer items, max 10 items. See below |
+| nonce | LONG | YES | Microsecond timestamp |
+| user | STRING | YES | Source account wallet address |
+| signature | STRING | YES | EIP-712 signature, signed with the `user` account's wallet private key |
+
+Fields of each element in `items`:
+
+| Name | Type | Mandatory | Description |
+|------|------|-----------|-------------|
+| toAddress | STRING | YES | Recipient's Aster Chain wallet address |
+| asset | STRING | YES | Asset name (e.g. `"USDT"`), case-insensitive |
+| amount | STRING | YES | Transfer amount, must be greater than 0, at most 8 decimal places |
+| transferChainId | INT | NO | Chain ID of the asset to transfer |
+
+Example `items` value:
+
+```json
+[{"toAddress":"0xAbCd1234...","asset":"USDT","amount":"1.5"},{"toAddress":"0xEf567890...","asset":"USDT","amount":"2"}]
+```
+
+**Notes:**
+
+* The whole batch is validated before it is submitted. If any item is invalid, the request fails with an error and nothing is transferred:
+  * `items` must not be empty and must not contain more than 10 items.
+  * `toAddress` must be a valid EVM address of a registered Aster Chain user and must not be your own address.
+  * The same `toAddress` + `asset` pair must not appear more than once in a batch.
+  * `amount` must be greater than 0 and have no more than 8 decimal places.
+* Not available while the account is in `PRIVATE` mode (see [Modify Account Status (TRADE)](#modify-account-status-trade)).
+* `transferId` in the response is the ID of each item's transfer. It matches `transferId` in the history response.
+
+---
+
+## Batch Transfer History (USER_DATA)
+
+> **Response:**
+
+```javascript
+{
+    "total": 1,
+    "rows": [
+        {
+            "clientTranId": "batch-20261026-000000001",
+            "status": "M",
+            "createTime": 1761000000000,
+            "updateTime": 1761000005000,
+            "totalCount": 2,
+            "successCount": 1,
+            "failCount": 1,
+            "partialCount": 0,
+            "processingCount": 0,
+            "failedItems": [
+                {
+                    "transferId": "100002",
+                    "toAddress": "0xEf567890...",
+                    "asset": "USDT",
+                    "amount": "2",
+                    "transferChainId": null,
+                    "successAmount": null,
+                    "status": "F",
+                    "errorCode": "...",
+                    "errorMsg": "...",
+                    "createTime": 1761000000000,
+                    "updateTime": 1761000005000
+                }
+            ],
+            "details": [
+                {
+                    "transferId": "100001",
+                    "toAddress": "0xAbCd1234...",
+                    "asset": "USDT",
+                    "amount": "1.5",
+                    "transferChainId": null,
+                    "successAmount": "1.5",
+                    "status": "S",
+                    "errorCode": null,
+                    "errorMsg": null,
+                    "createTime": 1761000000000,
+                    "updateTime": 1761000003000
+                },
+                {
+                    "transferId": "100002",
+                    "toAddress": "0xEf567890...",
+                    "asset": "USDT",
+                    "amount": "2",
+                    "transferChainId": null,
+                    "successAmount": null,
+                    "status": "F",
+                    "errorCode": "...",
+                    "errorMsg": "...",
+                    "createTime": 1761000000000,
+                    "updateTime": 1761000005000
+                }
+            ]
+        }
+    ]
+}
+```
+
+`GET /aster-chain/v3/batch-transfer/history`
+
+Get the batch transfers submitted by the current account, with the result of each item.
+
+**Weight:** 5
+
+**Parameters:**
+
+| Name | Type | Mandatory | Description |
+|------|------|-----------|-------------|
+| clientTranId | STRING | NO | Batch ID. If sent without `startTime` and `endTime`, returns that batch only, regardless of when it was created |
+| status | STRING | NO | Batch status: `I`, `P`, `S`, `F` or `M` |
+| startTime | LONG | NO | Batch creation time in milliseconds, inclusive. Default: `endTime` - 7 days |
+| endTime | LONG | NO | Batch creation time in milliseconds, exclusive. Default: current time |
+| page | INT | NO | Page number, starts at 1. Default: 1 |
+| limit | INT | NO | Number of batches per page. Default: 20, max: 100 |
+| nonce | LONG | YES | Microsecond timestamp |
+| signer | STRING | YES | Agent wallet address (sub-wallet authorized to sign on behalf of the account) |
+| signature | STRING | YES | EIP-712 signature, signed with the `signer` wallet private key |
+
+**Notes:**
+
+* If `clientTranId` is not sent, or is sent together with `startTime`/`endTime`, batches are searched by creation time:
+  * `endTime` must be after `startTime`, and the time range must not exceed 31 days.
+  * If neither `startTime` nor `endTime` is sent, batches from the last 7 days are returned.
+* Each batch includes all of its items in `details`. `failedItems` contains only the failed items.
+* Batch / item status:
+  * `I`: pending
+  * `P`: processing
+  * `S`: success
+  * `F`: failed
+  * `M`: partially successful
+* `successAmount` is the amount actually transferred for the item.
+* All times are in milliseconds.
 
 ---
 

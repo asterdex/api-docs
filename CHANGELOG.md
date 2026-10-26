@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-10-26
+
+### Added
+
+#### `POST /aster-chain/v3/batch-transfer` — Batch Transfer to Addresses
+
+New WITHDRAW endpoint (weight 50) that transfers assets from the current account to multiple Aster Chain addresses in one request. `items` is a JSON array of `{toAddress, asset, amount, transferChainId?}` with at most 10 items. `clientTranId` (20–64 characters) is required and makes the request idempotent: resubmitting the same `clientTranId` returns the existing batch. The whole batch is validated before it is submitted, and any invalid item rejects the whole batch. Invalid items are a bad address, an unregistered or own address, a duplicate `toAddress` + `asset` pair, or an `amount` that is ≤ 0 or has more than 8 decimal places. The endpoint is not available while the account is in `PRIVATE` mode. Processing is asynchronous: the response (`clientTranId`, `status`, `totalCount`, `items[]` with `toAddress`/`asset`/`transferId`) only confirms that the batch was accepted. Uses the same `nonce`/`user`/`signature` parameters as `POST /aster-chain/v3/transfer`.
+
+#### `GET /aster-chain/v3/batch-transfer/history` — Batch Transfer History
+
+New USER_DATA endpoint (weight 5) returning the current account's batch transfers with per-item results (`total`, `rows[]` with batch counts, `failedItems` and `details`). Sending only `clientTranId` (no `startTime`/`endTime`) returns that batch regardless of its creation time. Otherwise batches are filtered by creation time, `startTime` inclusive and `endTime` exclusive. The default is the last 7 days and the range is at most 31 days. `status` filters by `I`/`P`/`S`/`F`/`M`, `page` starts at 1, and `limit` defaults to 20 (max 100). Requires the V3 authentication parameters `nonce`, `signer`, and `signature`.
+
+Documented in EN and CN mainnet Aster-Chain API references.
+
+---
+
 ## 2026-10-22
 
 ### Added
