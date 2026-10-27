@@ -9,6 +9,8 @@
   - [查询账户状态 (USER_DATA)](#查询账户状态-user_data)
   - [修改账户状态 (TRADE)](#修改账户状态-trade)
   - [转账至地址 (WITHDRAW)](#转账至地址-withdraw)
+  - [批量转账至地址 (WITHDRAW)](#批量转账至地址-withdraw)
+  - [查询批量转账历史 (USER_DATA)](#查询批量转账历史-user_data)
 - [Aster-Chain 质押接口](#aster-chain-质押接口)
   - [查询质押账户状态 (USER_DATA)](#查询质押账户状态-user_data)
   - [查询我的质押 (USER_DATA)](#查询我的质押-user_data)
@@ -124,6 +126,180 @@
 | nonce | LONG | YES | 微秒时间戳 |
 | user | STRING | YES | 发起账户钱包地址 |
 | signature | STRING | YES | EIP-712 签名，使用 `user` 账户的钱包私钥签名 |
+
+---
+
+## 批量转账至地址 (WITHDRAW)
+
+> **响应:**
+
+```javascript
+{
+    "clientTranId": "batch-20261026-000000001",
+    "status": "I",       // 批次状态，见说明
+    "totalCount": 2,
+    "items": [
+        {
+            "toAddress": "0xAbCd1234...",
+            "asset": "USDT",
+            "transferId": "100001"
+        },
+        {
+            "toAddress": "0xEf567890...",
+            "asset": "USDT",
+            "transferId": "100002"
+        }
+    ]
+}
+```
+
+`POST /aster-chain/v3/batch-transfer`
+
+在一次请求中将当前账户的资产转账至多个 Aster Chain 地址。每个接收地址都必须属于已注册的 Aster Chain 用户。
+
+该接口异步处理：响应仅表示批次已受理。每笔转账的最终结果请通过 [查询批量转账历史 (USER_DATA)](#查询批量转账历史-user_data) 获取。
+
+**示例代码:** [101_batchTransfer.js](https://github.com/asterdex/API-demo/blob/main/futures-v3-demo/101_batchTransfer.js)
+
+**权重:** 50
+
+**参数:**
+
+| 名称 | 类型 | 是否必需 | 描述 |
+|------|------|---------|------|
+| clientTranId | STRING | YES | 客户端自定义批次 ID，长度 20~64。用于幂等：使用相同 `clientTranId` 重复提交时返回已有批次，不会重复创建 |
+| items | STRING | YES | 转账明细的 JSON 数组，最多 10 条，字段见下表 |
+| nonce | LONG | YES | 微秒时间戳 |
+| user | STRING | YES | 发起账户钱包地址 |
+| signature | STRING | YES | EIP-712 签名，使用 `user` 账户的钱包私钥签名 |
+
+`items` 中每个元素的字段：
+
+| 名称 | 类型 | 是否必需 | 描述 |
+|------|------|---------|------|
+| toAddress | STRING | YES | 接收方的 Aster Chain 钱包地址 |
+| asset | STRING | YES | 资产名称（如 `"USDT"`），不区分大小写 |
+| amount | STRING | YES | 转账金额，必须大于 0，最多 8 位小数 |
+| transferChainId | INT | NO | 转账资产所在链的 Chain ID |
+
+`items` 示例：
+
+```json
+[{"toAddress":"0xAbCd1234...","asset":"USDT","amount":"1.5"},{"toAddress":"0xEf567890...","asset":"USDT","amount":"2"}]
+```
+
+**说明:**
+
+* 提交前会校验整个批次，任一条不合法则整批返回错误，不会执行任何转账：
+  * `items` 不能为空，且不能超过 10 条。
+  * `toAddress` 必须是合法的 EVM 地址，属于已注册的 Aster Chain 用户，且不能是自己的地址。
+  * 同一批次中 `toAddress` + `asset` 不能重复。
+  * `amount` 必须大于 0，且不超过 8 位小数。
+* 账户处于 `PRIVATE` 模式时不可使用（见 [修改账户状态 (TRADE)](#修改账户状态-trade)）。
+* 响应中的 `transferId` 为每笔转账的 ID，与历史查询响应中的 `transferId` 对应。
+
+---
+
+## 查询批量转账历史 (USER_DATA)
+
+> **响应:**
+
+```javascript
+{
+    "total": 1,
+    "rows": [
+        {
+            "clientTranId": "batch-20261026-000000001",
+            "status": "M",
+            "createTime": 1761000000000,
+            "updateTime": 1761000005000,
+            "totalCount": 2,
+            "successCount": 1,
+            "failCount": 1,
+            "partialCount": 0,
+            "processingCount": 0,
+            "failedItems": [
+                {
+                    "transferId": "100002",
+                    "toAddress": "0xEf567890...",
+                    "asset": "USDT",
+                    "amount": "2",
+                    "transferChainId": null,
+                    "successAmount": null,
+                    "status": "F",
+                    "errorCode": "...",
+                    "errorMsg": "...",
+                    "createTime": 1761000000000,
+                    "updateTime": 1761000005000
+                }
+            ],
+            "details": [
+                {
+                    "transferId": "100001",
+                    "toAddress": "0xAbCd1234...",
+                    "asset": "USDT",
+                    "amount": "1.5",
+                    "transferChainId": null,
+                    "successAmount": "1.5",
+                    "status": "S",
+                    "errorCode": null,
+                    "errorMsg": null,
+                    "createTime": 1761000000000,
+                    "updateTime": 1761000003000
+                },
+                {
+                    "transferId": "100002",
+                    "toAddress": "0xEf567890...",
+                    "asset": "USDT",
+                    "amount": "2",
+                    "transferChainId": null,
+                    "successAmount": null,
+                    "status": "F",
+                    "errorCode": "...",
+                    "errorMsg": "...",
+                    "createTime": 1761000000000,
+                    "updateTime": 1761000005000
+                }
+            ]
+        }
+    ]
+}
+```
+
+`GET /aster-chain/v3/batch-transfer/history`
+
+查询当前账户提交的批量转账及每笔明细的结果。
+
+**权重:** 5
+
+**参数:**
+
+| 名称 | 类型 | 是否必需 | 描述 |
+|------|------|---------|------|
+| clientTranId | STRING | NO | 批次 ID。仅传 `clientTranId`、不传 `startTime` 和 `endTime` 时，只返回该批次，不受创建时间限制 |
+| status | STRING | NO | 批次状态：`I`、`P`、`S`、`F` 或 `M` |
+| startTime | LONG | NO | 批次创建时间（毫秒），包含。默认：`endTime` - 7 天 |
+| endTime | LONG | NO | 批次创建时间（毫秒），不包含。默认：当前时间 |
+| page | INT | NO | 页码，从 1 开始。默认：1 |
+| limit | INT | NO | 每页批次数。默认：20，最大：100 |
+| nonce | LONG | YES | 微秒时间戳 |
+| signer | STRING | YES | 代理钱包地址（被授权代表账户签名的子钱包） |
+| signature | STRING | YES | EIP-712 签名，使用 `signer` 钱包私钥签名 |
+
+**说明:**
+
+* 未传 `clientTranId`，或 `clientTranId` 与 `startTime`/`endTime` 一起传时，按批次创建时间查询：
+  * `endTime` 必须晚于 `startTime`，且时间跨度不能超过 31 天。
+  * `startTime` 和 `endTime` 都未传时，返回最近 7 天的批次。
+* 每个批次的 `details` 包含该批次的全部明细，`failedItems` 仅包含失败的明细。
+* 批次 / 明细状态：
+  * `I`：待执行
+  * `P`：执行中
+  * `S`：成功
+  * `F`：失败
+  * `M`：部分成功
+* `successAmount` 为该笔实际转账成功的金额。
+* 所有时间均为毫秒。
 
 ---
 
