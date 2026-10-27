@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-10-27
+
+### Added
+
+#### `GET /fapi/v3/builder/userCommissions` — Get Builder User Commissions
+
+New USER_DATA endpoint (weight 5) returning the builder fees earned on trades of users trading under the caller's builder code, page by page. It takes the same parameters as `GET /fapi/v3/builder/userTrades` (`userAddresses` up to 50, `startTime`/`endTime`, `page`, `limit` default `50` max `1000`) and covers the same trades. Each row only contains `tradeId`, `insertTime`, `orderId`, `symbol`, `feeAsset`, `marginAsset`, `builderFee` (`"0"` when none was charged) and `userAddress`. Users' privacy mode does not apply, so trades of users who enabled privacy mode are returned too. Requires the V3 authentication parameters `nonce`, `signer`, and `signature`.
+
+Documented in EN and CN mainnet futures API references.
+
+---
+
 ## 2026-10-22
 
 ### Added

@@ -127,6 +127,7 @@
 	- [查询Builder用户持仓风险 (USER_DATA)](#查询builder用户持仓风险-user_data)
 	- [查询Builder用户手续费率 (USER_DATA)](#查询builder用户手续费率-user_data)
 	- [查询Builder交易记录 (USER_DATA)](#查询builder交易记录-user_data)
+	- [查询Builder用户佣金 (USER_DATA)](#查询builder用户佣金-user_data)
 	- [查询Builder全部订单 (USER_DATA)](#查询builder全部订单-user_data)
 	- [查询Builder已授权用户列表 (USER_DATA)](#查询builder已授权用户列表-user_data)
 	- [查询全部资产Logo](#查询全部资产logo)
@@ -5848,6 +5849,84 @@ typed_data = {
 | errors | ARRAY | 仅当部分请求地址无法返回时才出现 |
 | errors[].address | STRING | 未出现在 `rows` 中的地址 |
 | errors[].errorMsg | STRING | 该地址被排除的原因：`This function can only be used after deposit`（该地址尚未生成账户/未充值）、`User privacy mode is enabled, this operation is not allowed.`（已开启隐私模式）、`Failed to check privacy switch status for this address.`（隐私状态校验失败）或 `This user address is not bound to this builder.`（仅在显式传入 `userAddresses` 时可能出现，表示该地址未绑定该Builder） |
+
+---
+
+# 查询Builder用户佣金 (USER_DATA)
+
+> **响应:**
+
+```javascript
+{
+  "total": 42,
+  "currentPage": 1,
+  "totalPages": 1,
+  "pageSize": 50,
+  "hasMore": false,
+  "rows": [
+    {
+      "tradeId": 698759,
+      "insertTime": 1751500000000,
+      "orderId": 25851813,
+      "symbol": "BTCUSDT",
+      "feeAsset": "USDT",
+      "marginAsset": "USDT",
+      "builderFee": "0.00050000",
+      "userAddress": "0x1234...abcd"
+    }
+  ]
+}
+```
+
+`GET /fapi/v3/builder/userCommissions`
+
+分页查询在当前调用者的Builder代码下交易的用户成交所产生的Builder手续费。查询的成交范围与 [查询Builder交易记录 (USER_DATA)](#查询builder交易记录-user_data) 相同，但仅返回手续费相关字段，且包含已开启隐私模式的用户。以已认证账户本身作为Builder身份，无需单独传入`builder`地址参数。
+
+**权重:** 5
+
+**参数:**
+
+| 名称 | 类型 | 是否必需 | 描述 |
+|------|------|---------|------|
+| userAddresses | STRING | NO | 逗号分隔的用户钱包地址列表，最多50个 |
+| startTime | LONG | NO | 起始时间戳（毫秒） |
+| endTime | LONG | NO | 结束时间戳（毫秒） |
+| page | INT | NO | 页码，从 `1` 开始。默认: `1` |
+| limit | INT | NO | 每页返回数量。默认 `50`；最大 `1000` |
+| nonce | LONG | YES | 微秒级时间戳，用于防重放攻击 |
+| signer | STRING | YES | 与当前认证账户关联的 signer 地址 |
+| signature | STRING | YES | 对请求体的签名 |
+
+* 如果 `startTime` 和 `endTime` 都未发送，则返回最近7天的数据。
+* 最终生效的 `startTime` 不能早于当前时间之前90天，否则请求会被拒绝。
+* `endTime` 不能超过当前服务器时间1天以上。
+* 结果按成交时间倒序排列。
+* 不受用户隐私模式限制：已开启隐私模式的用户的成交也会返回。
+* 如果传入 `userAddresses`，仅返回这些地址的成交记录；每个地址必须已将调用者地址授权为其Builder，否则该地址不会出现在 `rows` 中，而是记录在 `errors` 里。
+* 如果不传 `userAddresses`，则返回当前绑定到该Builder的全部用户的成交记录。
+* `userAddresses` 每次请求最多支持50个地址，超出则请求被拒绝。
+
+**响应字段:**
+
+| 字段 | 类型 | 描述 |
+|------|------|------|
+| total | LONG | 符合条件的成交总数 |
+| currentPage | INT | 当前页码 |
+| totalPages | INT | 总页数 |
+| pageSize | INT | 每页数量 |
+| hasMore | BOOLEAN | 是否还有下一页 |
+| rows | ARRAY | 佣金记录列表，每笔成交一条 |
+| rows[].tradeId | LONG | 成交ID |
+| rows[].insertTime | LONG | 成交时间（毫秒） |
+| rows[].orderId | LONG | 订单ID |
+| rows[].symbol | STRING | 交易对 |
+| rows[].feeAsset | STRING | 手续费资产 |
+| rows[].marginAsset | STRING | 保证金（结算）资产 |
+| rows[].builderFee | STRING | 该笔成交收取的Builder手续费；未收取时为 `"0"` |
+| rows[].userAddress | STRING | 交易用户的钱包地址 |
+| errors | ARRAY | 仅当部分请求地址无法返回时才出现 |
+| errors[].address | STRING | 未出现在 `rows` 中的地址 |
+| errors[].errorMsg | STRING | 该地址被排除的原因：`This function can only be used after deposit`（该地址尚未生成账户/未充值）、`Failed to check privacy switch status for this address.`（隐私状态校验失败）或 `This user address is not bound to this builder.`（该地址未绑定该Builder） |
 
 ---
 
