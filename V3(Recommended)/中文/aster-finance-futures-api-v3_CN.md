@@ -5926,7 +5926,7 @@ typed_data = {
 | rows[].userAddress | STRING | 交易用户的钱包地址 |
 | errors | ARRAY | 仅当部分请求地址无法返回时才出现 |
 | errors[].address | STRING | 未出现在 `rows` 中的地址 |
-| errors[].errorMsg | STRING | 该地址被排除的原因：`This function can only be used after deposit`（该地址尚未生成账户/未充值）、`Failed to check privacy switch status for this address.`（隐私状态校验失败）或 `This user address is not bound to this builder.`（该地址未绑定该Builder） |
+| errors[].errorMsg | STRING | 该地址被排除的原因：`This function can only be used after deposit`（该地址尚未生成账户/未充值）或 `This user address is not bound to this builder.`（该地址未绑定该Builder） |
 
 ---
 

@@ -5760,7 +5760,7 @@ Query the paginated builder fees earned on trades of users trading under the cal
 | rows[].userAddress | STRING | Wallet address of the trading user |
 | errors | ARRAY | Present only when one or more requested addresses could not be returned |
 | errors[].address | STRING | The address that was left out of `rows` |
-| errors[].errorMsg | STRING | Reason the address was left out of `rows`: `This function can only be used after deposit` (address has no generated account), `Failed to check privacy switch status for this address.`, or `This user address is not bound to this builder.` |
+| errors[].errorMsg | STRING | Reason the address was left out of `rows`: `This function can only be used after deposit` (address has no generated account) or `This user address is not bound to this builder.` |
 
 ---
 
