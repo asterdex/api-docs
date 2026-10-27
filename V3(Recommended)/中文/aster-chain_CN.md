@@ -159,6 +159,8 @@
 
 该接口异步处理：响应仅表示批次已受理。每笔转账的最终结果请通过 [查询批量转账历史 (USER_DATA)](#查询批量转账历史-user_data) 获取。
 
+**示例代码:** [101_batchTransfer.js](https://github.com/asterdex/API-demo/blob/main/futures-v3-demo/101_batchTransfer.js)
+
 **权重:** 50
 
 **参数:**

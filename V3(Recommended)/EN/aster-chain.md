@@ -160,6 +160,8 @@ Transfer assets from the current account to multiple Aster Chain addresses in on
 
 The request is processed asynchronously: the response only confirms that the batch has been accepted. Use [Batch Transfer History (USER_DATA)](#batch-transfer-history-user_data) to get the final result of each item.
 
+**Demo:** [101_batchTransfer.js](https://github.com/asterdex/API-demo/blob/main/futures-v3-demo/101_batchTransfer.js)
+
 **Weight:** 50
 
 **Parameters:**
