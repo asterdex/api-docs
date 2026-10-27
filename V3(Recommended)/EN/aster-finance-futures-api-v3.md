@@ -129,6 +129,7 @@
   - [Get Builder User Position Risk (USER_DATA)](#get-builder-user-position-risk-user_data)
   - [Get Builder User Commission Rates (USER_DATA)](#get-builder-user-commission-rates-user_data)
   - [Get Builder Trades (USER_DATA)](#get-builder-trades-user_data)
+  - [Get Builder User Commissions (USER_DATA)](#get-builder-user-commissions-user_data)
   - [Get Builder All Orders (USER_DATA)](#get-builder-all-orders-user_data)
   - [Get Builder Approved User List (USER_DATA)](#get-builder-approved-user-list-user_data)
   - [Get All Asset Logos](#get-all-asset-logos)
@@ -5682,6 +5683,84 @@ Query the paginated trade history of users trading under the caller's builder co
 | errors | ARRAY | Present only when one or more requested addresses could not be returned |
 | errors[].address | STRING | The address that was left out of `rows` |
 | errors[].errorMsg | STRING | Reason the address was left out of `rows`: `This function can only be used after deposit` (address has no generated account), `User privacy mode is enabled, this operation is not allowed.`, `Failed to check privacy switch status for this address.`, or `This user address is not bound to this builder.` (only possible when `userAddresses` is explicitly supplied) |
+
+---
+
+# Get Builder User Commissions (USER_DATA)
+
+> **Response:**
+
+```javascript
+{
+  "total": 42,
+  "currentPage": 1,
+  "totalPages": 1,
+  "pageSize": 50,
+  "hasMore": false,
+  "rows": [
+    {
+      "tradeId": 698759,
+      "insertTime": 1751500000000,
+      "orderId": 25851813,
+      "symbol": "BTCUSDT",
+      "feeAsset": "USDT",
+      "marginAsset": "USDT",
+      "builderFee": "0.00050000",
+      "userAddress": "0x1234...abcd"
+    }
+  ]
+}
+```
+
+`GET /fapi/v3/builder/userCommissions`
+
+Query the paginated builder fees earned on trades of users trading under the caller's builder code. It covers the same trades as [Get Builder Trades (USER_DATA)](#get-builder-trades-user_data), but only returns the fee fields, and also includes users who have enabled privacy mode. The authenticated account is used as the builder identity — there is no separate `builder` address parameter.
+
+**Weight:** 5
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| userAddresses | STRING | NO | Comma-separated list of up to 50 user wallet addresses to query |
+| startTime | LONG | NO | Timestamp in ms |
+| endTime | LONG | NO | Timestamp in ms |
+| page | INT | NO | Page number, starting from `1`. Default: `1` |
+| limit | INT | NO | Number of results per page. Default `50`; max `1000` |
+| nonce | LONG | YES | Microsecond-level timestamp, used for replay attack prevention |
+| signer | STRING | YES | Signer address associated with the authenticated account |
+| signature | STRING | YES | Signature over the request body |
+
+* If neither `startTime` nor `endTime` is sent, the recent 7 days' data is returned.
+* The resolved `startTime` must not be earlier than 90 days before the current time, or the request is rejected.
+* `endTime` cannot be more than 1 day ahead of the current server time.
+* Results are ordered by trade time descending.
+* Users' privacy mode does not apply: trades of users who have enabled privacy mode are returned as well.
+* If `userAddresses` is sent, only trades of those addresses are returned; each address must have already approved the caller's address as its builder, otherwise it is left out of `rows` and reported in `errors` instead.
+* If `userAddresses` is omitted, trades of every user currently bound to this builder are returned instead.
+* `userAddresses` accepts at most 50 addresses per request; sending more is rejected.
+
+**Response Fields:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| total | LONG | Total number of matching trades |
+| currentPage | INT | Current page number |
+| totalPages | INT | Total number of pages |
+| pageSize | INT | Number of records per page |
+| hasMore | BOOLEAN | Whether more pages are available |
+| rows | ARRAY | List of commission records, one per trade |
+| rows[].tradeId | LONG | Trade ID |
+| rows[].insertTime | LONG | Trade time (milliseconds) |
+| rows[].orderId | LONG | Order ID |
+| rows[].symbol | STRING | Symbol |
+| rows[].feeAsset | STRING | Commission asset |
+| rows[].marginAsset | STRING | Margin (settlement) asset |
+| rows[].builderFee | STRING | Builder fee charged on the trade; `"0"` if no builder fee was charged |
+| rows[].userAddress | STRING | Wallet address of the trading user |
+| errors | ARRAY | Present only when one or more requested addresses could not be returned |
+| errors[].address | STRING | The address that was left out of `rows` |
+| errors[].errorMsg | STRING | Reason the address was left out of `rows`: `This function can only be used after deposit` (address has no generated account) or `This user address is not bound to this builder.` |
 
 ---
 
