@@ -29,16 +29,6 @@ Official API documentation for Aster.
 - [Spot Testnet API V3 (EN)](./V3(Recommended)/EN/aster-finance-spot-api-testnet.md)
 - [Spot Testnet API V3 (中文)](./V3(Recommended)/中文/aster-finance-spot-api-testnet_CN.md)
 
-### V1 Futures API (Legacy)
-
-- [Futures API V1 (EN)](./V1(Legacy)/EN/aster-finance-futures-api.md)
-- [Futures API V1 (中文)](./V1(Legacy)/中文/aster-finance-futures-api_CN.md)
-
-### V1 Spot API (Legacy)
-
-- [Spot API V1 (EN)](./V1(Legacy)/EN/aster-finance-spot-api.md)
-- [Spot API V1 (中文)](./V1(Legacy)/中文/aster-finance-spot-api_CN.md)
-
 ### RPC
 
 - [Aster Chain RPC](./RPC/aster-chain-rpc.md)
