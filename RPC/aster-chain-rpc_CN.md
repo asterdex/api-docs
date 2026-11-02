@@ -1,7 +1,5 @@
 - [基本信息](#基本信息)
   - [接口通用说明](#接口通用说明)
-  - [访问限制](#访问限制)
-  - [错误码](#错误码)
 - [链上 RPC 接口](#链上-rpc-接口)
   - [查询账户余额](#查询账户余额)
   - [查询当前挂单](#查询当前挂单)
@@ -24,37 +22,6 @@
 * 无数据的字段会直接从响应中省略，而不是返回空数组（如 `perpAssets`、`openOrders`、`fills`）。
 
 > **注意：** 在 Open Orders 和 Fills 接口中，隐私模式仅影响开启后的新订单；非隐私模式下完成的历史订单仍按正常规则展示。
-
-## 访问限制
-
-* 每个方法的权重均为 1。
-* 按客户端 IP 限流。
-* 超出限制时接口返回 HTTP `429 Too Many Requests`，请至少等待 1 秒后再重试。
-
-## 错误码
-
-错误遵循 JSON-RPC 2.0 格式，HTTP 状态码为 `200`：
-
-```javascript
-{
-  "id": 1,
-  "jsonrpc": "2.0",
-  "error": {
-    "code": -32603,
-    "message": "Internal error: Time range exceeds 7 days"
-  }
-}
-```
-
-错误码 | 错误信息 | 触发场景
------- | -------- | --------
--32601 | `Method not found` | 缺少 `method`，或 `method` 不是以下任一方法
--32603 | `Internal error: Invalid params` | `params` 为空，或 `address` 缺失 / 不是字符串
--32603 | `Internal error: Time range exceeds 7 days` | `to - from` 大于 7 天（恰好 7 天是允许的）
--32603 | `Internal error: ...` | 该地址没有 Aster 账户
--32603 | `Internal error: ...` | 其他非法输入（如不存在的期货 `symbol`、参数 JSON 类型错误）或内部错误
-
-在 HTTP 层面不是合法 JSON-RPC 的请求（JSON 格式错误、批量数组，或 `params` 以对象形式传入）会返回 HTTP `400`。
 
 ---
 
