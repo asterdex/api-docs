@@ -1,5 +1,21 @@
 # Changelog
+## 2026-11-02
 
+### Removed
+   #### `future v1 api`
+   #### `prediction api`
+
+### Changed
+
+#### `GET /fapi/v3/incomePage` — Get User Income Histories by page
+#### `GET /fapi/v3/income` — Get User Income Histories
+#### `GET /api/v3/transactionHistory` — Get User Transaction Histories
+
+## incomeType  
+  #### add: `DEPOSIT` `WITHDRAW`
+  #### remove: `TRANSFER_SPOT_TO_FUTURE`  `TRANSFER_FUTURE_TO_SPOT`
+
+---
 ## 2026-10-27
 
 ### Added

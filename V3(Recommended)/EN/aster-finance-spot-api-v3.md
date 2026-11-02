@@ -1433,7 +1433,7 @@ limit | LONG | NO | default:100 max:1000
 
 **Note:** 
 
-*  `type`: `TRADE_TARGET`,`TRADE_SOURCE`,`TRANSFER_SPOT_TO_FUTURE`,`TRANSFER_FUTURE_TO_SPOT`,`TRANSFER_SPOT_TO_SPOT`,`AIRDROP`,`DIVIDEND`,`TRANSFER_REFUND`,`INTERNAL_TRANSFER`,`TRANSFER`,`SWAP`,`COMMISSION_REBATE`,`CASH_BACK`,`STAKING_WITHDRAW`, `STAKING_CLAIM`, `STAKING_DELEGATE` (this list is not exhaustive; additional values such as `USD1_AIRDROP`, `DRIBBLET_EXCHANGE`, `USER_REBATE`, `INVITER_REBATE`, and several `PREDICTION_*` types are also accepted/returned)
+*  `type`: `TRADE_TARGET`,`TRADE_SOURCE`,`DEPOSIT`,`WITHDRAW`,`AIRDROP`,`DIVIDEND`,`TRANSFER_REFUND`,`INTERNAL_TRANSFER`,`TRANSFER`,`SWAP`,`COMMISSION_REBATE`,`CASH_BACK`,`STAKING_WITHDRAW`, `STAKING_CLAIM`, `STAKING_DELEGATE` (this list is not exhaustive; additional values such as `USD1_AIRDROP`, `DRIBBLET_EXCHANGE`, `USER_REBATE`, `INVITER_REBATE`, and several `PREDICTION_*` types are also accepted/returned)
 *  If startTime and endTime are not provided, only data from the most recent 7 days will be returned.
 
 ## Perp-spot transfer (TRADE)
