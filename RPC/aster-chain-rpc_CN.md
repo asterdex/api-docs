@@ -28,7 +28,7 @@
 ## 访问限制
 
 * 每个方法的权重均为 1。
-* 按客户端 IP 限流：每秒最多 `{IP_PER_SECOND}` 次请求，每分钟最多 `{IP_PER_MINUTE}` 次请求。
+* 按客户端 IP 限流。
 * 超出限制时接口返回 HTTP `429 Too Many Requests`，请至少等待 1 秒后再重试。
 
 ## 错误码
@@ -51,7 +51,7 @@
 -32601 | `Method not found` | 缺少 `method`，或 `method` 不是以下任一方法
 -32603 | `Internal error: Invalid params` | `params` 为空，或 `address` 缺失 / 不是字符串
 -32603 | `Internal error: Time range exceeds 7 days` | `to - from` 大于 7 天（恰好 7 天是允许的）
--32603 | `Internal error: BinanceApiError[code=-40000005,...]` | 该地址没有 Aster 账户
+-32603 | `Internal error: ...` | 该地址没有 Aster 账户
 -32603 | `Internal error: ...` | 其他非法输入（如不存在的期货 `symbol`、参数 JSON 类型错误）或内部错误
 
 在 HTTP 层面不是合法 JSON-RPC 的请求（JSON 格式错误、批量数组，或 `params` 以对象形式传入）会返回 HTTP `400`。

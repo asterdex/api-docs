@@ -28,7 +28,7 @@
 ## Rate Limits
 
 * Every method has a weight of 1.
-* Requests are limited per client IP: at most `{IP_PER_SECOND}` requests per second and `{IP_PER_MINUTE}` requests per minute.
+* Requests are rate-limited per client IP.
 * When the limit is exceeded the endpoint returns HTTP `429 Too Many Requests`. Back off for at least 1 second before retrying.
 
 ## Error Codes
@@ -51,7 +51,7 @@ Code | Message | When
 -32601 | `Method not found` | `method` is missing or not one of the methods below
 -32603 | `Internal error: Invalid params` | `params` is empty, or `address` is missing / not a string
 -32603 | `Internal error: Time range exceeds 7 days` | `to - from` is greater than 7 days (exactly 7 days is allowed)
--32603 | `Internal error: BinanceApiError[code=-40000005,...]` | The address has no Aster account
+-32603 | `Internal error: ...` | The address has no Aster account
 -32603 | `Internal error: ...` | Other invalid input (e.g. a futures `symbol` that does not exist, a parameter of the wrong JSON type) or an internal failure
 
 Requests that are not valid JSON-RPC at the HTTP level (malformed JSON, a batch array, or `params` sent as an object) are rejected with HTTP `400`.
