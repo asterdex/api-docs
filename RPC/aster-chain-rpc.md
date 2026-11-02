@@ -1,7 +1,5 @@
 - [General Info](#general-info)
   - [General API Information](#general-api-information)
-  - [Rate Limits](#rate-limits)
-  - [Error Codes](#error-codes)
 - [Chain RPC Endpoints](#chain-rpc-endpoints)
   - [Get Balance](#get-balance)
   - [Get Open Orders](#get-open-orders)
@@ -24,37 +22,6 @@
 * Fields with no data are omitted from the response rather than returned as empty arrays (e.g. `perpAssets`, `openOrders`, `fills`).
 
 > **Note:** In the Open Orders and Fills endpoints, account privacy enabled only applies to new orders placed after it is enabled; orders completed when account privacy is disabled remain visible as usual.
-
-## Rate Limits
-
-* Every method has a weight of 1.
-* Requests are rate-limited per client IP.
-* When the limit is exceeded the endpoint returns HTTP `429 Too Many Requests`. Back off for at least 1 second before retrying.
-
-## Error Codes
-
-Errors follow the JSON-RPC 2.0 format and are returned with HTTP status `200`:
-
-```javascript
-{
-  "id": 1,
-  "jsonrpc": "2.0",
-  "error": {
-    "code": -32603,
-    "message": "Internal error: Time range exceeds 7 days"
-  }
-}
-```
-
-Code | Message | When
----- | ------- | ----
--32601 | `Method not found` | `method` is missing or not one of the methods below
--32603 | `Internal error: Invalid params` | `params` is empty, or `address` is missing / not a string
--32603 | `Internal error: Time range exceeds 7 days` | `to - from` is greater than 7 days (exactly 7 days is allowed)
--32603 | `Internal error: ...` | The address has no Aster account
--32603 | `Internal error: ...` | Other invalid input (e.g. a futures `symbol` that does not exist, a parameter of the wrong JSON type) or an internal failure
-
-Requests that are not valid JSON-RPC at the HTTP level (malformed JSON, a batch array, or `params` sent as an object) are rejected with HTTP `400`.
 
 ---
 
