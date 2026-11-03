@@ -4531,8 +4531,8 @@ symbol | STRING | YES
 | positionSide | STRING | NO | `BOTH`、`LONG`、`SHORT` |
 | type | STRING | YES | 订单类型 |
 | quantity | STRING | NO | 新委托数量 |
-| price | STRING | NO | 新价格（适用于 `LIMIT`、`STOP`、`TAKE_PROFIT`） |
-| stopPrice | STRING | NO | 新止损价 |
+| price | STRING | NO | 订单触发后用于下单的新价格（适用于 `LIMIT`、`STOP`、`TAKE_PROFIT`） |
+| stopPrice | STRING | NO | 用于触发订单的新止损价格 |
 | timeInForce | STRING | NO | 新的[有效方式](#枚举定义) |
 | workingType | STRING | NO | 新的触发价格类型 |
 | reduceOnly | STRING | NO | |

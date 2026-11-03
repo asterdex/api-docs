@@ -4371,8 +4371,8 @@ Update one or more sub-orders of an existing strategy order. Returns an array wi
 | positionSide | STRING | NO | `BOTH`, `LONG`, `SHORT` |
 | type | STRING | YES | Order type |
 | quantity | STRING | NO | New order quantity |
-| price | STRING | NO | New price (applicable for `LIMIT`, `STOP`, `TAKE_PROFIT`) |
-| stopPrice | STRING | NO | New stop price |
+| price | STRING | NO | New limit price at which the order is placed once triggered (applicable for `LIMIT`, `STOP`, `TAKE_PROFIT`) |
+| stopPrice | STRING | NO | New stop price that triggers the order |
 | timeInForce | STRING | NO | New [time in force](#enum-definitions) |
 | workingType | STRING | NO | New working type |
 | reduceOnly | STRING | NO | |
