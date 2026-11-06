@@ -190,6 +190,16 @@
 
 * Overall effect: **prevents duplicates and stale requests, retaining only recent valid requests**
 
+* **Optional request deadline (`nonceWindow`)**
+
+  * `nonceWindow` is an **optional** parameter that sets a deadline for a request: an integer number of **milliseconds**, counted from the time encoded in the request's `nonce`. If the request has not been processed by the sequencer by `nonce + nonceWindow`, it is **rejected and never forwarded to the matching engine**, and an explicit failure is returned. Once the deadline has passed, the request will not be executed later.
+  * Valid range: **1 – 60000** (milliseconds). A non-integer value or a value outside this range is rejected as `INVALID_PARAMETER` (HTTP 400).
+  * If `nonceWindow` is omitted, requests behave exactly as before.
+  * Send it together with the other request parameters before signing. The whole parameter string is signed, so `nonceWindow` is covered by the signature.
+  * It applies to requests submitted through the sequencer (for example placing, modifying and cancelling orders, and transfers). It has no effect on read-only endpoints.
+  * Failure returned when the deadline has passed: `{"code": -4227, "msg": "Request was not processed within the nonceWindow"}`
+  * For the guarded cancel endpoints, `nonce` is the nonce of the original order, so the deadline is measured from that nonce, not from the time the cancel request is sent.
+
 ## LIMITS
 
 * The `/fapi/v3/exchangeInfo` `rateLimits` array contains objects related to the exchange's `RAW_REQUEST`, `REQUEST_WEIGHT`, and `ORDER` rate limits. These are further defined in the `ENUM definitions` section under `Rate limiters (rateLimitType)`.

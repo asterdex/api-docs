@@ -32,6 +32,15 @@ If an API Key is accidentally exposed, immediately delete that Key and generate 
 
 * Overall effect: **prevents duplicates and stale requests, retaining only recent valid requests**
 
+* **Optional request deadline (`nonceWindow`)**
+
+  * `nonceWindow` is an **optional** parameter that sets a deadline for a request: an integer number of **milliseconds**, counted from the time encoded in the request's `nonce`. If the request has not been processed by the sequencer by `nonce + nonceWindow`, it is **rejected and never forwarded to the matching engine**, and an explicit failure is returned. Once the deadline has passed, the request will not be executed later.
+  * Valid range: **1 – 60000** (milliseconds). A non-integer value or a value outside this range is rejected as `INVALID_PARAMETER` (HTTP 400).
+  * If `nonceWindow` is omitted, requests behave exactly as before.
+  * Send it together with the other request parameters before signing. The whole parameter string is signed, so `nonceWindow` is covered by the signature.
+  * It applies to requests submitted through the sequencer (for example placing and cancelling orders, and transfers). It has no effect on read-only endpoints.
+  * Failure returned when the deadline has passed: `{"code": -4227, "msg": "Request was not processed within the nonceWindow"}`
+
 ### HTTP return codes
 
 * HTTP `4XX` status codes are used to indicate errors in the request content, behavior, or format. The problem lies with the requester.  
