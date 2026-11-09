@@ -1,16 +1,4 @@
 # Changelog
-## 2026-11-09
-
-### Changed
-
-#### `nonceWindow` — Wording of the expired-request behavior
-
-Clarified what happens to a request that has not been processed by the sequencer by `nonce + nonceWindow`: it is rejected and never included in blocks (previously worded as "never forwarded to the matching engine"). No behavior change.
-
-Updated in the "V3 Nonce Mechanism" section of the EN and CN, mainnet and testnet futures and spot API references.
-
----
-
 ## 2026-11-06
 
 ### Added
