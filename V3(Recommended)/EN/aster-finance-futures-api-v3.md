@@ -217,7 +217,7 @@
 
 * **Optional request deadline (`nonceWindow`)**
 
-  * `nonceWindow` is an **optional** parameter that sets a deadline for a request: an integer number of **milliseconds**, counted from the time encoded in the request's `nonce`. If the request has not been processed by the sequencer by `nonce + nonceWindow`, it is **rejected and never forwarded to the matching engine**, and an explicit failure is returned. Once the deadline has passed, the request will not be executed later.
+  * `nonceWindow` is an **optional** parameter that sets a deadline for a request: an integer number of **milliseconds**, counted from the time encoded in the request's `nonce`. If the request has not been processed by the sequencer by `nonce + nonceWindow`, it is **rejected and never included in blocks**, and an explicit failure is returned. Once the deadline has passed, the request will not be executed later.
   * Valid range: **1 – 60000** (milliseconds). A non-integer value or a value outside this range is rejected as `INVALID_PARAMETER` (HTTP 400).
   * If `nonceWindow` is omitted, requests behave exactly as before.
   * Send it together with the other request parameters before signing. The whole parameter string is signed, so `nonceWindow` is covered by the signature.

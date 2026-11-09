@@ -1,11 +1,23 @@
 # Changelog
+## 2026-11-09
+
+### Changed
+
+#### `nonceWindow` — Wording of the expired-request behavior
+
+Clarified what happens to a request that has not been processed by the sequencer by `nonce + nonceWindow`: it is rejected and never included in blocks (previously worded as "never forwarded to the matching engine"). No behavior change.
+
+Updated in the "V3 Nonce Mechanism" section of the EN and CN, mainnet and testnet futures and spot API references.
+
+---
+
 ## 2026-11-06
 
 ### Added
 
 #### `nonceWindow` — Optional Request Deadline
 
-New optional parameter on V3 signed requests that sets a deadline for the request. `nonceWindow` is an integer in milliseconds (`1`–`60000`), counted from the time encoded in the request's `nonce`. If the request has not been processed by the sequencer by `nonce + nonceWindow`, it is rejected, is never forwarded to the matching engine, and an explicit failure `-4227` (`Request was not processed within the nonceWindow`) is returned. Once the deadline has passed the request will not be executed later. A non-integer or out-of-range value is rejected as `INVALID_PARAMETER` (HTTP 400). Omitting `nonceWindow` leaves the request behavior unchanged. It is part of the signed parameter string, applies to requests submitted through the sequencer (for example orders and transfers) and has no effect on read-only endpoints. For the guarded cancel endpoints the deadline is measured from the original order's `nonce`.
+New optional parameter on V3 signed requests that sets a deadline for the request. `nonceWindow` is an integer in milliseconds (`1`–`60000`), counted from the time encoded in the request's `nonce`. If the request has not been processed by the sequencer by `nonce + nonceWindow`, it is rejected, is never included in blocks, and an explicit failure `-4227` (`Request was not processed within the nonceWindow`) is returned. Once the deadline has passed the request will not be executed later. A non-integer or out-of-range value is rejected as `INVALID_PARAMETER` (HTTP 400). Omitting `nonceWindow` leaves the request behavior unchanged. It is part of the signed parameter string, applies to requests submitted through the sequencer (for example orders and transfers) and has no effect on read-only endpoints. For the guarded cancel endpoints the deadline is measured from the original order's `nonce`.
 
 Documented in the "V3 Nonce Mechanism" section of the EN and CN, mainnet and testnet futures and spot API references.
 
