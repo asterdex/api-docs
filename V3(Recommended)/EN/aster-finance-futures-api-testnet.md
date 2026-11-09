@@ -2419,7 +2419,7 @@ Place a **Chase strategy order** — a BBO-pegged GTX limit order that automatic
 | symbol             | STRING  | YES       | Trading pair.                                                                                                                                                                              |
 | side               | ENUM    | YES       | `BUY` or `SELL`. Missing/blank returns `"Mandatory parameter 'side' was not sent, was empty/null, or malformed."`                                                                          |
 | positionSide       | ENUM    | NO        | Default `BOTH` for One-way Mode; `LONG` or `SHORT` for Hedge Mode.                                                                                                                         |
-| quantityUnit       | STRING  | YES       | `BASE` (qty in base asset, e.g. BTC) or `QUOTE` (qty in quote asset, e.g. USDT). For `QUOTE` orders the system converts to BASE using mark price.                                          |
+| quantityUnit       | STRING  | YES       | `BASE` (qty in base asset, e.g. BTC) or `QUOTE` (qty in quote asset, e.g. USDT). For `QUOTE` orders the system converts to BASE at mark price, rounded down to `stepSize` (see validation rules). |
 | quantity           | DECIMAL | YES       | Order quantity in the unit specified by `quantityUnit`.                                                                                                                                    |
 | reduceOnly         | STRING  | NO        | `"true"` or `"false"` (case-insensitive). Any other value is rejected. Default `"false"`.                                                                                                  |
 | chaseOffset        | DECIMAL | NO        | Distance from BBO to peg the order. Default `"0"` (exact BBO peg). Must be ≥ 0 and a multiple of `tickSize`. BUY price = `bid1 − chaseOffset`; SELL price = `ask1 + chaseOffset`.           |
@@ -2443,6 +2443,7 @@ Place a **Chase strategy order** — a BBO-pegged GTX limit order that automatic
 * When `maxChaseOffsetType = ABSOLUTE`, `maxChaseOffset` must be a multiple of `tickSize`.
 * `clientStrategyId` length must be ≤ 28 characters.
 * OI cap check: for `quantityUnit = QUOTE`, the gateway converts to BASE quantity for the symbol-leverage OI bracket check using `qtyBase = qtyQuote × 10^quantityDecimal / markPrice`.
+* `quantityUnit = QUOTE` conversion: the quote amount is converted to a BASE quantity at the current mark price and rounded **down** to the symbol's `stepSize`, then re-validated: the converted quantity must be > 0 and ≥ `minQty` (else `QTY_LESS_THAN_MIN_QTY`) and ≤ `maxQty` (else `QTY_GREATER_THAN_MAX_QTY`); for entry orders, converted quantity × `markPrice` must still be ≥ `minNotional` (else `MIN_NOTIONAL`) — rounding down to `stepSize` can reduce the order's value below `minNotional` even if the amount you sent was above it (e.g. 5.5 USDT at mark price 2.00 with `stepSize` 1 → 2 units = 4 USDT). If the mark price is unavailable, the order is rejected with `-4125 STRATEGY_ORDER_TRIGGER_FAILURE`.
 
 **Behavior:**
 

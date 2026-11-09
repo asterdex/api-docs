@@ -2602,7 +2602,7 @@ price  |  DECIMAL | NO | 委托价格
 | symbol             | STRING  | YES        | 交易对。                                                                                                                                                          |
 | side               | ENUM    | YES        | `BUY` 或 `SELL`。缺失/空值返回 `"Mandatory parameter 'side' was not sent, was empty/null, or malformed."`                                                          |
 | positionSide       | ENUM    | NO         | 单向持仓模式默认 `BOTH`；双向持仓模式必须传 `LONG` 或 `SHORT`。                                                                                                    |
-| quantityUnit       | STRING  | YES        | `BASE`（数量以标的资产计价，如 BTC）或 `QUOTE`（数量以计价资产计价，如 USDT）。`QUOTE` 时系统按 mark price 换算到 BASE。                                              |
+| quantityUnit       | STRING  | YES        | `BASE`（数量以标的资产计价，如 BTC）或 `QUOTE`（数量以计价资产计价，如 USDT）。`QUOTE` 时系统按 mark price 换算到 BASE，并按 `stepSize` 向下取整（见校验规则）。                    |
 | quantity           | DECIMAL | YES        | 数量，单位由 `quantityUnit` 决定。                                                                                                                                |
 | reduceOnly         | STRING  | NO         | `"true"` 或 `"false"`（大小写不敏感）。任何其他值会被拒绝。默认 `"false"`。                                                                                        |
 | chaseOffset        | DECIMAL | NO         | 距 BBO 的偏移量。默认 `"0"`（完全贴近 BBO）。必须 ≥ 0 且为 `tickSize` 的倍数。买单价 = `bid1 − chaseOffset`；卖单价 = `ask1 + chaseOffset`。                          |
@@ -2626,6 +2626,7 @@ price  |  DECIMAL | NO | 委托价格
 * `maxChaseOffsetType = ABSOLUTE` 时，`maxChaseOffset` 必须为 `tickSize` 倍数。
 * `clientStrategyId` 长度必须 ≤ 28 字符。
 * OI cap 校验：`quantityUnit = QUOTE` 时按 mark price 换算到 BASE 数量进行 symbol-leverage OI 档位校验，公式 `qtyBase = qtyQuote × 10^quantityDecimal / markPrice`。
+* `quantityUnit = QUOTE` 换算：按当前 mark price 将计价金额换算为 BASE 数量，并按交易对 `stepSize` **向下**取整，随后再次校验：换算后数量必须 > 0 且 ≥ `minQty`（否则 `QTY_LESS_THAN_MIN_QTY`），且 ≤ `maxQty`（否则 `QTY_GREATER_THAN_MAX_QTY`）；开仓单换算后数量 × `markPrice` 仍须 ≥ `minNotional`（否则 `MIN_NOTIONAL`）——按 `stepSize` 向下取整可能使订单价值低于 `minNotional`，即使提交的金额高于它（例如 mark price 2.00、`stepSize` 1 时，5.5 USDT → 2 个 = 4 USDT）。mark price 不可用时拒单，返回 `-4125 STRATEGY_ORDER_TRIGGER_FAILURE`。
 
 **行为:**
 

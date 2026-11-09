@@ -1,4 +1,16 @@
 # Changelog
+## 2026-11-09
+
+### Changed
+
+#### `POST /fapi/v3/chase` — `quantityUnit = QUOTE` conversion rules
+
+For `quantityUnit = QUOTE`, the quote amount is converted to a BASE quantity at the current mark price and rounded down to the symbol's `stepSize`, then re-validated. Newly documented rejections: converted quantity ≤ 0 or below `minQty` → `QTY_LESS_THAN_MIN_QTY`; above `maxQty` → `QTY_GREATER_THAN_MAX_QTY`; for entry orders, converted quantity × `markPrice` below `minNotional` → `MIN_NOTIONAL` (rounding down to `stepSize` can reduce the order's value below `minNotional` even if the amount you sent was above it); mark price unavailable → `-4125 STRATEGY_ORDER_TRIGGER_FAILURE`.
+
+Documented in the "Validation rules" of the Chase order section of the EN and CN, mainnet and testnet futures API references.
+
+---
+
 ## 2026-11-06
 
 ### Added
