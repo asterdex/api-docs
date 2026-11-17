@@ -35,7 +35,7 @@ You are signing into Astherus 501182
 ### result:
 
 ```text
-0xa4ee6b068060caeac447216b592a918b085642056248e6ff50ba22b50e8884875ead28f06cbcefcbb93d03997f807fd242354d878756f4690f791ae8dbfcde841c
+0x<signature>
 ```
 
 # 3. login
@@ -70,7 +70,7 @@ curl -XPOST 'https://www.asterdex.com/bapi/futures/v1/public/future/web3/ae/logi
   "message": null,
   "messageDetail": null,
   "data": {
-    "token": "D5M8792356G7H8J9K0L1N2B3V4C5X6Z7D5621",
+    "token": "<login-token>",
     "uid": 12345678
   },
   "success": true
@@ -90,8 +90,8 @@ curl --location 'https://www.asterdex.com/bapi/futures/v1/public/future/web3/bro
 "desc": "test description",
 "ip": "",
 "network": "56",
-"signature": "0xa4ee6b068060caeac447216b592a918b085642056248e6ff50ba22b50e8884875ead28f06cbcefcbb93d03997f807fd242354d878756f4690f791ae8dbfcde841c",
-"sourceAddr": "0xE90F9596e3Bfd49e9f4c2E0eA48830DC47e6997b",
+"signature": "0x<signature>",
+"sourceAddr": "0x<your-wallet-address>",
 "type": "CREATE_API_KEY",
 "sourceCode": "broker"
 }'
@@ -117,8 +117,8 @@ curl --location 'https://www.asterdex.com/bapi/futures/v1/public/future/web3/bro
   "message": null,
   "messageDetail": null,
   "data": {
-    "apiKey": "4a2e11b243b1ad75981edf359ae02e873bf88b699196170d998d8266f5eb9f32",
-    "apiSecret": "72911505f67b24a8efe8f246d06c324b787d2f3f7cb8b5b80ef1698ee1486e25",
+    "apiKey": "<api-key>",
+    "apiSecret": "<api-secret>",
     "keyId": 0,
     "apiName": null
   },
