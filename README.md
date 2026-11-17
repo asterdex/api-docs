@@ -36,6 +36,5 @@ Official API documentation for Aster.
 
 ### Demo
 
-- [API Key Registration](./demo/aster-api-key-registration.md)
 - [Spot Asset Consolidation](./demo/consolidation.js)
 - [Deposit & Withdrawal](./demo/aster-deposit-withdrawal.md)

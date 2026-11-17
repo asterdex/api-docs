@@ -13,16 +13,16 @@ chain_id = 1666
 # aster_chain = 'Testnet'
 # chain_id = 714
 
-user = '0x014c85ffb0fF2F2972237AA950B452f92C69Ae1D'
+user = '0x<your-main-wallet-address>'
 main_private_key = '*'
 
 
-signer = '0xC98Fd64eBc39E28b92849d9cCef9495663439014'
+signer = '0x<your-api-wallet-address>'
 priKey =  '*'
 
-builder = '0x014c85ffb0fF2F2972237AA950B452f92C69Ae1D'
+builder = '0x<builder-address>'
 approveAgent = {'url': '/fapi/v3/approveAgent', 'method': 'POST',
-              'params':{'agentName': 'ivanbuilder','agentAddress':signer,
+              'params':{'agentName': 'mybuilder','agentAddress':signer,
                       'ipWhitelist':'', 'expired':1967945395040,'canSpotTrade':True,
                         'canPerpTrade':False,  'canWithdraw':False}
     ,'main':True,"primary_type":"ApproveAgent"}
@@ -39,7 +39,7 @@ getAgents = {'url': '/fapi/v3/agent', 'method': 'GET',
 
 approveBuilder = {'url': '/fapi/v3/approveBuilder', 'method': 'POST',
                   'params': {'builder': builder,
-                             'maxFeeRate': '0.00001','builderName':'ivan3' }, 'main': True,"primary_type":"ApproveBuilder"}
+                             'maxFeeRate': '0.00001','builderName':'mybuilder' }, 'main': True,"primary_type":"ApproveBuilder"}
 
 updateBuilder = {'url': '/fapi/v3/updateBuilder', 'method': 'POST',
               'params':{'builder': builder,'maxFeeRate': '0.00002'},'main':True,"primary_type":"UpdateBuilder"}

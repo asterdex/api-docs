@@ -8,12 +8,12 @@ from nacl.signing import SigningKey
 import time
 import requests
 
-user = '6mSp4BuWCNgRSwv8JopQwCma26hmBT8jrcgJNadq23Gt'
+user = '<your-solana-wallet-address>'
 base58_private_key = '*'
-signer = '0x71949710270163F096A8Bd342b266183Ae742e5E'
+signer = '0x<your-api-wallet-address>'
 signer_pri_key =  '*'
 
-builder = '0x014c85ffb0fF2F2972237AA950B452f92C69Ae1D'
+builder = '0x<builder-address>'
 host = 'https://fapi3.asterdex.com'
 
 headers = {
@@ -63,7 +63,7 @@ getAgents = {'url': '/fapi/v3/agent', 'method': 'GET',
 
 approveBuilder = {'url': '/fapi/v3/approveBuilder', 'method': 'POST',
                   'params': {'builder': builder,
-                             'maxFeeRate': '0.00001','builderName':'ivan3' }, 'main': True,"primary_type":"ApproveBuilder"}
+                             'maxFeeRate': '0.00001','builderName':'mybuilder' }, 'main': True,"primary_type":"ApproveBuilder"}
 
 updateBuilder = {'url': '/fapi/v3/updateBuilder', 'method': 'POST',
               'params':{'builder': builder,'maxFeeRate': '0.00002'},'main':True,"primary_type":"UpdateBuilder"}
