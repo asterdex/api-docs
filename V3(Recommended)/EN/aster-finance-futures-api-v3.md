@@ -4322,7 +4322,7 @@ Place a new strategy order. Supports OTO (One-Triggers-the-Other), OCO (One-Canc
 | stopPrice | STRING | YES* | Required for `STOP`, `STOP_MARKET`, `TAKE_PROFIT`, `TAKE_PROFIT_MARKET` |
 | timeInForce | STRING | YES* | Required for `LIMIT`; optional for stop orders (default `GTC`). `IOC` and `FOK` are not supported. See [ENUM definitions: Time in force](#enum-definitions) |
 | workingType | STRING | NO | `CONTRACT_PRICE` or `MARK_PRICE`. Default `CONTRACT_PRICE` |
-| reduceOnly | STRING | NO | Reduce-only flag |
+| reduceOnly | STRING | NO | Reduce-only flag. In one-way mode, send `true` on take-profit / stop-loss legs; a leg without it is checked as an opening order (see notes below) |
 | closePosition | STRING | NO | Close-position flag |
 | priceProtect | STRING | NO | Price protection flag |
 | clientOrderId | STRING | NO | Client-assigned order ID |
@@ -4334,6 +4334,10 @@ Place a new strategy order. Supports OTO (One-Triggers-the-Other), OCO (One-Canc
 | secondDrivenId | STRING | NO | `strategySubId` of the driving sub-order for the second trigger condition |
 | secondDrivenOn | STRING | NO | Event type that activates the second trigger |
 | secondTrigger | STRING | NO | Second trigger action |
+
+* Account and symbol risk checks (symbol status, vault symbol restriction, OI cap, account status, account rules) run on **every** sub-order, not only on `strategySubId` = 1.
+* Each sub-order is classified as opening or not by its own `reduceOnly` / `closePosition` / `positionSide`; take-profit / stop-loss legs get no exemption for being attached to an entry leg, and `reduceOnly` is never changed for you.
+* In one-way mode, a take-profit / stop-loss leg sent without `reduceOnly=true` is checked as an opening order, so it may be rejected (for example `-5048 VAULT_SYMBOL_NOT_ALLOWED`, or an OI cap / account status error) even though the entry leg passes. Send `reduceOnly=true` on these legs.
 
 ---
 
@@ -4386,11 +4390,17 @@ Update one or more sub-orders of an existing strategy order. Returns an array wi
 | stopPrice | STRING | NO | New stop price that triggers the order |
 | timeInForce | STRING | NO | New [time in force](#enum-definitions) |
 | workingType | STRING | NO | New working type |
-| reduceOnly | STRING | NO | |
-| closePosition | STRING | NO | |
-| priceProtect | STRING | NO | |
+| reduceOnly | STRING | NO | `true` / `false`. If omitted, the sub-order keeps its current value |
+| closePosition | STRING | NO | `true` / `false`. If omitted, the sub-order keeps its current value |
+| priceProtect | STRING | NO | `true` / `false`. If omitted, the sub-order keeps its current value |
 | activationPrice | STRING | NO | For `TRAILING_STOP_MARKET` only |
 | callbackRate | STRING | NO | For `TRAILING_STOP_MARKET` only |
+
+* This is a partial update: `reduceOnly`, `closePosition` and `priceProtect` keep their current values when omitted. When sent, only `true` / `false` (case-insensitive) is accepted; any other value is rejected with `-1102`.
+* A sub-order is treated as **opening** when the request declares it: in one-way mode, an explicit `reduceOnly=false`; in hedge mode, a `positionSide` / `side` pair in the opening direction (`LONG` + `BUY`, `SHORT` + `SELL`). Explicit `reduceOnly=true` or `closePosition=true` is never opening.
+* An opening sub-order must include `quantity` (otherwise `-1102`) and goes through the same account and symbol risk checks as Place Strategy Order (vault symbol restriction, OI cap, account status, account rules).
+* A sub-order that does not declare opening (for example a price-only edit of a take-profit / stop-loss leg) only gets the checks unrelated to opening (symbol status, account rules), so a reduce-only-restricted account can still amend its own take-profit / stop-loss. If such an edit would actually turn the sub-order into an opening order, the update is rejected.
+* All sub-orders in the request are validated first and sent only if every one passes; if any sub-order fails validation, the request returns an error and no sub-order is updated.
 
 ---
 
