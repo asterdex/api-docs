@@ -1,4 +1,18 @@
 # Changelog
+## 2026-11-22
+
+### Changed
+
+#### `POST /fapi/v3/placeStrategyOrder` / `POST /fapi/v3/updateStrategyOrder` — Per-sub-order risk checks
+
+Account and symbol risk checks (symbol status, vault symbol restriction, OI cap, account status, account rules) now run on every sub-order of a strategy order, not only on `strategySubId` = 1. Each leg is classified as opening by its own `reduceOnly` / `closePosition` / `positionSide`; in one-way mode, send `reduceOnly=true` on take-profit / stop-loss legs, otherwise they are checked as opening orders and may be rejected.
+
+`updateStrategyOrder` is a partial update: omitted `reduceOnly` / `closePosition` / `priceProtect` keep their current values, and only `true` / `false` is accepted (otherwise `-1102`). Sub-orders that declare opening must include `quantity` and get the full risk checks; other edits (such as price-only changes to take-profit / stop-loss legs) only get the checks unrelated to opening. All sub-orders are validated before any is sent; if one fails, none is updated.
+
+Documented in the EN and CN mainnet futures API references (the testnet references do not include the strategy order endpoints).
+
+---
+
 ## 2026-11-09
 
 ### Changed

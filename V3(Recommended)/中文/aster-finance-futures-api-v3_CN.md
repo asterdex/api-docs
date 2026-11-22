@@ -4482,7 +4482,7 @@ symbol | STRING | YES
 | stopPrice | STRING | YES* | `STOP`、`STOP_MARKET`、`TAKE_PROFIT`、`TAKE_PROFIT_MARKET` 时必填 |
 | timeInForce | STRING | YES* | `LIMIT` 时必填；止损类订单可选（默认 `GTC`）。不支持 `IOC` 和 `FOK`。详见[枚举定义：有效方式](#枚举定义) |
 | workingType | STRING | NO | `CONTRACT_PRICE` 或 `MARK_PRICE`，默认 `CONTRACT_PRICE` |
-| reduceOnly | STRING | NO | 是否仅减仓 |
+| reduceOnly | STRING | NO | 是否仅减仓。单向持仓下止盈止损腿请传 `true`，未传时按开仓单校验（见下方说明） |
 | closePosition | STRING | NO | 是否全部平仓 |
 | priceProtect | STRING | NO | 是否开启价格保护 |
 | clientOrderId | STRING | NO | 客户端自定义订单 ID |
@@ -4494,6 +4494,10 @@ symbol | STRING | YES
 | secondDrivenId | STRING | NO | 第二触发条件的驱动子订单 `strategySubId` |
 | secondDrivenOn | STRING | NO | 激活第二触发条件的事件类型 |
 | secondTrigger | STRING | NO | 第二触发动作 |
+
+* 账户与币种风控校验（币种状态、vault 币种限制、OI cap、账户状态、账户规则）对**每一条**子订单都会执行，而不仅是 `strategySubId` = 1 的子订单。
+* 每条子订单只按自身的 `reduceOnly` / `closePosition` / `positionSide` 判断是否为开仓；止盈止损腿不会因为附属于入场腿而免检，系统也不会替用户修改 `reduceOnly`。
+* 单向持仓下，止盈止损腿未传 `reduceOnly=true` 时会按开仓单校验，即使入场腿校验通过，也可能被拒绝（例如 `-5048 VAULT_SYMBOL_NOT_ALLOWED`，或 OI cap / 账户状态相关错误）。请对这些腿传 `reduceOnly=true`。
 
 ---
 
@@ -4546,11 +4550,17 @@ symbol | STRING | YES
 | stopPrice | STRING | NO | 用于触发订单的新止损价格 |
 | timeInForce | STRING | NO | 新的[有效方式](#枚举定义) |
 | workingType | STRING | NO | 新的触发价格类型 |
-| reduceOnly | STRING | NO | |
-| closePosition | STRING | NO | |
-| priceProtect | STRING | NO | |
+| reduceOnly | STRING | NO | `true` / `false`。不传则沿用子订单当前值 |
+| closePosition | STRING | NO | `true` / `false`。不传则沿用子订单当前值 |
+| priceProtect | STRING | NO | `true` / `false`。不传则沿用子订单当前值 |
 | activationPrice | STRING | NO | 仅适用于 `TRAILING_STOP_MARKET` |
 | callbackRate | STRING | NO | 仅适用于 `TRAILING_STOP_MARKET` |
+
+* 本接口为部分更新：`reduceOnly`、`closePosition`、`priceProtect` 不传时沿用当前值；传入时仅接受 `true` / `false`（不区分大小写），其他值返回 `-1102`。
+* 请求中声明为**开仓**的子订单：单向持仓下显式传 `reduceOnly=false`；双向持仓下 `positionSide` / `side` 为开仓方向（`LONG` + `BUY`、`SHORT` + `SELL`）。显式传 `reduceOnly=true` 或 `closePosition=true` 的子订单不算开仓。
+* 声明开仓的子订单必须带 `quantity`（否则返回 `-1102`），并与策略下单一样执行账户与币种风控校验（vault 币种限制、OI cap、账户状态、账户规则）。
+* 未声明开仓的子订单（例如只修改止盈止损腿的价格）只执行与开仓无关的校验（币种状态、账户规则），因此受限账户（只允许减仓）仍可修改自己的止盈止损。若此类修改实际会使子订单变为开仓单，更新会被拒绝。
+* 请求中的所有子订单会先全部校验，全部通过后才统一提交；任一子订单校验失败时，整个请求返回错误，不会更新任何子订单。
 
 ---
 
