@@ -1354,7 +1354,8 @@ Klines are uniquely identified by their open time.
 Mark Price and Funding Rate
 
 **Weight:**
-1
+1 for a single symbol;
+**10** when the symbol parameter is omitted
 
 **Parameters:**
 
@@ -1431,7 +1432,8 @@ GET /fapi/v3/fundingInfo
 
 
 **Weight:**
-1
+1 for a single symbol;
+**10** when the symbol parameter is omitted
 
 **Parameters:**
 
